@@ -10,13 +10,15 @@
 	</parent>
 	<groupId>uk.ac.ebi.ega</groupId>
 	<artifactId>ega-permissions</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.0.1</version>
 	<name>ega-permissions</name>
 	<description>This is a base project for EGA permissions</description>
 
 	<properties>
 		<java.version>11</java.version>
 	</properties>
+
+	
 
 	<dependencies>
 		<dependency>
