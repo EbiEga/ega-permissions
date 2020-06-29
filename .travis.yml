@@ -1,0 +1,29 @@
+## This key is deprecated, so this does not do anything anymore
+sudo: true
+
+## Based on ubuntu xenial (OS dist)
+dist: xenial
+
+## This install several java packages
+language: java
+
+## Which JDK we need to use
+jdk:
+  - openjdk8
+
+## Set-Up SamTools before run maven install
+before_install:
+  - wget https://github.com/samtools/samtools/releases/download/1.9/samtools-1.9.tar.bz2
+  - tar -xjvf samtools-1.9.tar.bz2
+  - cd samtools-1.9
+  - make
+  - sudo make install
+  - cd ..
+
+## Install EGA-ingestion piepline
+install:
+  - mvn install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
+
+## Run the test for the EGA-ingestion pipeline
+script:
+  - mvn test -DtrimStackTrace=false
