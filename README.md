@@ -1,4 +1,4 @@
-# ega-permissions
+# EGA-permissions
 We are in the process to create a permissions API that will be used to apply permission into the EGA. The specifics of the API are still under consideration, in the meantime we want to start the generation of the process and the pipeline from development to production.
 
 ## Building
