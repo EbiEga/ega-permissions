@@ -1,0 +1,52 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ega-permissions
+  namespace: test
+spec:
+  replicas: 1
+  strategy:
+        type: RollingUpdate
+        rollingUpdate:
+          maxUnavailable: 1
+  selector:
+        matchLabels:
+          app: ega-permissions
+  template:
+        metadata:
+          labels:
+            app: ega-permissions
+        spec:
+          containers:
+          - name: ega-permissions
+            image: "hh-ega-kube-13.ebi.ac.uk/ega/ega-permissions:master"
+            imagePullPolicy: Always
+            ports:
+            - containerPort: 80
+            volumeMounts:
+              - mountPath: "/log"
+                name: log-directory
+          volumes:
+            - name: log-directory
+              hostPath:
+                path: /nfs/ega/public/kube-logs
+          imagePullSecrets:
+            - name: regcredc
+---
+apiVersion: v1
+kind: Service
+metadata:
+    name: ega-permissions
+    namespace: test
+    labels:
+        app: ega-permissions
+spec:
+    type: NodePort
+    ports:
+    -   port: 8080
+        nodePort: 30140
+        protocol: TCP
+        name: ega-permissions
+    selector:
+        app: ega-permissions
