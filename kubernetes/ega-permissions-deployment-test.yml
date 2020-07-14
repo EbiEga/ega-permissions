@@ -20,7 +20,7 @@ spec:
         spec:
           containers:
           - name: ega-permissions
-            image: "hh-ega-kube-13.ebi.ac.uk/ega/ega-permissions:master"
+            image: "dockerhub.ebi.ac.uk/ega/ega-permissions:master"
             imagePullPolicy: Always
             ports:
             - containerPort: 80
@@ -32,7 +32,7 @@ spec:
               hostPath:
                 path: /nfs/ega/public/kube-logs
           imagePullSecrets:
-            - name: regcredc
+            - name: gitlab-registry
 ---
 apiVersion: v1
 kind: Service
