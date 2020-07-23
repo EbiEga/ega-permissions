@@ -10,97 +10,106 @@ info:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
   version: 1.0.0
+servers:
+  - url: http://localhost:8080
+    description: localhost
 tags:
-- name: permissions
-  description: EGA Data Permissions
+  - name: permissions
+    description: EGA Data Permissions
 paths:
   /{accountId}/permissions:
     get:
       tags:
-      - permissions
+        - permissions
       summary: Read Permissions
       description: Read permissions
       operationId: readPermissions
       parameters:
-      - name: accountId
-        in: path
-        description: ID of the user account
-        required: true
-        schema:
-          type: string
+        - name: accountId
+          in: path
+          description: ID of the user account
+          required: true
+          schema:
+            type: string
       responses:
         200:
           description: successful operation
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ArrayOfPermissions'
+                type: array
+                items:
+                  $ref: '#/components/schemas/Visa'
         400:
           description: Invalid ID supplied
           content: {}
         404:
           description: User account not found
           content: {}
-          
+
     post:
       tags:
-      - permissions
+        - permissions
       summary: Create Permissions
       description: Create permissions. The account_id can be a namespace qualified
         ID, for example EGA or ELIXIR ID.
       operationId: createPermissions
       parameters:
-      - name: accountId
-        in: path
-        description: ID of the user account
-        required: true
-        schema:
-          type: string
+        - name: accountId
+          in: path
+          description: ID of the user account
+          required: true
+          schema:
+            type: string
       requestBody:
         description: ID of the user account
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ArrayOfPermissionRequests'
+              type: array
+              items:
+                $ref: '#/components/schemas/PassportVisaObject'
         required: true
       responses:
-        200:
+        207:
           description: successful operation
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ArrayOfPermissionResponses'
+                type: array
+                items:
+                  $ref: '#/components/schemas/PermissionsResponse'
         400:
           description: Invalid ID supplied
           content: {}
         404:
           description: User account not found
           content: {}
-  
+
     delete:
       tags:
-      - permissions
+        - permissions
       summary: Delete Permission
       description: Delete Permission
       operationId: deletePermissions
       parameters:
-      - name: accountId
-        in: path
-        description: ID of the user account
-        required: true
-        schema:
-          type: string
-      - name: value
-        in: query
-        description: Object to which permissions will apply
-        required: true
-        schema:
-          type: string
+        - name: accountId
+          in: path
+          description: ID of the user account
+          required: true
+          schema:
+            type: string
+        - name: value
+          in: query
+          description: Object to which permissions will apply
+          required: true
+          schema:
+            type: string
       responses:
         200:
           description: OK
           content: {}
-          
+
 components:
   schemas:
     Visa:
@@ -112,6 +121,12 @@ components:
         iss:
           type: string
           description: Issuer
+        iat:
+          type: integer
+          description: Timestamp of when the Passport Visa was minted
+        jti:
+          type: string
+          description: jti (JWT ID) claim
         exp:
           type: integer
           description: Generally, it is seconds since unix epoch of when the Passport
@@ -125,9 +140,12 @@ components:
         iat: 1592820914
         jti: f030c620-993b-49af-a830-4b9af4f379f8
         ga4gh_visa_v1:
-          $ref: '#/components/schemas/PassportVisaObject/example'
-          
-       
+          type: ControlledAccessGrants
+          asserted: 1568814383
+          value: https://ega-archive.org/datasets/EGAD00001002069
+          source: https://ega-archive.org/dacs/EGAC00001000514
+          by: dac
+
     PassportVisaObject:
       type: object
       properties:
@@ -145,31 +163,14 @@ components:
           description: The authority who sanctioned this action
         by:
           type: string
-          description: Indicates that the person, service, or broker that applied
-            the action on behalf of the 'source'
+          description: Indicates that the person, service, or broker that applied the action on behalf of the 'source'
       example:
         type: ControlledAccessGrants
         asserted: 1568814383
         value: https://ega-archive.org/datasets/EGAD00001002069
         source: https://ega-archive.org/dacs/EGAC00001000514
         by: dac
-        
-    ArrayOfPermissions:
-      type: array
-      items:
-        $ref: '#/components/schemas/PassportVisaObject'
-        
-    PermissionsRequest:
-      type: object
-      properties:
-        ga4gh_visa_v1:
-          $ref: '#/components/schemas/PassportVisaObject'
-          
-    ArrayOfPermissionRequests:
-      type: array
-      items:
-        $ref: '#/components/schemas/PermissionsRequest'
-        
+
     PermissionsResponse:
       type: object
       properties:
@@ -178,8 +179,11 @@ components:
         status:
           type: integer
           description: HTTP Status Code
-          
-    ArrayOfPermissionResponses:
-      type: array
-      items:
-        $ref: '#/components/schemas/PermissionsResponse'
+      example:
+        ga4gh_visa_v1:
+          type: ControlledAccessGrants
+          asserted: 1568814383
+          value: https://ega-archive.org/datasets/EGAD00001002069
+          source: https://ega-archive.org/dacs/EGAC00001000514
+          by: dac
+        status: 201
