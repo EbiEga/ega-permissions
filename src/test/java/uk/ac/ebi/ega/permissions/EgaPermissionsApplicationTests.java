@@ -1,4 +1,4 @@
-package uk.ac.ebi.ega.egapermissions;
+package uk.ac.ebi.ega.permissions;
 
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;

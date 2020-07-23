@@ -1,0 +1,185 @@
+openapi: 3.0.1
+info:
+  title: EGA Data Permissions
+  description: This API handles requests to read, add, update, and delete permissions
+    to EGA.
+  termsOfService: TBD
+  contact:
+    email: ega-dev@ebi.ac.uk
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.0.0
+tags:
+- name: permissions
+  description: EGA Data Permissions
+paths:
+  /{accountId}/permissions:
+    get:
+      tags:
+      - permissions
+      summary: Read Permissions
+      description: Read permissions
+      operationId: readPermissions
+      parameters:
+      - name: accountId
+        in: path
+        description: ID of the user account
+        required: true
+        schema:
+          type: string
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArrayOfPermissions'
+        400:
+          description: Invalid ID supplied
+          content: {}
+        404:
+          description: User account not found
+          content: {}
+          
+    post:
+      tags:
+      - permissions
+      summary: Create Permissions
+      description: Create permissions. The account_id can be a namespace qualified
+        ID, for example EGA or ELIXIR ID.
+      operationId: createPermissions
+      parameters:
+      - name: accountId
+        in: path
+        description: ID of the user account
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: ID of the user account
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ArrayOfPermissionRequests'
+        required: true
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArrayOfPermissionResponses'
+        400:
+          description: Invalid ID supplied
+          content: {}
+        404:
+          description: User account not found
+          content: {}
+  
+    delete:
+      tags:
+      - permissions
+      summary: Delete Permission
+      description: Delete Permission
+      operationId: deletePermissions
+      parameters:
+      - name: accountId
+        in: path
+        description: ID of the user account
+        required: true
+        schema:
+          type: string
+      - name: value
+        in: query
+        description: Object to which permissions will apply
+        required: true
+        schema:
+          type: string
+      responses:
+        200:
+          description: OK
+          content: {}
+          
+components:
+  schemas:
+    Visa:
+      type: object
+      properties:
+        sub:
+          type: string
+          description: User who applied the action
+        iss:
+          type: string
+          description: Issuer
+        exp:
+          type: integer
+          description: Generally, it is seconds since unix epoch of when the Passport
+            Visa Assertion Source requires such a claim to be no longer valid
+        ga4gh_visa_v1:
+          $ref: '#/components/schemas/PassportVisaObject'
+      example:
+        sub: EGAW00000015388
+        iss: https://ega.ebi.ac.uk:8053/ega-openid-connect-server/
+        exp: 1592824514
+        iat: 1592820914
+        jti: f030c620-993b-49af-a830-4b9af4f379f8
+        ga4gh_visa_v1:
+          $ref: '#/components/schemas/PassportVisaObject/example'
+          
+       
+    PassportVisaObject:
+      type: object
+      properties:
+        type:
+          type: string
+          description: Visa Type
+        asserted:
+          type: integer
+          description: Timestamp when the action was added or last updated
+        value:
+          type: string
+          description: Object to which permissions will apply
+        source:
+          type: string
+          description: The authority who sanctioned this action
+        by:
+          type: string
+          description: Indicates that the person, service, or broker that applied
+            the action on behalf of the 'source'
+      example:
+        type: ControlledAccessGrants
+        asserted: 1568814383
+        value: https://ega-archive.org/datasets/EGAD00001002069
+        source: https://ega-archive.org/dacs/EGAC00001000514
+        by: dac
+        
+    ArrayOfPermissions:
+      type: array
+      items:
+        $ref: '#/components/schemas/PassportVisaObject'
+        
+    PermissionsRequest:
+      type: object
+      properties:
+        ga4gh_visa_v1:
+          $ref: '#/components/schemas/PassportVisaObject'
+          
+    ArrayOfPermissionRequests:
+      type: array
+      items:
+        $ref: '#/components/schemas/PermissionsRequest'
+        
+    PermissionsResponse:
+      type: object
+      properties:
+        ga4gh_visa_v1:
+          $ref: '#/components/schemas/PassportVisaObject'
+        status:
+          type: integer
+          description: HTTP Status Code
+          
+    ArrayOfPermissionResponses:
+      type: array
+      items:
+        $ref: '#/components/schemas/PermissionsResponse'

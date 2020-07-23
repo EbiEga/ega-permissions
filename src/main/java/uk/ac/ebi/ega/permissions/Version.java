@@ -1,4 +1,4 @@
-package uk.ac.ebi.ega.egapermissions;
+package uk.ac.ebi.ega.permissions;
 
 public class Version {
     private final String version;
