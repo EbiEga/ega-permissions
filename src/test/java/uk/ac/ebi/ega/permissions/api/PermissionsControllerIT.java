@@ -34,7 +34,7 @@ class PermissionsControllerIT {
     @Test
     @DisplayName("NOT_FOUND Response when GET request sent to /{accountId}/permissions endpoint")
     public void shouldReturnNotFoundWithInvalidUserAccountId() throws Exception {
-        final String baseUrl = "http://localhost:" + port + "/invalid/permissions";
+        final String baseUrl = "http://localhost:" + port + "/EGAW0000001000/permissions";
         URI uri = new URI(baseUrl);
         ResponseEntity result = this.restTemplate.getForEntity(uri, Object.class);
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
@@ -43,8 +43,18 @@ class PermissionsControllerIT {
     @Test
     @DisplayName("OK Response when GET request sent to /{accountId}/permissions endpoint")
     public void shouldReturnOkWithUserPermissions() throws Exception {
-        final String baseUrl = "http://localhost:" + port + "/accountId/permissions";
+        final String baseUrl = "http://localhost:" + port + "/EGAW0000002000/permissions";
         URI uri = new URI(baseUrl);
+
+        PassportVisaObject passportVisaObject = new PassportVisaObject();
+        passportVisaObject.setSource("https://ega-archive.org/dacs/EGAC00001111111");
+        passportVisaObject.setType("ControlledAccessGrants");
+        passportVisaObject.setValue("https://ega-archive.org/datasets/EGAD00002222222");
+        passportVisaObject.setAsserted(1568814383);
+        passportVisaObject.setBy("dac");
+
+        this.restTemplate.postForEntity(uri, Arrays.asList(passportVisaObject), PermissionsResponse[].class);
+
         ResponseEntity<Visa[]> result = this.restTemplate.getForEntity(uri, Visa[].class);
         Visa[] permissions = result.getBody();
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -54,7 +64,7 @@ class PermissionsControllerIT {
     @Test
     @DisplayName("MULTI_STATUS Response when POST request sent to /{accountId}/permissions endpoint")
     public void shouldReturnMultiStatusWithResponses() throws Exception {
-        final String baseUrl = "http://localhost:" + port + "/accountId/permissions";
+        final String baseUrl = "http://localhost:" + port + "/EGAW0000003000/permissions";
         URI uri = new URI(baseUrl);
 
         PassportVisaObject passportVisaObject1 = new PassportVisaObject();
@@ -68,7 +78,7 @@ class PermissionsControllerIT {
         PassportVisaObject passportVisaObject2 = new PassportVisaObject();
         passportVisaObject2.setSource("https://ega-archive.org/dacs/EGAC00001111111");
         passportVisaObject2.setType("ControlledAccessGrants");
-        passportVisaObject2.setValue("error");
+        passportVisaObject2.setValue("");
         passportVisaObject2.setAsserted(1568814383);
         passportVisaObject2.setBy("dac");
 
@@ -85,8 +95,17 @@ class PermissionsControllerIT {
     @Test
     @DisplayName("OK Response when DELETE request sent to /{accountId}/permissions endpoint")
     public void shouldReturnOkWithNoResponseBody() throws Exception {
-        final String baseUrl = "http://localhost:" + port + "/accountId/permissions";
+        final String baseUrl = "http://localhost:" + port + "/EGAW0000004000/permissions";
         URI uri = new URI(baseUrl);
+
+        PassportVisaObject passportVisaObject = new PassportVisaObject();
+        passportVisaObject.setSource("https://ega-archive.org/dacs/EGAC00001111111");
+        passportVisaObject.setType("ControlledAccessGrants");
+        passportVisaObject.setValue("https://ega-archive.org/datasets/EGAD00002222222");
+        passportVisaObject.setAsserted(1568814383);
+        passportVisaObject.setBy("dac");
+
+        this.restTemplate.postForEntity(uri, Arrays.asList(passportVisaObject), PermissionsResponse[].class);
 
         HttpHeaders headers = new HttpHeaders();
         headers.set("Accept", MediaType.APPLICATION_JSON_VALUE);
@@ -103,8 +122,7 @@ class PermissionsControllerIT {
     @Test
     @DisplayName("NOT_FOUND Response when DELETE request sent to /{accountId}/permissions endpoint")
     public void shouldReturnNotFoundForDeleteOperation() throws Exception {
-        final String baseUrl = "http://localhost:" + port + "/invalid/permissions";
-        URI uri = new URI(baseUrl);
+        final String baseUrl = "http://localhost:" + port + "/EGAW0000005000/permissions";
 
         HttpHeaders headers = new HttpHeaders();
         headers.set("Accept", MediaType.APPLICATION_JSON_VALUE);
