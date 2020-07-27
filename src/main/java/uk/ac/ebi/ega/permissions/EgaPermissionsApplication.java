@@ -9,5 +9,4 @@ public class EgaPermissionsApplication {
     public static void main(String[] args) {
         SpringApplication.run(EgaPermissionsApplication.class, args);
     }
-
 }

@@ -1,4 +1,4 @@
-openapi: 3.0.1
+openapi: 3.0.3
 info:
   title: EGA Data Permissions
   description: This API handles requests to read, add, update, and delete permissions
@@ -41,10 +41,10 @@ paths:
                 items:
                   $ref: '#/components/schemas/Visa'
         400:
-          description: Invalid ID supplied
+          description: Bad request
           content: {}
         404:
-          description: User account not found
+          description: User account invalid or not found
           content: {}
 
     post:
@@ -133,6 +133,8 @@ components:
             Visa Assertion Source requires such a claim to be no longer valid
         ga4gh_visa_v1:
           $ref: '#/components/schemas/PassportVisaObject'
+      required:
+        - sub
       example:
         sub: EGAW00000015388
         iss: https://ega.ebi.ac.uk:8053/ega-openid-connect-server/
@@ -164,6 +166,11 @@ components:
         by:
           type: string
           description: Indicates that the person, service, or broker that applied the action on behalf of the 'source'
+      required:
+        - type
+        - asserted
+        - value
+        - source
       example:
         type: ControlledAccessGrants
         asserted: 1568814383
