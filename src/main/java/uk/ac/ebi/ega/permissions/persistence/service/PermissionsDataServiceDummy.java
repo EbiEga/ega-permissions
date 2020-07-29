@@ -1,8 +1,5 @@
 package uk.ac.ebi.ega.permissions.persistence.service;
 
-import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Service;
 import uk.ac.ebi.ega.permissions.persistence.entities.PassportClaim;
 import uk.ac.ebi.ega.permissions.persistence.entities.TokenPayload;
 
@@ -13,11 +10,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@Service
-@Scope(BeanDefinition.SCOPE_SINGLETON)
 public class PermissionsDataServiceDummy implements PermissionsDataService {
 
-    Map<String, TokenPayload> permissionsStore = new HashMap<>();
+    private Map<String, TokenPayload> permissionsStore = new HashMap<>();
 
     @Override
     public List<PassportClaim> getPassPortClaimsForAccount(String accountId) {
@@ -31,7 +26,7 @@ public class PermissionsDataServiceDummy implements PermissionsDataService {
     @Override
     public PassportClaim savePassportClaim(String accountId, PassportClaim claim) {
         //Simulating validations that can be introduced with JPA. Requests with empty values will return responses other than 200
-        if(claim.getValue().isEmpty()){
+        if (claim.getValue().isEmpty()) {
             return null;
         }
         if (this.permissionsStore.containsKey(accountId)) {

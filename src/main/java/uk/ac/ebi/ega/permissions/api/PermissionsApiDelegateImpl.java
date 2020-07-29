@@ -3,7 +3,6 @@ package uk.ac.ebi.ega.permissions.api;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Service;
 import uk.ac.ebi.ega.permissions.model.PassportVisaObject;
 import uk.ac.ebi.ega.permissions.model.PermissionsResponse;
 import uk.ac.ebi.ega.permissions.model.Visa;
@@ -13,7 +12,6 @@ import javax.validation.ValidationException;
 import java.util.ArrayList;
 import java.util.List;
 
-@Service
 public class PermissionsApiDelegateImpl implements PermissionsApiDelegate {
 
     private PermissionsService permissionsService;

@@ -1,6 +1,5 @@
 package uk.ac.ebi.ega.permissions.mapper;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.mapstruct.InjectionStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -13,7 +12,6 @@ import java.util.Arrays;
 import java.util.List;
 
 @Mapper(componentModel = "spring",
-        imports = {ObjectMapper.class},
         injectionStrategy = InjectionStrategy.CONSTRUCTOR)
 public interface TokenPayloadMapper {
 
