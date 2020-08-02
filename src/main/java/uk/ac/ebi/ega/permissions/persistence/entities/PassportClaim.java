@@ -1,13 +1,25 @@
 package uk.ac.ebi.ega.permissions.persistence.entities;
 
-//TODO: This will become a JPA Entity Later
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.IdClass;
+import javax.validation.constraints.NotBlank;
+
+@Entity
+@IdClass(PassportClaimId.class)
 public class PassportClaim {
+
+    @Id
+    @NotBlank
+    private String accountId;
+
+    @Id
+    @NotBlank
+    private String value;
 
     private String type;
 
     private Integer asserted;
-
-    private String value;
 
     private String source;
 
@@ -17,12 +29,21 @@ public class PassportClaim {
 
     }
 
-    public PassportClaim(String type, Integer asserted, String value, String source, String by) {
+    public PassportClaim(String accountId, String type, Integer asserted, String value, String source, String by) {
+        this.accountId = accountId;
         this.type = type;
         this.asserted = asserted;
         this.value = value;
         this.source = source;
         this.by = by;
+    }
+
+    public String getAccountId() {
+        return accountId;
+    }
+
+    public void setAccountId(String accountId) {
+        this.accountId = accountId;
     }
 
     public String getType() {

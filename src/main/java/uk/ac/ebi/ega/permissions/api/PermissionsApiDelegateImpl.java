@@ -34,7 +34,7 @@ public class PermissionsApiDelegateImpl implements PermissionsApiDelegate {
             if (savedObject == null) {
                 permissionsResponse.setStatus(HttpStatus.UNPROCESSABLE_ENTITY.value());
             } else {
-                permissionsResponse.setStatus(HttpStatus.OK.value());
+                permissionsResponse.setStatus(HttpStatus.CREATED.value());
             }
             permissionsResponses.add(permissionsResponse);
         }
