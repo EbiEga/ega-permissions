@@ -1,8 +1,7 @@
-package uk.ac.ebi.ega.permissions;
+package uk.ac.ebi.ega.permissions.configuration;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import uk.ac.ebi.ega.permissions.api.PermissionsApiDelegate;
 import uk.ac.ebi.ega.permissions.api.PermissionsApiDelegateImpl;
 import uk.ac.ebi.ega.permissions.mapper.TokenPayloadMapper;
@@ -13,21 +12,25 @@ import uk.ac.ebi.ega.permissions.service.PermissionsService;
 import uk.ac.ebi.ega.permissions.service.PermissionsServiceImpl;
 
 @Configuration
-@EnableJpaRepositories
 public class EgaPermissionsConfiguration {
 
     private final TokenPayloadMapper tokenPayloadMapper;
 
     private final PassportClaimRepository passportClaimRepository;
 
-    public EgaPermissionsConfiguration(TokenPayloadMapper tokenPayloadMapper, PassportClaimRepository passportClaimRepository){
+    private final VisaInfoProperties visaInfoProperties;
+
+    public EgaPermissionsConfiguration(TokenPayloadMapper tokenPayloadMapper,
+                                       PassportClaimRepository passportClaimRepository,
+                                       VisaInfoProperties visaInfoProperties){
         this.tokenPayloadMapper = tokenPayloadMapper;
         this.passportClaimRepository = passportClaimRepository;
+        this.visaInfoProperties = visaInfoProperties;
     }
 
     @Bean
     public PermissionsService permissionsService() {
-        return new PermissionsServiceImpl(permissionsDataService(), tokenPayloadMapper);
+        return new PermissionsServiceImpl(permissionsDataService(), tokenPayloadMapper, visaInfoProperties);
     }
 
     @Bean

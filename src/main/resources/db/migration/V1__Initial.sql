@@ -4,7 +4,7 @@
 
 -- DROP TABLE public.passport_claim;
 
-CREATE TABLE public.passport_claim (
+CREATE TABLE passport_claim (
 	account_id varchar(255) NOT NULL,
 	value varchar(255) NOT NULL,
 	asserted int4 NULL,
@@ -13,3 +13,5 @@ CREATE TABLE public.passport_claim (
 	type varchar(255) NULL,
 	CONSTRAINT passport_claim_pkey PRIMARY KEY (account_id, value)
 );
+
+CREATE INDEX passport_claim_account_idx ON passport_claim(account_id);

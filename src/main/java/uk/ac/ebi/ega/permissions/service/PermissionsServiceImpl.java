@@ -1,11 +1,13 @@
 package uk.ac.ebi.ega.permissions.service;
 
+import uk.ac.ebi.ega.permissions.configuration.VisaInfoProperties;
 import uk.ac.ebi.ega.permissions.mapper.TokenPayloadMapper;
 import uk.ac.ebi.ega.permissions.model.PassportVisaObject;
 import uk.ac.ebi.ega.permissions.model.Visa;
 import uk.ac.ebi.ega.permissions.persistence.entities.PassportClaim;
 import uk.ac.ebi.ega.permissions.persistence.service.PermissionsDataService;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -13,10 +15,12 @@ public class PermissionsServiceImpl implements PermissionsService {
 
     private PermissionsDataService permissionsDataService;
     private TokenPayloadMapper tokenPayloadMapper;
+    private VisaInfoProperties visaInfoProperties;
 
-    public PermissionsServiceImpl(PermissionsDataService permissionsDataService, TokenPayloadMapper tokenPayloadMapper) {
+    public PermissionsServiceImpl(PermissionsDataService permissionsDataService, TokenPayloadMapper tokenPayloadMapper, VisaInfoProperties visaInfoProperties) {
         this.permissionsDataService = permissionsDataService;
         this.tokenPayloadMapper = tokenPayloadMapper;
+        this.visaInfoProperties = visaInfoProperties;
     }
 
     @Override
@@ -28,7 +32,12 @@ public class PermissionsServiceImpl implements PermissionsService {
     public List<Visa> getVisas(String accountId) {
         List<PassportVisaObject> passportVisaObjects = this.tokenPayloadMapper
                 .mapPassportClaimsToPassportVisaObjects(this.permissionsDataService.getPassPortClaimsForAccount(accountId));
-        Visa visa = generatedVisa();
+
+        if(passportVisaObjects.isEmpty()){
+            return Collections.emptyList();
+        }
+
+        Visa visa = generatedVisaInfo(accountId);
 
         List<Visa> visas = passportVisaObjects.stream().map(e -> {
             Visa innerVisa = new Visa();
@@ -56,14 +65,15 @@ public class PermissionsServiceImpl implements PermissionsService {
         return this.permissionsDataService.deletePassportClaim(accountId, value);
     }
 
-    //TODO: Implement logic to populate visa attributes
-    private Visa generatedVisa() {
+    //TODO: Verify/improve this logic to populate visa attributes
+    // this can be generated but for now I'm using values from properties
+    private Visa generatedVisaInfo(String accountId) {
         Visa visa = new Visa();
-        visa.setSub("EGAW00000015388");
-        visa.setIss("https://ega.ebi.ac.uk:8053/ega-openid-connect-server/");
-        visa.setExp(1592824514);
-        visa.setIat(1592820914);
-        visa.setJti("f030c620-993b-49af-a830-4b9af4f379f8");
+        visa.setSub(accountId);
+        visa.setIss(this.visaInfoProperties.getIssuer());
+        visa.setExp(this.visaInfoProperties.getExpiry());
+        visa.setIat(this.visaInfoProperties.getIat());
+        visa.setJti(this.visaInfoProperties.getJti());
         return visa;
     }
 }
