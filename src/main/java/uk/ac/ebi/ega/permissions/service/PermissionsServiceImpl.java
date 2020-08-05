@@ -7,8 +7,10 @@ import uk.ac.ebi.ega.permissions.model.Visa;
 import uk.ac.ebi.ega.permissions.persistence.entities.PassportClaim;
 import uk.ac.ebi.ega.permissions.persistence.service.PermissionsDataService;
 
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class PermissionsServiceImpl implements PermissionsService {
@@ -33,7 +35,7 @@ public class PermissionsServiceImpl implements PermissionsService {
         List<PassportVisaObject> passportVisaObjects = this.tokenPayloadMapper
                 .mapPassportClaimsToPassportVisaObjects(this.permissionsDataService.getPassPortClaimsForAccount(accountId));
 
-        if(passportVisaObjects.isEmpty()){
+        if (passportVisaObjects.isEmpty()) {
             return Collections.emptyList();
         }
 
@@ -71,9 +73,9 @@ public class PermissionsServiceImpl implements PermissionsService {
         Visa visa = new Visa();
         visa.setSub(accountId);
         visa.setIss(this.visaInfoProperties.getIssuer());
-        visa.setExp(this.visaInfoProperties.getExpiry());
+        visa.setExp(Calendar.getInstance().getTimeInMillis() / 1000L + this.visaInfoProperties.getExpireAfter());
         visa.setIat(this.visaInfoProperties.getIat());
-        visa.setJti(this.visaInfoProperties.getJti());
+        visa.setJti(UUID.randomUUID().toString());
         return visa;
     }
 }

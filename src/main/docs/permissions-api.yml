@@ -129,6 +129,7 @@ components:
           description: jti (JWT ID) claim
         exp:
           type: integer
+          format: int64
           description: Generally, it is seconds since unix epoch of when the Passport
             Visa Assertion Source requires such a claim to be no longer valid
         ga4gh_visa_v1:

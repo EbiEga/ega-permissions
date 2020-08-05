@@ -8,9 +8,8 @@ import org.springframework.context.annotation.Configuration;
 public class VisaInfoProperties {
 
     private String issuer;
-    private int expiry;
+    private long expireAfter;
     private int iat;
-    private String jti;
 
     public String getIssuer() {
         return issuer;
@@ -20,12 +19,12 @@ public class VisaInfoProperties {
         this.issuer = issuer;
     }
 
-    public int getExpiry() {
-        return expiry;
+    public long getExpireAfter() {
+        return expireAfter;
     }
 
-    public void setExpiry(int expiry) {
-        this.expiry = expiry;
+    public void setExpireAfter(long expireAfter) {
+        this.expireAfter = expireAfter;
     }
 
     public int getIat() {
@@ -34,13 +33,5 @@ public class VisaInfoProperties {
 
     public void setIat(int iat) {
         this.iat = iat;
-    }
-
-    public String getJti() {
-        return jti;
-    }
-
-    public void setJti(String jti) {
-        this.jti = jti;
     }
 }
