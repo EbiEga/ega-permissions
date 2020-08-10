@@ -27,15 +27,13 @@ public class PermissionsApiDelegateImpl implements PermissionsApiDelegate {
 
         for (PassportVisaObject visaObject : passportVisaObjects) {
             PermissionsResponse permissionsResponse = new PermissionsResponse();
-
-            PassportVisaObject savedObject = this.permissionsService.savePassportVisaObject(accountId, visaObject);
             permissionsResponse.setGa4ghVisaV1(visaObject);
 
-            if (savedObject == null) {
-                permissionsResponse.setStatus(HttpStatus.UNPROCESSABLE_ENTITY.value());
-            } else {
-                permissionsResponse.setStatus(HttpStatus.CREATED.value());
-            }
+            this.permissionsService.savePassportVisaObject(accountId, visaObject).ifPresentOrElse(
+                    e -> permissionsResponse.setStatus(HttpStatus.CREATED.value()),
+                    () -> permissionsResponse.setStatus(HttpStatus.UNPROCESSABLE_ENTITY.value())
+            );
+
             permissionsResponses.add(permissionsResponse);
         }
         return ResponseEntity.status(HttpStatus.MULTI_STATUS).body(permissionsResponses);

@@ -76,13 +76,15 @@ class PassportClaimRepositoryTest {
     void deleteByAccountIdAndValue() {
         passportClaimRepository.save(createPassportClaim("account1", "object1"));
         passportClaimRepository.save(createPassportClaim("account1", "object2"));
-        passportClaimRepository.save(createPassportClaim("account2", "object1"));
-        long claimsBefore = passportClaimRepository.count();
-        passportClaimRepository.deleteByAccountIdAndValue("account2", "object1");
-        long claimsAfter = passportClaimRepository.count();
+        passportClaimRepository.save(createPassportClaim("account1", "object3"));
+        List<PassportClaim> claimsBefore = passportClaimRepository.findAllByAccountId("account1");
+        passportClaimRepository.deleteByAccountIdAndValue("account1", "object2");
+        List<PassportClaim> claimsAfter = passportClaimRepository.findAllByAccountId("account1");
 
-        assertThat(claimsBefore).isEqualTo(3);
-        assertThat(claimsAfter).isEqualTo(2);
+        assertThat(claimsBefore).hasSize(3);
+        assertThat(claimsBefore).filteredOn(e -> e.getValue().equals("object2")).hasSize(1);
+        assertThat(claimsAfter).hasSize(2);
+        assertThat(claimsAfter).filteredOn(e -> e.getValue().equals("object2")).hasSize(0);
     }
 
     private PassportClaim createPassportClaim(String accountId, String value) {

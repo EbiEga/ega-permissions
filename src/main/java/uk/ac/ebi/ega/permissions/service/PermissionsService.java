@@ -4,6 +4,7 @@ import uk.ac.ebi.ega.permissions.model.PassportVisaObject;
 import uk.ac.ebi.ega.permissions.model.Visa;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface PermissionsService {
 
@@ -11,7 +12,7 @@ public interface PermissionsService {
 
     List<Visa> getVisas(String accountId);
 
-    PassportVisaObject savePassportVisaObject(String accountId, PassportVisaObject passportVisaObject);
+    Optional<PassportVisaObject> savePassportVisaObject(String accountId, PassportVisaObject passportVisaObject);
 
     int deletePassportVisaObject(String accountId, String value);
 }

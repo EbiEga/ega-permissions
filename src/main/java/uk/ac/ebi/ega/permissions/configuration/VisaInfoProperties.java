@@ -1,10 +1,5 @@
 package uk.ac.ebi.ega.permissions.configuration;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
-
-@Configuration
-@ConfigurationProperties(prefix = "ega-permissions.visainfo")
 public class VisaInfoProperties {
 
     private String issuer;

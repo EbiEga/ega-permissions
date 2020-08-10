@@ -1,5 +1,6 @@
 package uk.ac.ebi.ega.permissions.service;
 
+import org.springframework.util.CollectionUtils;
 import uk.ac.ebi.ega.permissions.configuration.VisaInfoProperties;
 import uk.ac.ebi.ega.permissions.mapper.TokenPayloadMapper;
 import uk.ac.ebi.ega.permissions.model.PassportVisaObject;
@@ -10,6 +11,7 @@ import uk.ac.ebi.ega.permissions.persistence.service.PermissionsDataService;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -35,7 +37,7 @@ public class PermissionsServiceImpl implements PermissionsService {
         List<PassportVisaObject> passportVisaObjects = this.tokenPayloadMapper
                 .mapPassportClaimsToPassportVisaObjects(this.permissionsDataService.getPassPortClaimsForAccount(accountId));
 
-        if (passportVisaObjects.isEmpty()) {
+        if (CollectionUtils.isEmpty(passportVisaObjects)) {
             return Collections.emptyList();
         }
 
@@ -56,10 +58,16 @@ public class PermissionsServiceImpl implements PermissionsService {
     }
 
     @Override
-    public PassportVisaObject savePassportVisaObject(String accountId, PassportVisaObject passportVisaObject) {
-        PassportClaim savedClaim = this.permissionsDataService
-                .savePassportClaim(tokenPayloadMapper.mapPassportVisaObjectToPassportClaim(accountId, passportVisaObject));
-        return this.tokenPayloadMapper.mapPassportClaimToPassportVisaObject(savedClaim);
+    public Optional<PassportVisaObject> savePassportVisaObject(String accountId, PassportVisaObject passportVisaObject) {
+        PassportVisaObject savedObject;
+        try {
+            PassportClaim savedClaim = this.permissionsDataService.savePassportClaim(tokenPayloadMapper.mapPassportVisaObjectToPassportClaim(accountId, passportVisaObject));
+            savedObject = this.tokenPayloadMapper.mapPassportClaimToPassportVisaObject(savedClaim);
+            return Optional.of(savedObject);
+        } catch (Exception ex) {
+            //Handle exception in the save process so the caller can check using Optional
+            return Optional.empty();
+        }
     }
 
     @Override

@@ -3,7 +3,6 @@ package uk.ac.ebi.ega.permissions.persistence.service;
 import uk.ac.ebi.ega.permissions.persistence.repository.PassportClaimRepository;
 import uk.ac.ebi.ega.permissions.persistence.entities.PassportClaim;
 
-import javax.transaction.Transactional;
 import java.util.List;
 
 public class PermissionsDataServiceImpl implements PermissionsDataService {
@@ -25,7 +24,6 @@ public class PermissionsDataServiceImpl implements PermissionsDataService {
     }
 
     @Override
-    @Transactional
     public int deletePassportClaim(String accountId, String value) {
         return this.passportClaimRepository.deleteByAccountIdAndValue(accountId, value);
     }
