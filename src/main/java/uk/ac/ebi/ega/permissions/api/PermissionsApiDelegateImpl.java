@@ -3,6 +3,7 @@ package uk.ac.ebi.ega.permissions.api;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import uk.ac.ebi.ega.permissions.exception.ServiceException;
 import uk.ac.ebi.ega.permissions.model.PassportVisaObject;
 import uk.ac.ebi.ega.permissions.model.PermissionsResponse;
 import uk.ac.ebi.ega.permissions.model.Visa;
@@ -29,10 +30,14 @@ public class PermissionsApiDelegateImpl implements PermissionsApiDelegate {
             PermissionsResponse permissionsResponse = new PermissionsResponse();
             permissionsResponse.setGa4ghVisaV1(visaObject);
 
-            this.permissionsService.savePassportVisaObject(accountId, visaObject).ifPresentOrElse(
-                    e -> permissionsResponse.setStatus(HttpStatus.CREATED.value()),
-                    () -> permissionsResponse.setStatus(HttpStatus.UNPROCESSABLE_ENTITY.value())
-            );
+            try {
+                this.permissionsService.savePassportVisaObject(accountId, visaObject);
+                permissionsResponse.setStatus(HttpStatus.CREATED.value());
+                permissionsResponse.setMessage("Created");
+            } catch (ServiceException ex) {
+                permissionsResponse.setStatus(ex.getHttpStatus().value());
+                permissionsResponse.setMessage(ex.getMessage());
+            }
 
             permissionsResponses.add(permissionsResponse);
         }

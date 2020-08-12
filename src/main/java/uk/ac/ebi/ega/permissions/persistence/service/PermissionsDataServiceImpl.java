@@ -1,5 +1,6 @@
 package uk.ac.ebi.ega.permissions.persistence.service;
 
+import org.springframework.transaction.annotation.Transactional;
 import uk.ac.ebi.ega.permissions.persistence.repository.PassportClaimRepository;
 import uk.ac.ebi.ega.permissions.persistence.entities.PassportClaim;
 
@@ -24,6 +25,7 @@ public class PermissionsDataServiceImpl implements PermissionsDataService {
     }
 
     @Override
+    @Transactional
     public int deletePassportClaim(String accountId, String value) {
         return this.passportClaimRepository.deleteByAccountIdAndValue(accountId, value);
     }

@@ -1,10 +1,10 @@
 package uk.ac.ebi.ega.permissions.service;
 
+import uk.ac.ebi.ega.permissions.exception.ServiceException;
 import uk.ac.ebi.ega.permissions.model.PassportVisaObject;
 import uk.ac.ebi.ega.permissions.model.Visa;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface PermissionsService {
 
@@ -12,7 +12,7 @@ public interface PermissionsService {
 
     List<Visa> getVisas(String accountId);
 
-    Optional<PassportVisaObject> savePassportVisaObject(String accountId, PassportVisaObject passportVisaObject);
+    PassportVisaObject savePassportVisaObject(String accountId, PassportVisaObject passportVisaObject) throws ServiceException;
 
     int deletePassportVisaObject(String accountId, String value);
 }

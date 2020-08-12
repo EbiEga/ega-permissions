@@ -187,6 +187,9 @@ components:
         status:
           type: integer
           description: HTTP Status Code
+        message:
+          type: String
+          description: Optional message
       example:
         ga4gh_visa_v1:
           type: ControlledAccessGrants
@@ -195,3 +198,4 @@ components:
           source: https://ega-archive.org/dacs/EGAC00001000514
           by: dac
         status: 201
+        message: Success
