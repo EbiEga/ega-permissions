@@ -1,12 +1,10 @@
 package uk.ac.ebi.ega.permissions.service;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
 import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.util.CollectionUtils;
 import uk.ac.ebi.ega.permissions.configuration.VisaInfoProperties;
 import uk.ac.ebi.ega.permissions.exception.ServiceException;
+import uk.ac.ebi.ega.permissions.exception.SystemException;
 import uk.ac.ebi.ega.permissions.mapper.TokenPayloadMapper;
 import uk.ac.ebi.ega.permissions.model.PassportVisaObject;
 import uk.ac.ebi.ega.permissions.model.Visa;
@@ -21,8 +19,6 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class PermissionsServiceImpl implements PermissionsService {
-
-    Logger LOGGER = LoggerFactory.getLogger(PermissionsServiceImpl.class);
 
     private PermissionsDataService permissionsDataService;
     private TokenPayloadMapper tokenPayloadMapper;
@@ -65,14 +61,14 @@ public class PermissionsServiceImpl implements PermissionsService {
     }
 
     @Override
-    public PassportVisaObject savePassportVisaObject(String accountId, PassportVisaObject passportVisaObject) throws ServiceException {
+    public PassportVisaObject savePassportVisaObject(String accountId, PassportVisaObject passportVisaObject) throws ServiceException, SystemException {
         try {
             PassportClaim savedClaim = this.permissionsDataService.savePassportClaim(tokenPayloadMapper.mapPassportVisaObjectToPassportClaim(accountId, passportVisaObject));
             passportVisaObject = this.tokenPayloadMapper.mapPassportClaimToPassportVisaObject(savedClaim);
         } catch (PersistenceException | CannotCreateTransactionException | IllegalArgumentException ex) { //These are spring-data possible errors
-            throwServiceException(ex, String.format("Error saving permissions to the DB for [account:%s, object:%s]", accountId, passportVisaObject.getValue()));
+            throw new ServiceException(String.format("Error saving permissions to the DB for [account:%s, object:%s]", accountId, passportVisaObject.getValue()), ex);
         } catch (Exception ex) { //Generic errors are wrapped with a default message
-            throwServiceException(ex, String.format(String.format("Error processing permissions object [account:%s, object:%s]", accountId, passportVisaObject.getValue())));
+            throw new SystemException(String.format("Error processing permissions for [account:%s, object:%s]", accountId, passportVisaObject.getValue()), ex);
         }
         return passportVisaObject;
     }
@@ -92,11 +88,5 @@ public class PermissionsServiceImpl implements PermissionsService {
         visa.setIat(this.visaInfoProperties.getIat());
         visa.setJti(UUID.randomUUID().toString());
         return visa;
-    }
-
-    private void throwServiceException(Exception ex, String message) throws ServiceException {
-        ServiceException serviceException = new ServiceException(message, ex, HttpStatus.SERVICE_UNAVAILABLE);
-        LOGGER.error(serviceException.getMessage(), serviceException);
-        throw serviceException;
     }
 }
