@@ -36,7 +36,14 @@ class PermissionsServiceImplTest {
         when(permissionsDataService.savePassportClaim(any())).thenThrow(new CannotCreateTransactionException("Error connecting to the DB"));
 
         assertThatThrownBy(() -> {
-            permissionsService.savePassportVisaObject("id", new PassportVisaObject());
+            PassportVisaObject passportVisaObject = new PassportVisaObject();
+            passportVisaObject.setBy("dac");
+            passportVisaObject.setAsserted(1568814383);
+            passportVisaObject.setValue("https://ega-archive.org/datasets/EGAD00002222222");
+            passportVisaObject.setType("ControlledAccessGrants");
+            passportVisaObject.setSource("https://ega-archive.org/dacs/EGAC00001111111");
+            
+            permissionsService.savePassportVisaObject("id", passportVisaObject);
         }).isInstanceOf(ServiceException.class).hasMessageContaining("Error saving permissions to the DB");
     }
 

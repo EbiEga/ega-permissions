@@ -12,6 +12,7 @@ import uk.ac.ebi.ega.permissions.persistence.entities.PassportClaim;
 import uk.ac.ebi.ega.permissions.persistence.service.PermissionsDataService;
 
 import javax.persistence.PersistenceException;
+import javax.validation.ValidationException;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
@@ -63,10 +64,16 @@ public class PermissionsServiceImpl implements PermissionsService {
     @Override
     public PassportVisaObject savePassportVisaObject(String accountId, PassportVisaObject passportVisaObject) throws ServiceException, SystemException {
         try {
+            //TODO: This will be improved later with other validations such as valid accountIds and Datasets
+            if (passportVisaObject.getValue().isEmpty() || accountId.isEmpty()) {
+                throw new ValidationException("Values for accountId and value are incorrect or not valid");
+            }
             PassportClaim savedClaim = this.permissionsDataService.savePassportClaim(tokenPayloadMapper.mapPassportVisaObjectToPassportClaim(accountId, passportVisaObject));
             passportVisaObject = this.tokenPayloadMapper.mapPassportClaimToPassportVisaObject(savedClaim);
         } catch (PersistenceException | CannotCreateTransactionException | IllegalArgumentException ex) { //These are spring-data possible errors
             throw new ServiceException(String.format("Error saving permissions to the DB for [account:%s, object:%s]", accountId, passportVisaObject.getValue()), ex);
+        } catch (ValidationException exception) {
+            throw exception;
         } catch (Exception ex) { //Generic errors are wrapped with a default message
             throw new SystemException(String.format("Error processing permissions for [account:%s, object:%s]", accountId, passportVisaObject.getValue()), ex);
         }
