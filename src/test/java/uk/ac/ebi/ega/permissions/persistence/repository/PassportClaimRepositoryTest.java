@@ -18,6 +18,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
+import static uk.ac.ebi.ega.permissions.persistence.entities.PassportClaim.VisaType.ControlledAccessGrants;
 
 @ExtendWith(SpringExtension.class)
 @DataJpaTest
@@ -89,10 +90,10 @@ class PassportClaimRepositoryTest {
 
     private PassportClaim createPassportClaim(String accountId, String value) {
         return new PassportClaim(accountId,
-                "ControlledAccessGrants",
-                1568814383,
+                PassportClaim.VisaType.ControlledAccessGrants,
+                1568814383L,
                 value,
                 "https://ega-archive.org/dacs/EGAC00001111111",
-                "dac");
+                PassportClaim.Authority.dac);
     }
 }

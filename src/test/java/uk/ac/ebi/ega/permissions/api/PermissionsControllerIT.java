@@ -52,7 +52,7 @@ class PermissionsControllerIT {
         passportVisaObject.setSource("https://ega-archive.org/dacs/EGAC00001111111");
         passportVisaObject.setType("ControlledAccessGrants");
         passportVisaObject.setValue("https://ega-archive.org/datasets/EGAD00002222222");
-        passportVisaObject.setAsserted(1568814383);
+        passportVisaObject.setAsserted(1568814383L);
         passportVisaObject.setBy("dac");
 
         this.restTemplate.postForEntity(uri, Arrays.asList(passportVisaObject), PermissionsResponse[].class);
@@ -73,14 +73,14 @@ class PermissionsControllerIT {
         passportVisaObject1.setSource("https://ega-archive.org/dacs/EGAC00001111111");
         passportVisaObject1.setType("ControlledAccessGrants");
         passportVisaObject1.setValue("https://ega-archive.org/datasets/EGAD00002222222");
-        passportVisaObject1.setAsserted(1568814383);
+        passportVisaObject1.setAsserted(1568814383L);
         passportVisaObject1.setBy("dac");
 
         PassportVisaObject passportVisaObject2 = new PassportVisaObject();
         passportVisaObject2.setSource("https://ega-archive.org/dacs/EGAC00001111111");
         passportVisaObject2.setType("ControlledAccessGrants");
         passportVisaObject2.setValue("https://ega-archive.org/datasets/EGAD00003333333");
-        passportVisaObject2.setAsserted(1568814383);
+        passportVisaObject2.setAsserted(1568814383L);
         passportVisaObject2.setBy("dac");
 
         ResponseEntity<PermissionsResponse[]> result = this.restTemplate.postForEntity(uri, Arrays.asList(passportVisaObject1, passportVisaObject2),
@@ -102,7 +102,7 @@ class PermissionsControllerIT {
         passportVisaObject.setSource("https://ega-archive.org/dacs/EGAC00001111111");
         passportVisaObject.setType("ControlledAccessGrants");
         passportVisaObject.setValue("https://ega-archive.org/datasets/EGAD00002222222");
-        passportVisaObject.setAsserted(1568814383);
+        passportVisaObject.setAsserted(1568814383L);
         passportVisaObject.setBy("dac");
 
         this.restTemplate.postForEntity(uri, Arrays.asList(passportVisaObject), PermissionsResponse[].class);

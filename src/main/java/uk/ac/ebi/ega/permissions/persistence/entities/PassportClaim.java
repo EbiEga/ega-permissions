@@ -1,13 +1,30 @@
 package uk.ac.ebi.ega.permissions.persistence.entities;
 
+import org.hibernate.annotations.Type;
+import org.hibernate.annotations.TypeDef;
+
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import javax.persistence.IdClass;
 import javax.validation.constraints.NotBlank;
 
 @Entity
 @IdClass(PassportClaimId.class)
+@TypeDef(name = "visa_type", typeClass = PostgreSQLEnumType.class)
+@TypeDef(name = "visa_authority", typeClass = PostgreSQLEnumType.class)
 public class PassportClaim {
+
+    public enum VisaType {
+        AffiliationAndRole,
+        ControlledAccessGrants,
+        AcceptedTermsAndPolicies,
+        ResearcherStatus,
+        LinkedIdentities
+    }
+
+    public enum Authority {dac, system}
 
     @Id
     @NotBlank
@@ -17,19 +34,23 @@ public class PassportClaim {
     @NotBlank
     private String value;
 
-    private String type;
+    @Enumerated(EnumType.STRING)
+    @Type(type = "visa_type")
+    private VisaType type;
 
-    private Integer asserted;
+    private Long asserted;
 
     private String source;
 
-    private String by;
+    @Enumerated(EnumType.STRING)
+    @Type(type = "visa_authority")
+    private Authority by;
 
-    public PassportClaim(){
+    public PassportClaim() {
 
     }
 
-    public PassportClaim(String accountId, String type, Integer asserted, String value, String source, String by) {
+    public PassportClaim(String accountId, VisaType type, Long asserted, String value, String source, Authority by) {
         this.accountId = accountId;
         this.type = type;
         this.asserted = asserted;
@@ -46,19 +67,19 @@ public class PassportClaim {
         this.accountId = accountId;
     }
 
-    public String getType() {
+    public VisaType getType() {
         return type;
     }
 
-    public void setType(String type) {
+    public void setType(VisaType type) {
         this.type = type;
     }
 
-    public Integer getAsserted() {
+    public Long getAsserted() {
         return asserted;
     }
 
-    public void setAsserted(Integer asserted) {
+    public void setAsserted(Long asserted) {
         this.asserted = asserted;
     }
 
@@ -78,11 +99,11 @@ public class PassportClaim {
         this.source = source;
     }
 
-    public String getBy() {
+    public Authority getBy() {
         return by;
     }
 
-    public void setBy(String by) {
+    public void setBy(Authority by) {
         this.by = by;
     }
 }

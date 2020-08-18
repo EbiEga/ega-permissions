@@ -38,7 +38,7 @@ class PermissionsServiceImplTest {
         assertThatThrownBy(() -> {
             PassportVisaObject passportVisaObject = new PassportVisaObject();
             passportVisaObject.setBy("dac");
-            passportVisaObject.setAsserted(1568814383);
+            passportVisaObject.setAsserted(1568814383L);
             passportVisaObject.setValue("https://ega-archive.org/datasets/EGAD00002222222");
             passportVisaObject.setType("ControlledAccessGrants");
             passportVisaObject.setSource("https://ega-archive.org/dacs/EGAC00001111111");

@@ -157,6 +157,7 @@ components:
           description: Visa Type
         asserted:
           type: integer
+          format: int64
           description: Timestamp when the action was added or last updated
         value:
           type: string
