@@ -4,29 +4,23 @@ import org.mapstruct.InjectionStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import uk.ac.ebi.ega.permissions.model.PassportVisaObject;
-import uk.ac.ebi.ega.permissions.model.Visa;
 import uk.ac.ebi.ega.permissions.persistence.entities.PassportClaim;
-import uk.ac.ebi.ega.permissions.persistence.entities.TokenPayload;
 
-import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Mapper(componentModel = "spring",
         injectionStrategy = InjectionStrategy.CONSTRUCTOR)
 public interface TokenPayloadMapper {
 
-    @Mapping(target = "claims", expression = "java(mapPassportVisaObjectToList(visa.getGa4ghVisaV1()))")
-    TokenPayload mapVisa(Visa visa);
+    @Mapping(source = "accountId", target = "accountId")
+    PassportClaim mapPassportVisaObjectToPassportClaim(String accountId, PassportVisaObject passportVisaObject);
 
-    Visa mapTokenPayload(TokenPayload tokenPayload);
-
-    PassportClaim mapPassportVisaObject(PassportVisaObject passportVisaObject);
-
-    default List<PassportClaim> mapPassportVisaObjectToList(PassportVisaObject passportVisaObject) {
-        return Arrays.asList(mapPassportVisaObject(passportVisaObject));
+    default List<PassportClaim> mapPassportVisaObjectsToPassportClaims(String accountId, List<PassportVisaObject> passportVisaObjects){
+        return passportVisaObjects.stream().map(e -> this.mapPassportVisaObjectToPassportClaim(accountId, e)).collect(Collectors.toList());
     }
 
-    PassportVisaObject mapPassportClaim(PassportClaim passportClaim);
+    PassportVisaObject mapPassportClaimToPassportVisaObject(PassportClaim passportClaim);
 
-    List<PassportVisaObject> mapPassportClaims(List<PassportClaim> passportClaims);
+    List<PassportVisaObject> mapPassportClaimsToPassportVisaObjects(List<PassportClaim> passportClaims);
 }

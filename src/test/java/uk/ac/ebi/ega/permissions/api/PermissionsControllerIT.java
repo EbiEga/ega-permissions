@@ -12,6 +12,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.web.util.UriComponentsBuilder;
 import uk.ac.ebi.ega.permissions.model.PassportVisaObject;
 import uk.ac.ebi.ega.permissions.model.PermissionsResponse;
@@ -23,6 +24,7 @@ import java.util.Arrays;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@TestPropertySource(locations="classpath:application-test.properties")
 class PermissionsControllerIT {
 
     @Autowired
@@ -50,7 +52,7 @@ class PermissionsControllerIT {
         passportVisaObject.setSource("https://ega-archive.org/dacs/EGAC00001111111");
         passportVisaObject.setType("ControlledAccessGrants");
         passportVisaObject.setValue("https://ega-archive.org/datasets/EGAD00002222222");
-        passportVisaObject.setAsserted(1568814383);
+        passportVisaObject.setAsserted(1568814383L);
         passportVisaObject.setBy("dac");
 
         this.restTemplate.postForEntity(uri, Arrays.asList(passportVisaObject), PermissionsResponse[].class);
@@ -71,15 +73,14 @@ class PermissionsControllerIT {
         passportVisaObject1.setSource("https://ega-archive.org/dacs/EGAC00001111111");
         passportVisaObject1.setType("ControlledAccessGrants");
         passportVisaObject1.setValue("https://ega-archive.org/datasets/EGAD00002222222");
-        passportVisaObject1.setAsserted(1568814383);
+        passportVisaObject1.setAsserted(1568814383L);
         passportVisaObject1.setBy("dac");
 
-        //For testing purposes, this permission wont be saved and will be returned with 422 status code (see dummy logic in the controller delegate)
         PassportVisaObject passportVisaObject2 = new PassportVisaObject();
         passportVisaObject2.setSource("https://ega-archive.org/dacs/EGAC00001111111");
         passportVisaObject2.setType("ControlledAccessGrants");
-        passportVisaObject2.setValue("");
-        passportVisaObject2.setAsserted(1568814383);
+        passportVisaObject2.setValue("https://ega-archive.org/datasets/EGAD00003333333");
+        passportVisaObject2.setAsserted(1568814383L);
         passportVisaObject2.setBy("dac");
 
         ResponseEntity<PermissionsResponse[]> result = this.restTemplate.postForEntity(uri, Arrays.asList(passportVisaObject1, passportVisaObject2),
@@ -88,8 +89,7 @@ class PermissionsControllerIT {
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.MULTI_STATUS);
         assertThat(responses).hasSize(2);
 
-        assertThat(responses).filteredOn(e -> e.getStatus() == HttpStatus.OK.value()).hasSize(1);
-        assertThat(responses).filteredOn(e -> e.getStatus() == HttpStatus.UNPROCESSABLE_ENTITY.value()).hasSize(1);
+        assertThat(responses).filteredOn(e -> e.getStatus() == HttpStatus.CREATED.value()).hasSize(2);
     }
 
     @Test
@@ -102,7 +102,7 @@ class PermissionsControllerIT {
         passportVisaObject.setSource("https://ega-archive.org/dacs/EGAC00001111111");
         passportVisaObject.setType("ControlledAccessGrants");
         passportVisaObject.setValue("https://ega-archive.org/datasets/EGAD00002222222");
-        passportVisaObject.setAsserted(1568814383);
+        passportVisaObject.setAsserted(1568814383L);
         passportVisaObject.setBy("dac");
 
         this.restTemplate.postForEntity(uri, Arrays.asList(passportVisaObject), PermissionsResponse[].class);
