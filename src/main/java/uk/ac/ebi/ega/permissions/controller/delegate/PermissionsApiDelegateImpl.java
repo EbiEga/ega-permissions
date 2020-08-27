@@ -1,10 +1,11 @@
-package uk.ac.ebi.ega.permissions.api;
+package uk.ac.ebi.ega.permissions.controller.delegate;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import uk.ac.ebi.ega.permissions.api.PermissionsApiDelegate;
 import uk.ac.ebi.ega.permissions.exception.ServiceException;
 import uk.ac.ebi.ega.permissions.exception.SystemException;
 import uk.ac.ebi.ega.permissions.model.PassportVisaObject;

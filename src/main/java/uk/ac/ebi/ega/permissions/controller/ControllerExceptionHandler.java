@@ -1,4 +1,4 @@
-package uk.ac.ebi.ega.permissions.api;
+package uk.ac.ebi.ega.permissions.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

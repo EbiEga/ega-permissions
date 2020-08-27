@@ -42,7 +42,7 @@ class PermissionsServiceImplTest {
             passportVisaObject.setValue("https://ega-archive.org/datasets/EGAD00002222222");
             passportVisaObject.setType("ControlledAccessGrants");
             passportVisaObject.setSource("https://ega-archive.org/dacs/EGAC00001111111");
-            
+
             permissionsService.savePassportVisaObject("id", passportVisaObject);
         }).isInstanceOf(ServiceException.class).hasMessageContaining("Error saving permissions to the DB");
     }
