@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.util.ResourceUtils;
 import uk.ac.ebi.ega.permissions.api.PermissionsApiDelegate;
+import uk.ac.ebi.ega.permissions.controller.RequestHandler;
 import uk.ac.ebi.ega.permissions.controller.delegate.PermissionsApiDelegateImpl;
 import uk.ac.ebi.ega.permissions.mapper.TokenPayloadMapper;
 import uk.ac.ebi.ega.permissions.model.JWTAlgorithm;
@@ -32,8 +33,9 @@ import java.util.stream.Collectors;
 public class EgaPermissionsConfiguration {
 
     @Bean
-    public PermissionsApiDelegate permissionsApiDelegate(final PermissionsService permissionsService) {
-        return new PermissionsApiDelegateImpl(permissionsService);
+    public PermissionsApiDelegate permissionsApiDelegate(final PermissionsService permissionsService,
+                                                         final RequestHandler requestHandler) {
+        return new PermissionsApiDelegateImpl(permissionsService, requestHandler);
     }
 
     @Bean
@@ -46,6 +48,11 @@ public class EgaPermissionsConfiguration {
     @Bean
     public PermissionsDataService permissionsDataService(final PassportClaimRepository passportClaimRepository) {
         return new PermissionsDataServiceImpl(passportClaimRepository);
+    }
+
+    @Bean
+    public RequestHandler requestHandler(final PermissionsService permissionsService, final TokenPayloadMapper tokenPayloadMapper) {
+        return new RequestHandler(permissionsService, tokenPayloadMapper);
     }
 
     @Bean
