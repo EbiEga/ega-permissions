@@ -14,11 +14,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import uk.ac.ebi.ega.permissions.model.JWTTokenResponse;
+import uk.ac.ebi.ega.permissions.model.PermissionsResponse;
 import uk.ac.ebi.ega.permissions.model.Visa;
 import uk.ac.ebi.ega.permissions.service.JWTService;
 import uk.ac.ebi.ega.permissions.service.PermissionsService;
 
 import javax.validation.Valid;
+import javax.validation.ValidationException;
 import javax.validation.constraints.NotNull;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -38,7 +40,7 @@ public class PermissionsController {
 
     @GetMapping(value = "/jwt/{accountId}/permissions", produces = MediaType.APPLICATION_JSON_VALUE)
     public List<String> getUserInfoAsGA4GH(@PathVariable("accountId") String accountId) {
-
+        requestHandler.verifyAccountId(accountId);
         List<Visa> visas = this.permissionsService.getVisas(accountId);
         //Create JWT for each dataset
         final List<String> ga4ghClaims = visas
@@ -51,15 +53,14 @@ public class PermissionsController {
     }
 
     @PostMapping(value = "/jwt/{accountId}/permissions", produces = MediaType.APPLICATION_JSON_VALUE)
-    public List<JWTTokenResponse> createPermissions(@PathVariable("accountId") String accountId,
-                                                    @RequestBody List<String> ga4ghVisaV1List) {
-        return requestHandler.createJWTPermissions(accountId, ga4ghVisaV1List);
+    public ResponseEntity<List<JWTTokenResponse>> createPermissions(@PathVariable("accountId") String accountId,
+                                                                    @RequestBody List<String> ga4ghVisaV1List) {
+        return ResponseEntity.status(HttpStatus.MULTI_STATUS).body(requestHandler.createJWTPermissions(accountId, ga4ghVisaV1List));
     }
 
     @DeleteMapping(value = "/jwt/{accountId}/permissions")
     public ResponseEntity<Void> deletePermissions(@PathVariable("accountId") String accountId,
-                                  @Valid @RequestParam(value = "value", required = true) String value) {
-
+                                                  @Valid @RequestParam(value = "value") String value) {
         return requestHandler.deletePermissions(accountId, value);
     }
 

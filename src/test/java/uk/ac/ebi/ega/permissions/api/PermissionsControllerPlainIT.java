@@ -25,7 +25,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource(locations="classpath:application-test.properties")
-class PermissionsControllerIT {
+class PermissionsControllerPlainIT {
 
     @Autowired
     private TestRestTemplate restTemplate;

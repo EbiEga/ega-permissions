@@ -4,13 +4,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class JWTTokenResponse {
 
-    @JsonProperty("ga4gh_visa_v1")
     private String ga4ghVisaV1;
-
-    @JsonProperty("status")
     private Integer status;
-
-    @JsonProperty("message")
     private String message = null;
 
     private JWTTokenResponse() {
@@ -26,10 +21,12 @@ public class JWTTokenResponse {
         this.ga4ghVisaV1 = ga4ghVisaV1;
     }
 
+    @JsonProperty("ga4gh_visa_v1")
     public String getUserClaimToken() {
         return this.ga4ghVisaV1;
     }
 
+    @JsonProperty("status")
     public Integer getStatus() {
         return status;
     }
@@ -38,6 +35,7 @@ public class JWTTokenResponse {
         this.status = status;
     }
 
+    @JsonProperty("message")
     public String getMessage() {
         return message;
     }

@@ -38,13 +38,7 @@ public class PermissionsApiDelegateImpl implements PermissionsApiDelegate {
 
     @Override
     public ResponseEntity<List<Visa>> readPermissions(String accountId) {
-        verifyAccountId(accountId);
+        requestHandler.verifyAccountId(accountId);
         return ResponseEntity.ok(this.permissionsService.getVisas(accountId));
-    }
-
-    private void verifyAccountId(String userAccountId) {
-        if (!this.permissionsService.accountExist(userAccountId)) {
-            throw new ValidationException("User account invalid or not found");
-        }
     }
 }

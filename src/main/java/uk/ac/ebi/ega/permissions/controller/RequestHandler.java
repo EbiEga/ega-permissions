@@ -87,7 +87,7 @@ public class RequestHandler {
         return permissionsResponse;
     }
 
-    private void verifyAccountId(String userAccountId) {
+    public void verifyAccountId(String userAccountId) {
         if (!this.permissionsService.accountExist(userAccountId)) {
             throw new ValidationException("User account invalid or not found");
         }
