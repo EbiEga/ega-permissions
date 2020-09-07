@@ -18,6 +18,7 @@ import javax.validation.ValidationException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class RequestHandler {
 
@@ -32,29 +33,24 @@ public class RequestHandler {
     }
 
     public List<JWTTokenResponse> createJWTPermissions(String accountId, List<String> ga4ghVisaV1List) {
-        List<JWTTokenResponse> jwtTokenResponses = new ArrayList<>(ga4ghVisaV1List.size());
-        for (String strVisa : ga4ghVisaV1List) {
-            JWTTokenResponse response;
-            try {
-                Visa visa = tokenPayloadMapper.mapJWTClaimSetToVisa(SignedJWT.parse(strVisa).getJWTClaimsSet());
-                PermissionsResponse preResponse = handlePassportVisaObjectProcessing(accountId, visa.getGa4ghVisaV1());
-                response = new JWTTokenResponse(strVisa, preResponse.getStatus(), preResponse.getMessage());
-            } catch (ParseException ex) {
-                response = new JWTTokenResponse(strVisa, HttpStatus.INTERNAL_SERVER_ERROR.value(), "Error decoding the JWT Token");
-            }
-            jwtTokenResponses.add(response);
-        }
-
-        return jwtTokenResponses;
+        return ga4ghVisaV1List
+                .stream()
+                .map((strVisa) -> {
+                    try {
+                        Visa visa = tokenPayloadMapper.mapJWTClaimSetToVisa(SignedJWT.parse(strVisa).getJWTClaimsSet());
+                        PermissionsResponse preResponse = handlePassportVisaObjectProcessing(accountId, visa.getGa4ghVisaV1());
+                        return new JWTTokenResponse(strVisa, preResponse.getStatus(), preResponse.getMessage());
+                    } catch (ParseException ex) {
+                        return new JWTTokenResponse(strVisa, HttpStatus.INTERNAL_SERVER_ERROR.value(), "Error decoding the JWT Token");
+                    }
+                }).collect(Collectors.toList());
     }
 
     public List<PermissionsResponse> createPermissions(String accountId, List<PassportVisaObject> passportVisaObjects) {
-        List<PermissionsResponse> permissionsResponses = new ArrayList<>(passportVisaObjects.size());
-        for (PassportVisaObject passportVisaObject : passportVisaObjects) {
-            PermissionsResponse permissionsResponse = handlePassportVisaObjectProcessing(accountId, passportVisaObject);
-            permissionsResponses.add(permissionsResponse);
-        }
-        return permissionsResponses;
+        return passportVisaObjects
+                .stream()
+                .map((passportVisaObject) -> handlePassportVisaObjectProcessing(accountId, passportVisaObject))
+                .collect(Collectors.toList());
     }
 
     public ResponseEntity<Void> deletePermissions(String accountId, String value) {
@@ -68,22 +64,24 @@ public class RequestHandler {
     }
 
     private PermissionsResponse handlePassportVisaObjectProcessing(String accountId, PassportVisaObject passportVisaObject) {
-        PermissionsResponse permissionsResponse = new PermissionsResponse();
-        permissionsResponse.setGa4ghVisaV1(passportVisaObject);
-
         try {
             this.permissionsService.savePassportVisaObject(accountId, passportVisaObject);
-            permissionsResponse.setStatus(HttpStatus.CREATED.value());
-            permissionsResponse.setMessage("Created");
+            final PermissionsResponse permissionsResponse = getPermissionsResponse(HttpStatus.CREATED, "Created");
+            permissionsResponse.setGa4ghVisaV1(passportVisaObject);
+            return permissionsResponse;
         } catch (ServiceException ex) {
             LOGGER.error(ex.getMessage(), ex);
-            permissionsResponse.setStatus(HttpStatus.SERVICE_UNAVAILABLE.value());
-            permissionsResponse.setMessage(ex.getMessage());
+            return getPermissionsResponse(HttpStatus.SERVICE_UNAVAILABLE, ex.getMessage());
         } catch (SystemException ex) {
             LOGGER.error(ex.getMessage(), ex);
-            permissionsResponse.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
-            permissionsResponse.setMessage(ex.getMessage());
+            return getPermissionsResponse(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage());
         }
+    }
+
+    private PermissionsResponse getPermissionsResponse(final HttpStatus httpStatus, final String message) {
+        final PermissionsResponse permissionsResponse = new PermissionsResponse();
+        permissionsResponse.setStatus(httpStatus.value());
+        permissionsResponse.setMessage(message);
         return permissionsResponse;
     }
 
