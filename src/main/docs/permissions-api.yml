@@ -17,7 +17,7 @@ tags:
   - name: permissions
     description: EGA Data Permissions
 paths:
-  /{accountId}/permissions:
+  /plain/{accountId}/permissions:
     get:
       tags:
         - permissions
