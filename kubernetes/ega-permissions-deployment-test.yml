@@ -7,46 +7,70 @@ metadata:
 spec:
   replicas: 1
   strategy:
-        type: RollingUpdate
-        rollingUpdate:
-          maxUnavailable: 1
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
   selector:
-        matchLabels:
-          app: ega-permissions
+    matchLabels:
+      app: ega-permissions
   template:
-        metadata:
-          labels:
-            app: ega-permissions
-        spec:
-          containers:
-          - name: ega-permissions
-            image: "dockerhub.ebi.ac.uk/ega/ega-permissions:master"
-            imagePullPolicy: Always
-            ports:
-            - containerPort: 80
-            volumeMounts:
-              - mountPath: "/log"
-                name: log-directory
-          volumes:
-            - name: log-directory
-              hostPath:
-                path: /nfs/ega/public/kube-logs
-          imagePullSecrets:
-            - name: gitlab-registry
+    metadata:
+      labels:
+        app: ega-permissions
+    spec:
+      containers:
+      - name: ega-permissions
+        image: "dockerhub.ebi.ac.uk/ega/ega-permissions:master"
+        imagePullPolicy: Always
+        ports:
+          - containerPort: 80
+        volumeMounts:
+          - mountPath: "/log"
+            name: log-directory
+          - mountPath: "/keystore"
+            name: keystore-directory
+            readOnly: true
+          - mountPath: "/config"
+            name: config-directory
+            readOnly: true
+        env:
+        - name: EGA_DIST_DB_01_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: ega-dist-db-01-username
+              key: username
+        - name: EGA_DIST_DB_01_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: ega-dist-db-01-password
+              key: password
+      volumes:
+      - name: log-directory
+        hostPath:
+          path: /nfs/ega/public/kube-logs
+      - name: keystore-directory
+        secret:
+          # Application is using ega aai proxy keys
+          secretName: ega-aai-proxy-keystore-jwks
+      - name: config-directory
+        configMap:
+          name: permissions-api-config
+      imagePullSecrets:
+        - name: gitlab-registry
 ---
 apiVersion: v1
 kind: Service
 metadata:
-    name: ega-permissions
-    namespace: test
-    labels:
-        app: ega-permissions
+  name: ega-permissions
+  namespace: test
+  labels:
+    app: ega-permissions
 spec:
-    type: NodePort
-    ports:
-    -   port: 8080
-        nodePort: 30140
-        protocol: TCP
-        name: ega-permissions
-    selector:
-        app: ega-permissions
+  type: NodePort
+  ports:
+    - port: 8080
+      nodePort: 30140
+      protocol: TCP
+      name: ega-permissions
+  selector:
+    app: ega-permissions
