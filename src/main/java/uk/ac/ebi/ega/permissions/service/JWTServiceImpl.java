@@ -123,7 +123,7 @@ public class JWTServiceImpl implements JWTService {
                 if (jwk instanceof RSAKey) {
                     // build RSA signers & verifiers
                     if (jwk.isPrivate()) { // only add the signer if there's a private key
-                        RSASSASigner signer = new RSASSASigner((RSAKey) jwk);
+                        RSASSASigner signer = new RSASSASigner((RSAKey) jwk, true);
                         signers.put(keyId, signer);
                     }
                     final RSASSAVerifier verifier = new RSASSAVerifier((RSAKey) jwk);
