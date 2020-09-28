@@ -1,26 +1,22 @@
 package uk.ac.ebi.ega.permissions.controller.delegate;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import uk.ac.ebi.ega.permissions.api.PermissionsApiDelegate;
 import uk.ac.ebi.ega.permissions.controller.RequestHandler;
+import uk.ac.ebi.ega.permissions.model.AccountAccess;
 import uk.ac.ebi.ega.permissions.model.PassportVisaObject;
 import uk.ac.ebi.ega.permissions.model.PermissionsResponse;
 import uk.ac.ebi.ega.permissions.model.Visa;
 import uk.ac.ebi.ega.permissions.service.PermissionsService;
 
-import javax.validation.ValidationException;
 import java.util.List;
 
 public class PermissionsApiDelegateImpl implements PermissionsApiDelegate {
 
-    private PermissionsService permissionsService;
-    private RequestHandler requestHandler;
+    private final PermissionsService permissionsService;
+    private final RequestHandler requestHandler;
 
-    @Autowired
     public PermissionsApiDelegateImpl(PermissionsService permissionsService, RequestHandler requestHandler) {
         this.permissionsService = permissionsService;
         this.requestHandler = requestHandler;
@@ -40,5 +36,10 @@ public class PermissionsApiDelegateImpl implements PermissionsApiDelegate {
     public ResponseEntity<List<Visa>> readPermissions(String accountId) {
         requestHandler.verifyAccountId(accountId);
         return ResponseEntity.ok(this.permissionsService.getVisas(accountId));
+    }
+
+    @Override
+    public ResponseEntity<List<AccountAccess>> plainDatasetsDatasetIdUsersGet(String datasetId) {
+        return null;
     }
 }

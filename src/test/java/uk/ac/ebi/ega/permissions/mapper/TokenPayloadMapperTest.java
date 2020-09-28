@@ -10,6 +10,7 @@ import com.nimbusds.jwt.SignedJWT;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
 import uk.ac.ebi.ega.permissions.exception.SystemException;
+import uk.ac.ebi.ega.permissions.model.AccountAccess;
 import uk.ac.ebi.ega.permissions.model.PassportVisaObject;
 import uk.ac.ebi.ega.permissions.model.Visa;
 import uk.ac.ebi.ega.permissions.persistence.entities.PassportClaim;
@@ -58,6 +59,20 @@ class TokenPayloadMapperTest {
         assertThat(visa.getGa4ghVisaV1().getValue()).isEqualTo("https://ega-archive.org/datasets/EGAD00002222222");
         assertThat(visa.getGa4ghVisaV1().getType()).isEqualTo("ControlledAccessGrants");
         assertThat(visa.getIss()).isEqualTo("iss-test");
+    }
+
+    @Test
+    void mapPassportClaimsToAccountAccesses(){
+        PassportClaim claim1 = new PassportClaim("testAccountId1", PassportClaim.VisaType.ControlledAccessGrants, 1568814383L, "https://ega-archive.org/datasets/EGAD00002222222", "https://ega-archive.org/dacs/EGAC00001111111", PassportClaim.Authority.dac);
+        PassportClaim claim2 = new PassportClaim("testAccountId2", PassportClaim.VisaType.ControlledAccessGrants, 1768814383L, "https://ega-archive.org/datasets/EGAD00003333333", "https://ega-archive.org/dacs/EGAC00001111111", PassportClaim.Authority.dac);
+
+        TokenPayloadMapper mapper = Mappers.getMapper(TokenPayloadMapper.class);
+
+        List<AccountAccess> accountAccesses = mapper.mapPassportClaimsToAccountAccesses(Arrays.asList(claim1, claim2));
+
+        assertThat(accountAccesses).hasSize(2);
+        assertThat(accountAccesses).filteredOn(e -> e.getAccountId().equals("testAccountId1")).hasSize(1);
+        assertThat(accountAccesses).filteredOn(e -> e.getAccountId().equals("testAccountId1")).hasSize(1);
     }
 
     private PassportVisaObject createPassportVisaObject(String value) {

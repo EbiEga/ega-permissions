@@ -14,4 +14,5 @@ public interface PassportClaimRepository extends CrudRepository<PassportClaim, P
 
     int deleteByAccountIdAndValue(String accountId, String value);
 
+    List<PassportClaim> findAllByValue(String value);
 }

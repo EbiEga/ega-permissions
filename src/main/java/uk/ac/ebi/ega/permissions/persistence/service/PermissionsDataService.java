@@ -14,4 +14,5 @@ public interface PermissionsDataService {
 
     boolean accountExists(String accountId);
 
+    List<PassportClaim> getPassportClaimsForDataset(String datasetId);
 }

@@ -6,6 +6,7 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import org.mapstruct.InjectionStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import uk.ac.ebi.ega.permissions.model.AccountAccess;
 import uk.ac.ebi.ega.permissions.model.PassportVisaObject;
 import uk.ac.ebi.ega.permissions.model.Visa;
 import uk.ac.ebi.ega.permissions.persistence.entities.PassportClaim;
@@ -38,4 +39,8 @@ public interface TokenPayloadMapper {
         }
         return visa;
     }
+
+    AccountAccess mapPassportClaimToAccountAccess(PassportClaim passportClaim);
+
+    List<AccountAccess> mapPassportClaimsToAccountAccesses(List<PassportClaim> passportClaims);
 }
