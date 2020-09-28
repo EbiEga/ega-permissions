@@ -40,6 +40,6 @@ public class PermissionsApiDelegateImpl implements PermissionsApiDelegate {
 
     @Override
     public ResponseEntity<List<AccountAccess>> plainDatasetsDatasetIdUsersGet(String datasetId) {
-        return null;
+        return ResponseEntity.ok(this.permissionsService.getGrantedAccountsForDataset(datasetId));
     }
 }
