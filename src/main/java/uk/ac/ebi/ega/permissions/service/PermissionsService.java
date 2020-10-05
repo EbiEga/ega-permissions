@@ -2,6 +2,7 @@ package uk.ac.ebi.ega.permissions.service;
 
 import uk.ac.ebi.ega.permissions.exception.ServiceException;
 import uk.ac.ebi.ega.permissions.exception.SystemException;
+import uk.ac.ebi.ega.permissions.model.AccountAccess;
 import uk.ac.ebi.ega.permissions.model.PassportVisaObject;
 import uk.ac.ebi.ega.permissions.model.Visa;
 
@@ -16,4 +17,6 @@ public interface PermissionsService {
     PassportVisaObject savePassportVisaObject(String accountId, PassportVisaObject passportVisaObject) throws ServiceException, SystemException;
 
     int deletePassportVisaObject(String accountId, String value);
+
+    List<AccountAccess> getGrantedAccountsForDataset(String datasetId);
 }

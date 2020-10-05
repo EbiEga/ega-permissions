@@ -6,6 +6,7 @@ import uk.ac.ebi.ega.permissions.configuration.VisaInfoProperties;
 import uk.ac.ebi.ega.permissions.exception.ServiceException;
 import uk.ac.ebi.ega.permissions.exception.SystemException;
 import uk.ac.ebi.ega.permissions.mapper.TokenPayloadMapper;
+import uk.ac.ebi.ega.permissions.model.AccountAccess;
 import uk.ac.ebi.ega.permissions.model.PassportVisaObject;
 import uk.ac.ebi.ega.permissions.model.Visa;
 import uk.ac.ebi.ega.permissions.persistence.entities.PassportClaim;
@@ -83,6 +84,11 @@ public class PermissionsServiceImpl implements PermissionsService {
     @Override
     public int deletePassportVisaObject(String accountId, String value) {
         return this.permissionsDataService.deletePassportClaim(accountId, value);
+    }
+
+    @Override
+    public List<AccountAccess> getGrantedAccountsForDataset(String datasetId){
+        return this.tokenPayloadMapper.mapPassportClaimsToAccountAccesses(this.permissionsDataService.getPassportClaimsForDataset(datasetId));
     }
 
     //TODO: Verify/improve this logic to populate visa attributes

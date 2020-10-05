@@ -34,4 +34,9 @@ public class PermissionsDataServiceImpl implements PermissionsDataService {
     public boolean accountExists(String accountId) {
         return this.passportClaimRepository.existsPassportClaimByAccountId(accountId);
     }
+
+    @Override
+    public List<PassportClaim> getPassportClaimsForDataset(String datasetId) {
+        return this.passportClaimRepository.findAllByValue(datasetId);
+    }
 }

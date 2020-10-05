@@ -14,6 +14,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.web.util.UriComponentsBuilder;
+import uk.ac.ebi.ega.permissions.model.AccountAccess;
 import uk.ac.ebi.ega.permissions.model.PassportVisaObject;
 import uk.ac.ebi.ega.permissions.model.PermissionsResponse;
 import uk.ac.ebi.ega.permissions.model.Visa;
@@ -135,4 +136,26 @@ class PermissionsControllerPlainIT {
         ResponseEntity result = restTemplate.exchange(builder.toUriString(), HttpMethod.DELETE, entity, Object.class);
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
     }
+
+    @Test
+    @DisplayName("OK Response when GET request sent to /plain/datasets/{datasetId}/users endpoint")
+    public void shouldReturnOkWithAccountUsers() throws Exception {
+        final String baseUrl = "http://localhost:" + port + "/plain/datasets/EGAD00002222222/users";
+        URI uri = new URI(baseUrl);
+
+        PassportVisaObject passportVisaObject = new PassportVisaObject();
+        passportVisaObject.setSource("https://ega-archive.org/dacs/EGAC00001111111");
+        passportVisaObject.setType("ControlledAccessGrants");
+        passportVisaObject.setValue("https://ega-archive.org/datasets/EGAD00002222222");
+        passportVisaObject.setAsserted(1568814383L);
+        passportVisaObject.setBy("dac");
+
+        this.restTemplate.postForEntity(uri, Arrays.asList(passportVisaObject), PermissionsResponse[].class);
+
+        ResponseEntity<AccountAccess[]> result = this.restTemplate.getForEntity(uri, AccountAccess[].class);
+        AccountAccess[] accesses = result.getBody();
+        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(accesses).hasSize(1);
+    }
+
 }
