@@ -11,6 +11,7 @@ import uk.ac.ebi.ega.permissions.controller.RequestHandler;
 import uk.ac.ebi.ega.permissions.controller.delegate.PermissionsApiDelegateImpl;
 import uk.ac.ebi.ega.permissions.mapper.TokenPayloadMapper;
 import uk.ac.ebi.ega.permissions.model.JWTAlgorithm;
+import uk.ac.ebi.ega.permissions.persistence.repository.AccountElixirIdRepository;
 import uk.ac.ebi.ega.permissions.persistence.repository.AccountRepository;
 import uk.ac.ebi.ega.permissions.persistence.repository.PassportClaimRepository;
 import uk.ac.ebi.ega.permissions.persistence.repository.UserGroupRepository;
@@ -51,8 +52,8 @@ public class EgaPermissionsConfiguration {
 
     @Bean
     public PermissionsDataService permissionsDataService(final PassportClaimRepository passportClaimRepository,
-            final AccountRepository accountRepository) {
-        return new PermissionsDataServiceImpl(passportClaimRepository, accountRepository);
+            final AccountRepository accountRepository, final AccountElixirIdRepository accountElixirIdRepository) {
+        return new PermissionsDataServiceImpl(passportClaimRepository, accountRepository, accountElixirIdRepository);
     }
 
     @Bean

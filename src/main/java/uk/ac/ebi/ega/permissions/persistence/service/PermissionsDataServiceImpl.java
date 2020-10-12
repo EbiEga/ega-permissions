@@ -1,7 +1,8 @@
 package uk.ac.ebi.ega.permissions.persistence.service;
 
 import org.springframework.transaction.annotation.Transactional;
-
+import uk.ac.ebi.ega.permissions.persistence.entities.AccountElixirId;
+import uk.ac.ebi.ega.permissions.persistence.repository.AccountElixirIdRepository;
 import uk.ac.ebi.ega.permissions.persistence.repository.AccountRepository;
 import uk.ac.ebi.ega.permissions.persistence.repository.PassportClaimRepository;
 import uk.ac.ebi.ega.permissions.persistence.entities.Account;
@@ -14,10 +15,14 @@ public class PermissionsDataServiceImpl implements PermissionsDataService {
 
     private PassportClaimRepository passportClaimRepository;
     private AccountRepository accountRepository;
+    private AccountElixirIdRepository accountElixirIdRepository;
 
-    public PermissionsDataServiceImpl(PassportClaimRepository passportClaimRepository, AccountRepository accountRepository) {
+    public PermissionsDataServiceImpl(PassportClaimRepository passportClaimRepository,
+                                      AccountRepository accountRepository,
+                                      AccountElixirIdRepository accountElixirIdRepository) {
         this.passportClaimRepository = passportClaimRepository;
         this.accountRepository = accountRepository;
+        this.accountElixirIdRepository = accountElixirIdRepository;
     }
 
     @Override
@@ -28,6 +33,11 @@ public class PermissionsDataServiceImpl implements PermissionsDataService {
     @Override
     public Optional<Account> getAccountByEmail(String email) {
         return accountRepository.findByEmail(email);
+    }
+
+    @Override
+    public Optional<AccountElixirId> getAccountIdForElixirId(String elixirId) {
+        return accountElixirIdRepository.findByElixirId(elixirId);
     }
 
     @Override

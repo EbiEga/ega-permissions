@@ -39,6 +39,7 @@ import uk.ac.ebi.ega.permissions.model.Visa;
 import uk.ac.ebi.ega.permissions.service.JWTService;
 import uk.ac.ebi.ega.permissions.service.PermissionsService;
 
+import javax.validation.ValidationException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
@@ -61,11 +62,13 @@ import static org.springframework.http.HttpMethod.DELETE;
 import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.http.HttpMethod.POST;
 import static org.springframework.http.HttpStatus.MULTI_STATUS;
+import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED;
 import static org.springframework.http.ResponseEntity.ok;
 import static org.springframework.security.oauth2.core.AuthorizationGrantType.CLIENT_CREDENTIALS;
+import static uk.ac.ebi.ega.permissions.controller.RequestHandler.EGA_ACCOUNT_ID_PREFIX;
 
 @TestPropertySource("classpath:application-test.properties")
 @ExtendWith(MockitoExtension.class)
@@ -73,7 +76,8 @@ import static org.springframework.security.oauth2.core.AuthorizationGrantType.CL
         webEnvironment = DEFINED_PORT)
 public class PermissionsControllerTest {
 
-    private static final String EGA_ACCOUNT_ID_PREFIX = "EGAW";
+    private static final String ELIXIR_ACCOUNT_ID = "test@elixir-europe.org";
+    private static final String EGA_ACCOUNT_ID = "EGAW00000000001";
 
     @Value("${spring.security.oauth2.authorizationserver.client-id}")
     private String clientId;
@@ -101,31 +105,44 @@ public class PermissionsControllerTest {
 
     @Test
     public void getJWTPermissions_WhenPassEGAAccountIdWithAccessToken_ReturnsSuccess() throws URISyntaxException {
-        doNothing()
-                .when(requestHandler)
-                .verifyAccountId(startsWith(EGA_ACCOUNT_ID_PREFIX));
-        when(permissionsService.getVisas(startsWith(EGA_ACCOUNT_ID_PREFIX)))
-                .thenReturn(singletonList(mock(Visa.class)));
-        when(jwtService.createJWT(any(Visa.class)))
-                .thenReturn(mock(SignedJWT.class));
-
+        commonMock();
         final String accessToken = obtainAccessToken();
         final HttpEntity<Void> httpEntity = new HttpEntity<>(getAccessTokenHeader(accessToken));
 
         assertStatus(restTemplate
-                .exchange(getPermissionsURI(), GET, httpEntity, String.class), OK);
+                .exchange(getPermissionsURI(EGA_ACCOUNT_ID), GET, httpEntity, String.class), OK);
+    }
+
+    @Test
+    public void getJWTPermissions_WhenPassEGAElixirAccountIdWithAccessToken_ReturnsSuccess() throws URISyntaxException {
+        commonMock();
+        when(requestHandler.getAccountIdForElixirId(ELIXIR_ACCOUNT_ID)).thenReturn(EGA_ACCOUNT_ID_PREFIX);
+        final String accessToken = obtainAccessToken();
+        final HttpEntity<Void> httpEntity = new HttpEntity<>(getAccessTokenHeader(accessToken));
+
+        assertStatus(restTemplate.exchange(getPermissionsURI(ELIXIR_ACCOUNT_ID), GET, httpEntity, String.class), OK);
+    }
+
+    @Test
+    public void getJWTPermissions_WhenPassElixirAccountIdNoMappingWithEGAAccountId_FailsWithNotFound() throws URISyntaxException {
+        commonMock();
+        when(requestHandler.getAccountIdForElixirId(ELIXIR_ACCOUNT_ID)).thenThrow(ValidationException.class);
+        final String accessToken = obtainAccessToken();
+        final HttpEntity<Void> httpEntity = new HttpEntity<>(getAccessTokenHeader(accessToken));
+
+        assertStatus(restTemplate.exchange(getPermissionsURI(ELIXIR_ACCOUNT_ID), GET, httpEntity, String.class), NOT_FOUND);
     }
 
     @Test
     public void getJWTPermissions_WhenPassEGAAccountIdWithoutAccessToken_FailsWithUnauthorized() throws URISyntaxException {
-        assertStatus(restTemplate.getForEntity(getPermissionsURI(), String.class), UNAUTHORIZED);
+        assertStatus(restTemplate.getForEntity(getPermissionsURI(EGA_ACCOUNT_ID), String.class), UNAUTHORIZED);
     }
 
     @Test
     public void getJWTPermissions_WhenPassEGAAccountIdWithInvalidAccessToken_FailsWithUnauthorized() throws URISyntaxException {
         final HttpEntity<Void> httpEntity = new HttpEntity<>(getAccessTokenHeader(getInvalidAccessToken()));
 
-        assertStatus(restTemplate.exchange(getPermissionsURI(), GET, httpEntity, String.class), UNAUTHORIZED);
+        assertStatus(restTemplate.exchange(getPermissionsURI(EGA_ACCOUNT_ID), GET, httpEntity, String.class), UNAUTHORIZED);
     }
 
     @Test
@@ -136,21 +153,21 @@ public class PermissionsControllerTest {
         final String accessToken = obtainAccessToken();
         final HttpEntity<List<String>> httpEntity = new HttpEntity<>(emptyList(), getAccessTokenHeader(accessToken));
 
-        assertStatus(restTemplate.exchange(getPermissionsURI(), POST, httpEntity, String.class), MULTI_STATUS);
+        assertStatus(restTemplate.exchange(getPermissionsURI(EGA_ACCOUNT_ID), POST, httpEntity, String.class), MULTI_STATUS);
     }
 
     @Test
     public void createJWTPermissions_WhenPassEGAAccountIdAndPermissionsWithoutAccessToken_FailsWithUnauthorized() throws URISyntaxException {
         final HttpEntity<List<String>> httpEntity = new HttpEntity<>(emptyList());
 
-        assertStatus(restTemplate.exchange(getPermissionsURI(), POST, httpEntity, String.class), UNAUTHORIZED);
+        assertStatus(restTemplate.exchange(getPermissionsURI(EGA_ACCOUNT_ID), POST, httpEntity, String.class), UNAUTHORIZED);
     }
 
     @Test
     public void createJWTPermissions_WhenPassEGAAccountIdAndPermissionsWithInvalidAccessToken_FailsWithUnauthorized() throws URISyntaxException {
         final HttpEntity<List<String>> httpEntity = new HttpEntity<>(emptyList(), getAccessTokenHeader(getInvalidAccessToken()));
 
-        assertStatus(restTemplate.exchange(getPermissionsURI(), POST, httpEntity, String.class), UNAUTHORIZED);
+        assertStatus(restTemplate.exchange(getPermissionsURI(EGA_ACCOUNT_ID), POST, httpEntity, String.class), UNAUTHORIZED);
     }
 
     @Test
@@ -164,19 +181,29 @@ public class PermissionsControllerTest {
 
         final HttpEntity<MultiValueMap<String, String>> httpEntity = new HttpEntity<>(params, getAccessTokenHeader(accessToken));
 
-        assertStatus(restTemplate.exchange(getPermissionsURI(), DELETE, httpEntity, Void.class), OK);
+        assertStatus(restTemplate.exchange(getPermissionsURI(EGA_ACCOUNT_ID), DELETE, httpEntity, Void.class), OK);
     }
 
     @Test
     public void deletePermissions_WhenPassEGAAccountIdWithoutAccessToken_FailsWithUnauthorized() throws URISyntaxException {
-        assertStatus(restTemplate.exchange(getPermissionsURI(), DELETE, null, Void.class), UNAUTHORIZED);
+        assertStatus(restTemplate.exchange(getPermissionsURI(EGA_ACCOUNT_ID), DELETE, null, Void.class), UNAUTHORIZED);
     }
 
     @Test
     public void deletePermissions_WhenPassEGAAccountIdWithInvalidAccessToken_FailsWithUnauthorized() throws URISyntaxException {
         final HttpEntity<Void> httpEntity = new HttpEntity<>(getAccessTokenHeader(getInvalidAccessToken()));
 
-        assertStatus(restTemplate.exchange(getPermissionsURI(), DELETE, httpEntity, Void.class), UNAUTHORIZED);
+        assertStatus(restTemplate.exchange(getPermissionsURI(EGA_ACCOUNT_ID), DELETE, httpEntity, Void.class), UNAUTHORIZED);
+    }
+    
+    private void commonMock() {
+        doNothing()
+                .when(requestHandler)
+                .verifyAccountId(startsWith(EGA_ACCOUNT_ID_PREFIX));
+        when(permissionsService.getVisas(startsWith(EGA_ACCOUNT_ID_PREFIX)))
+                .thenReturn(singletonList(mock(Visa.class)));
+        when(jwtService.createJWT(any(Visa.class)))
+                .thenReturn(mock(SignedJWT.class));
     }
 
     private <T> void assertStatus(final ResponseEntity<T> response, final HttpStatus httpStatus) {
@@ -222,11 +249,11 @@ public class PermissionsControllerTest {
         return "Basic " + new String(getEncoder().encode(toEncode));
     }
 
-    private URI getPermissionsURI() throws URISyntaxException {
+    private URI getPermissionsURI(String accountId) throws URISyntaxException {
         return UriComponentsBuilder
                 .fromUri(new URI(applicationTestURL))
                 .path("/jwt/{accountId}/permissions")
-                .build("EGAW00000000001");
+                .build(accountId);
     }
 
     private String getInvalidAccessToken() {

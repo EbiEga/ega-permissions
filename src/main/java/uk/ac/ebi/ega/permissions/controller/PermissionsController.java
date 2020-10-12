@@ -39,6 +39,7 @@ public class PermissionsController {
     @GetMapping(value = "/jwt/{accountId}/permissions", produces = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasPermission(#accountId, 'EGAAdmin_read')")
     public List<String> getUserInfoAsGA4GH(@PathVariable("accountId") String accountId) {
+        accountId = requestHandler.getAccountIdForElixirId(accountId);
         requestHandler.verifyAccountId(accountId);
         List<Visa> visas = this.permissionsService.getVisas(accountId);
         //Create JWT for each dataset
@@ -55,14 +56,14 @@ public class PermissionsController {
     @PreAuthorize("hasPermission(#accountId, 'DAC_write')")
     public ResponseEntity<List<JWTTokenResponse>> createPermissions(@PathVariable("accountId") String accountId,
                                                                     @RequestBody List<String> ga4ghVisaV1List) {
-        return ResponseEntity.status(HttpStatus.MULTI_STATUS).body(requestHandler.createJWTPermissions(accountId, ga4ghVisaV1List));
+        return ResponseEntity.status(HttpStatus.MULTI_STATUS).body(requestHandler.createJWTPermissions(requestHandler.getAccountIdForElixirId(accountId), ga4ghVisaV1List));
     }
 
     @DeleteMapping(value = "/jwt/{accountId}/permissions")
     @PreAuthorize("hasPermission(#accountId, 'DAC_write')")
     public ResponseEntity<Void> deletePermissions(@PathVariable("accountId") String accountId,
                                                   @Valid @RequestParam(value = "value") String value) {
-        return requestHandler.deletePermissions(accountId, value);
+        return requestHandler.deletePermissions(requestHandler.getAccountIdForElixirId(accountId), value);
     }
 
     private SignedJWT createSignedJWT(final Visa visa) {
