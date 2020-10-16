@@ -149,7 +149,6 @@ public class PermissionsControllerTest {
     public void createPermissions_WhenPassEGAAccountIdAndPermissionsWithAccessToken_ReturnsSuccess() throws URISyntaxException {
         when(requestHandler.createJWTPermissions(startsWith(EGA_ACCOUNT_ID_PREFIX), anyList()))
                 .thenReturn(emptyList());
-
         final String accessToken = obtainAccessToken();
         final HttpEntity<List<String>> httpEntity = new HttpEntity<>(emptyList(), getAccessTokenHeader(accessToken));
 
