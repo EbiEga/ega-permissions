@@ -14,7 +14,7 @@ public interface UserGroupRepository extends CrudRepository<UserGroup, UserGroup
     boolean existsBySourceAccountIdAndAccessGroup(String sourceAccountId, UserGroup.AccessGroup accessGroup);
 
     @Query("SELECT ug from UserGroup ug inner join PassportClaim pc " +
-            "on ug.destinationAccountId = pc.accountId " +
+            "on ug.destinationAccountId = pc.source " +
             "where ug.sourceAccountId = :sourceAccountId and pc.value = :datasetId")
     Optional<List<UserGroup>> findAllByAccountIdAndDataSetId(@Param("sourceAccountId") String sourceAccountId, @Param("datasetId") String datasetId);
 

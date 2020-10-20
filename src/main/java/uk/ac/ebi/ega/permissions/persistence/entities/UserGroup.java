@@ -3,6 +3,7 @@ package uk.ac.ebi.ega.permissions.persistence.entities;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -12,8 +13,7 @@ import javax.validation.constraints.NotBlank;
 
 @Entity
 @IdClass(UserGroupId.class)
-@TypeDef(name = "group_id", typeClass = PostgreSQLEnumType.class)
-@TypeDef(name = "level_id", typeClass = PostgreSQLEnumType.class)
+@TypeDef(name = "pgsql_enum", typeClass = PostgreSQLEnumType.class)
 public class UserGroup {
 
     public enum AccessGroup {
@@ -32,14 +32,14 @@ public class UserGroup {
     @NotBlank
     private String destinationAccountId;
 
-    @Id
-    @NotBlank
     @Enumerated(EnumType.STRING)
-    @Type(type = "group_id")
+    @Type(type = "pgsql_enum")
+    @Column(name = "group_id")
     private AccessGroup accessGroup;
 
     @Enumerated(EnumType.STRING)
-    @Type(type = "level_id")
+    @Type(type = "pgsql_enum")
+    @Column(name = "level_id")
     private AccessLevel accessLevel;
 
     public UserGroup() {

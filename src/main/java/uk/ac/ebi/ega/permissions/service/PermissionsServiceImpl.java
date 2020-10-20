@@ -9,6 +9,7 @@ import uk.ac.ebi.ega.permissions.mapper.TokenPayloadMapper;
 import uk.ac.ebi.ega.permissions.model.AccountAccess;
 import uk.ac.ebi.ega.permissions.model.PassportVisaObject;
 import uk.ac.ebi.ega.permissions.model.Visa;
+import uk.ac.ebi.ega.permissions.persistence.entities.Account;
 import uk.ac.ebi.ega.permissions.persistence.entities.PassportClaim;
 import uk.ac.ebi.ega.permissions.persistence.service.PermissionsDataService;
 
@@ -17,6 +18,7 @@ import javax.validation.ValidationException;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -35,6 +37,11 @@ public class PermissionsServiceImpl implements PermissionsService {
     @Override
     public boolean accountExist(String accountId) {
         return this.permissionsDataService.accountExists(accountId);
+    }
+
+    @Override
+    public Optional<Account> getAccountByEmail(String email) {
+        return permissionsDataService.getAccountByEmail(email);
     }
 
     @Override
