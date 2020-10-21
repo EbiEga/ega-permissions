@@ -27,11 +27,9 @@ public class PassportClaim {
     public enum Authority {dac, system}
 
     @Id
-    @NotBlank
     private String accountId;
 
     @Id
-    @NotBlank
     private String value;
 
     @Enumerated(EnumType.STRING)

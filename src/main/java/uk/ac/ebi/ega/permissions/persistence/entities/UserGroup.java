@@ -25,11 +25,9 @@ public class UserGroup {
     }
 
     @Id
-    @NotBlank
     private String sourceAccountId;
 
     @Id
-    @NotBlank
     private String destinationAccountId;
 
     @Enumerated(EnumType.STRING)
