@@ -45,7 +45,7 @@ public class CustomPermissionEvaluator implements PermissionEvaluator {
         Account account = permissionsService.getAccountByEmail(email).orElseThrow(() ->
                 new ValidationException(("No linked EGA account for email ").concat(email)));
 
-        String accountId = account.getAccount_id();
+        String accountId = account.getAccountId();
         List<UserGroup> userGroups = userGroupDataService.getPermissionGroups(accountId).orElseThrow(() ->
                 new ValidationException(("No linked user group for ").concat(email)));
 
