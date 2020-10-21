@@ -22,10 +22,4 @@ CREATE TABLE passport_claim (
 	CONSTRAINT passport_claim_pkey PRIMARY KEY (account_id, value)
 );
 
-CREATE TABLE account_elixir_id (
-	account_id varchar(128) NOT NULL,
-	elixir_id varchar(128) NOT NULL,
-	elixir_email varchar(255) NOT NULL
-);
-
 CREATE INDEX passport_claim_account_idx ON passport_claim(account_id);
