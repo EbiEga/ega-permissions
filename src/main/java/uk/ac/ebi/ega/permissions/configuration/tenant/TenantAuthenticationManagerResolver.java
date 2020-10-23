@@ -31,17 +31,15 @@ public class TenantAuthenticationManagerResolver implements AuthenticationManage
         this.egaJwtIssUri = egaJwtIssUri;
         this.egaJwtJwkSetUri = egaJwtJwkSetUri;
         this.elixirJtwIssUri = elixirJtwIssUri;
+
+        this.tenants.put(egaJwtIssUri, egaJwtIssUri);
+        this.tenants.put(elixirJtwIssUri, elixirJtwIssUri);
     }
 
     private final BearerTokenResolver resolver = new DefaultBearerTokenResolver();
     private final Map<String, String> tenants = new HashMap<>();
 
     private final Map<String, AuthenticationManager> authenticationManagers = new HashMap<>();
-
-    public TenantAuthenticationManagerResolver() {
-        this.tenants.put(egaJwtIssUri, egaJwtIssUri);
-        this.tenants.put(elixirJtwIssUri, elixirJtwIssUri);
-    }
 
     @Override
     public AuthenticationManager resolve(HttpServletRequest request) {
