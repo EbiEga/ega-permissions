@@ -5,7 +5,7 @@ import org.springframework.security.core.Authentication;
 import uk.ac.ebi.ega.permissions.persistence.entities.Account;
 import uk.ac.ebi.ega.permissions.persistence.entities.UserGroup;
 
-import static uk.ac.ebi.ega.permissions.persistence.entities.UserGroup.AccessGroup.EGAAdmin;
+import static uk.ac.ebi.ega.permissions.persistence.entities.AccessGroup.EGAAdmin;
 
 import uk.ac.ebi.ega.permissions.persistence.service.UserGroupDataService;
 import uk.ac.ebi.ega.permissions.service.PermissionsService;

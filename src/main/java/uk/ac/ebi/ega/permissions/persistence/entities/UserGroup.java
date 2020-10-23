@@ -9,61 +9,51 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import javax.persistence.IdClass;
-import javax.validation.constraints.NotBlank;
 
 @Entity
 @IdClass(UserGroupId.class)
 @TypeDef(name = "pgsql_enum", typeClass = PostgreSQLEnumType.class)
 public class UserGroup {
-
-    public enum AccessGroup {
-        EGAAdmin, DAC, User
-    }
-
-    public enum AccessLevel {
-        read, write
-    }
+    @Id
+    private String userId;
 
     @Id
-    private String sourceAccountId;
-
-    @Id
-    private String destinationAccountId;
+    private String groupId;
 
     @Enumerated(EnumType.STRING)
     @Type(type = "pgsql_enum")
-    @Column(name = "group_id")
+    @Column(name = "access_group")
     private AccessGroup accessGroup;
 
     @Enumerated(EnumType.STRING)
     @Type(type = "pgsql_enum")
-    @Column(name = "level_id")
+    @Column(name = "access_level")
     private AccessLevel accessLevel;
 
     public UserGroup() {
     }
 
-    public UserGroup(String sourceAccountId, String destinationAccountId, AccessGroup accessGroup, AccessLevel accessLevel) {
-        this.sourceAccountId = sourceAccountId;
-        this.destinationAccountId = destinationAccountId;
+    public UserGroup(String userId, String groupId, AccessGroup accessGroup, AccessLevel accessLevel) {
+        this.userId = userId;
+        this.groupId = groupId;
         this.accessGroup = accessGroup;
         this.accessLevel = accessLevel;
     }
 
-    public String getSourceAccountId() {
-        return sourceAccountId;
+    public String getUserId() {
+        return userId;
     }
 
-    public void setSourceAccountId(String sourceAccountId) {
-        this.sourceAccountId = sourceAccountId;
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
-    public String getDestinationAccountId() {
-        return destinationAccountId;
+    public String getGroupId() {
+        return groupId;
     }
 
-    public void setDestinationAccountId(String destinationAccountId) {
-        this.destinationAccountId = destinationAccountId;
+    public void setGroupId(String groupId) {
+        this.groupId = groupId;
     }
 
     public AccessGroup getAccessGroup() {

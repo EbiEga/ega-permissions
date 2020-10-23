@@ -1,10 +1,12 @@
 package uk.ac.ebi.ega.permissions.persistence.service;
 
-import uk.ac.ebi.ega.permissions.persistence.entities.UserGroup;
-import uk.ac.ebi.ega.permissions.persistence.repository.UserGroupRepository;
+import static uk.ac.ebi.ega.permissions.persistence.entities.AccessGroup.EGAAdmin;
 
 import java.util.List;
 import java.util.Optional;
+
+import uk.ac.ebi.ega.permissions.persistence.entities.UserGroup;
+import uk.ac.ebi.ega.permissions.persistence.repository.UserGroupRepository;
 
 public class UserGroupDataServiceImpl implements UserGroupDataService {
 
@@ -16,21 +18,21 @@ public class UserGroupDataServiceImpl implements UserGroupDataService {
 
     @Override
     public boolean isEGAAdmin(String accountId) {
-        return userGroupRepository.existsBySourceAccountIdAndAccessGroup(accountId, UserGroup.AccessGroup.EGAAdmin);
+        return userGroupRepository.existsByUserIdAndAccessGroup(accountId, EGAAdmin);
     }
 
     @Override
     public boolean belongsToDac(String accountId, String dacAccountId) {
-        return userGroupRepository.findAllBySourceAccountIdAndDestinationAccountId(accountId, dacAccountId).isPresent();
+        return userGroupRepository.findAllByUserIdAndGroupId(accountId, dacAccountId).isPresent();
     }
 
     @Override
     public boolean canControlDataset(String accountId, String datasetId) {
-        return userGroupRepository.findAllByAccountIdAndDataSetId(accountId, datasetId).isPresent();
+        return userGroupRepository.findAllByUserIdAndDataSetId(accountId, datasetId).isPresent();
     }
 
     @Override
     public Optional<List<UserGroup>> getPermissionGroups(String accountId) {
-        return userGroupRepository.findAllBySourceAccountId(accountId);
+        return userGroupRepository.findAllByUserId(accountId);
     }
 }

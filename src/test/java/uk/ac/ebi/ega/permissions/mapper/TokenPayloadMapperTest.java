@@ -13,11 +13,12 @@ import uk.ac.ebi.ega.permissions.exception.SystemException;
 import uk.ac.ebi.ega.permissions.model.AccountAccess;
 import uk.ac.ebi.ega.permissions.model.PassportVisaObject;
 import uk.ac.ebi.ega.permissions.model.Visa;
+import uk.ac.ebi.ega.permissions.persistence.entities.Authority;
 import uk.ac.ebi.ega.permissions.persistence.entities.PassportClaim;
+import uk.ac.ebi.ega.permissions.persistence.entities.VisaType;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.text.ParseException;
 import java.util.Arrays;
 import java.util.List;
@@ -28,8 +29,8 @@ class TokenPayloadMapperTest {
 
     @Test
     void mapPassportClaimsToPassportVisaObjects() {
-        PassportClaim claim1 = new PassportClaim("testAccountId", PassportClaim.VisaType.ControlledAccessGrants, 1568814383L, "https://ega-archive.org/datasets/EGAD00002222222", "https://ega-archive.org/dacs/EGAC00001111111", PassportClaim.Authority.dac);
-        PassportClaim claim2 = new PassportClaim("testAccountId", PassportClaim.VisaType.ControlledAccessGrants, 1768814383L, "https://ega-archive.org/datasets/EGAD00003333333", "https://ega-archive.org/dacs/EGAC00001111111", PassportClaim.Authority.dac);
+        PassportClaim claim1 = new PassportClaim("testAccountId", VisaType.ControlledAccessGrants, 1568814383L, "https://ega-archive.org/datasets/EGAD00002222222", "https://ega-archive.org/dacs/EGAC00001111111", Authority.dac);
+        PassportClaim claim2 = new PassportClaim("testAccountId", VisaType.ControlledAccessGrants, 1768814383L, "https://ega-archive.org/datasets/EGAD00003333333", "https://ega-archive.org/dacs/EGAC00001111111", Authority.dac);
 
         TokenPayloadMapper mapper = Mappers.getMapper(TokenPayloadMapper.class);
         List<PassportVisaObject> passportVisaObjects = mapper.mapPassportClaimsToPassportVisaObjects(Arrays.asList(claim1, claim2));
@@ -63,8 +64,8 @@ class TokenPayloadMapperTest {
 
     @Test
     void mapPassportClaimsToAccountAccesses(){
-        PassportClaim claim1 = new PassportClaim("testAccountId1", PassportClaim.VisaType.ControlledAccessGrants, 1568814383L, "https://ega-archive.org/datasets/EGAD00002222222", "https://ega-archive.org/dacs/EGAC00001111111", PassportClaim.Authority.dac);
-        PassportClaim claim2 = new PassportClaim("testAccountId2", PassportClaim.VisaType.ControlledAccessGrants, 1768814383L, "https://ega-archive.org/datasets/EGAD00003333333", "https://ega-archive.org/dacs/EGAC00001111111", PassportClaim.Authority.dac);
+        PassportClaim claim1 = new PassportClaim("testAccountId1", VisaType.ControlledAccessGrants, 1568814383L, "https://ega-archive.org/datasets/EGAD00002222222", "https://ega-archive.org/dacs/EGAC00001111111", Authority.dac);
+        PassportClaim claim2 = new PassportClaim("testAccountId2", VisaType.ControlledAccessGrants, 1768814383L, "https://ega-archive.org/datasets/EGAD00003333333", "https://ega-archive.org/dacs/EGAC00001111111", Authority.dac);
 
         TokenPayloadMapper mapper = Mappers.getMapper(TokenPayloadMapper.class);
 

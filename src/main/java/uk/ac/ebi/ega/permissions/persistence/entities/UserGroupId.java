@@ -5,32 +5,32 @@ import java.util.Objects;
 
 public class UserGroupId implements Serializable {
 
-    private String sourceAccountId;
-    private String destinationAccountId;
+    private String userId;
+    private String groupId;
 
     public UserGroupId() {
 
     }
 
-    public UserGroupId(String sourceAccountId, String destinationAccountId) {
-        this.sourceAccountId = sourceAccountId;
-        this.destinationAccountId = destinationAccountId;
+    public UserGroupId(String userId, String groupId) {
+        this.userId = userId;
+        this.groupId = groupId;
     }
 
-    public String getSourceAccountId() {
-        return sourceAccountId;
+    public String getUserId() {
+        return userId;
     }
 
-    public void setSourceAccountId(String sourceAccountId) {
-        this.sourceAccountId = sourceAccountId;
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
-    public String getDestinationAccountId() {
-        return destinationAccountId;
+    public String getGroupId() {
+        return groupId;
     }
 
-    public void setDestinationAccountId(String destinationAccountId) {
-        this.destinationAccountId = destinationAccountId;
+    public void setGroupId(String groupId) {
+        this.groupId = groupId;
     }
 
     @Override
@@ -38,12 +38,12 @@ public class UserGroupId implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         UserGroupId that = (UserGroupId) o;
-        return Objects.equals(sourceAccountId, that.sourceAccountId) &&
-                Objects.equals(destinationAccountId, that.destinationAccountId);
+        return Objects.equals(userId, that.userId) &&
+                Objects.equals(groupId, that.groupId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(sourceAccountId, destinationAccountId);
+        return Objects.hash(userId, groupId);
     }
 }
