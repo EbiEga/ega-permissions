@@ -17,14 +17,21 @@
  */
 package uk.ac.ebi.ega.permissions.configuration;
 
+import org.springframework.security.authentication.AuthenticationManagerResolver;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 
-import static org.springframework.security.config.Customizer.withDefaults;
+import javax.servlet.http.HttpServletRequest;
 
 @EnableWebSecurity
 public class OAuth2ResourceServerSecurityConfiguration extends WebSecurityConfigurerAdapter {
+
+    private AuthenticationManagerResolver<HttpServletRequest> authenticationManagerResolver;
+
+    public OAuth2ResourceServerSecurityConfiguration(AuthenticationManagerResolver<HttpServletRequest> authenticationManagerResolver){
+        this.authenticationManagerResolver = authenticationManagerResolver;
+    }
 
     // @formatter:off
     @Override
@@ -37,10 +44,7 @@ public class OAuth2ResourceServerSecurityConfiguration extends WebSecurityConfig
                     .anyRequest().authenticated())
             .csrf()
             .disable()
-            .oauth2ResourceServer((oauth2ResourceServer) ->
-                oauth2ResourceServer
-                    .jwt(withDefaults())
-            );
+            .oauth2ResourceServer(o -> o.authenticationManagerResolver(this.authenticationManagerResolver));
     }
 
     private String[] swaggerEndpointMatcher() {
