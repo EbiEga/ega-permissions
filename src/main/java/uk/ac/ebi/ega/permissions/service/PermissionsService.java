@@ -5,6 +5,7 @@ import uk.ac.ebi.ega.permissions.exception.SystemException;
 import uk.ac.ebi.ega.permissions.model.AccountAccess;
 import uk.ac.ebi.ega.permissions.model.PassportVisaObject;
 import uk.ac.ebi.ega.permissions.model.Visa;
+import uk.ac.ebi.ega.permissions.persistence.entities.AccountElixirId;
 import uk.ac.ebi.ega.permissions.persistence.entities.Account;
 
 import java.util.List;
@@ -13,6 +14,8 @@ import java.util.Optional;
 public interface PermissionsService {
 
     boolean accountExist(String accountId);
+
+    Optional<AccountElixirId> getAccountIdForElixirId(String elixirId);
 
     Optional<Account> getAccountByEmail(String email);
 

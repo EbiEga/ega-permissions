@@ -1,5 +1,6 @@
 package uk.ac.ebi.ega.permissions.persistence.service;
 
+import uk.ac.ebi.ega.permissions.persistence.entities.AccountElixirId;
 import uk.ac.ebi.ega.permissions.persistence.entities.Account;
 import uk.ac.ebi.ega.permissions.persistence.entities.PassportClaim;
 
@@ -11,6 +12,8 @@ public interface PermissionsDataService {
     List<PassportClaim> getPassPortClaimsForAccount(String accountId);
 
     Optional<Account> getAccountByEmail(String email);
+
+    Optional<AccountElixirId> getAccountIdForElixirId(String elixirId);
 
     PassportClaim savePassportClaim(PassportClaim claim);
 

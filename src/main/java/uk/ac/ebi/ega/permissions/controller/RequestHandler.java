@@ -12,16 +12,17 @@ import uk.ac.ebi.ega.permissions.model.JWTTokenResponse;
 import uk.ac.ebi.ega.permissions.model.PassportVisaObject;
 import uk.ac.ebi.ega.permissions.model.PermissionsResponse;
 import uk.ac.ebi.ega.permissions.model.Visa;
+import uk.ac.ebi.ega.permissions.persistence.entities.AccountElixirId;
 import uk.ac.ebi.ega.permissions.service.PermissionsService;
 
 import javax.validation.ValidationException;
 import java.text.ParseException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class RequestHandler {
 
+    public static final String EGA_ACCOUNT_ID_PREFIX = "EGAW";
     Logger LOGGER = LoggerFactory.getLogger(RequestHandler.class);
 
     private PermissionsService permissionsService;
@@ -89,5 +90,15 @@ public class RequestHandler {
         if (!this.permissionsService.accountExist(userAccountId)) {
             throw new ValidationException("User account invalid or not found");
         }
+    }
+    
+    public String getAccountIdForElixirId(String accountId) {
+        if (!accountId.startsWith(EGA_ACCOUNT_ID_PREFIX)) {
+            AccountElixirId accountIdForElixirId =
+                    permissionsService.getAccountIdForElixirId(accountId)
+                            .orElseThrow(() -> new ValidationException("No linked EGA account for accountId ".concat(accountId)));
+            return accountIdForElixirId.getAccountId();
+        }
+        return accountId;
     }
 }

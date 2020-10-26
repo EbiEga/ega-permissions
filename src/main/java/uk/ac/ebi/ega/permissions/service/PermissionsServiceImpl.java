@@ -9,6 +9,7 @@ import uk.ac.ebi.ega.permissions.mapper.TokenPayloadMapper;
 import uk.ac.ebi.ega.permissions.model.AccountAccess;
 import uk.ac.ebi.ega.permissions.model.PassportVisaObject;
 import uk.ac.ebi.ega.permissions.model.Visa;
+import uk.ac.ebi.ega.permissions.persistence.entities.AccountElixirId;
 import uk.ac.ebi.ega.permissions.persistence.entities.Account;
 import uk.ac.ebi.ega.permissions.persistence.entities.PassportClaim;
 import uk.ac.ebi.ega.permissions.persistence.service.PermissionsDataService;
@@ -42,6 +43,11 @@ public class PermissionsServiceImpl implements PermissionsService {
     @Override
     public Optional<Account> getAccountByEmail(String email) {
         return permissionsDataService.getAccountByEmail(email);
+    }
+
+    @Override
+    public Optional<AccountElixirId> getAccountIdForElixirId(String elixirId) {
+        return permissionsDataService.getAccountIdForElixirId(elixirId);
     }
 
     @Override
