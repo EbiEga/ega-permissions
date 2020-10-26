@@ -52,7 +52,8 @@ public class EgaPermissionsConfiguration {
 
     @Bean
     public PermissionsDataService permissionsDataService(final PassportClaimRepository passportClaimRepository,
-            final AccountRepository accountRepository, final AccountElixirIdRepository accountElixirIdRepository) {
+                                                         final AccountElixirIdRepository accountElixirIdRepository,
+                                                         final AccountRepository accountRepository) {
         return new PermissionsDataServiceImpl(passportClaimRepository, accountRepository, accountElixirIdRepository);
     }
 
