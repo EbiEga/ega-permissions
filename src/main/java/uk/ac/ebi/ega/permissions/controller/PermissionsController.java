@@ -6,6 +6,7 @@ import io.swagger.annotations.ApiParam;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -14,14 +15,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import uk.ac.ebi.ega.permissions.model.JWTTokenResponse;
-import uk.ac.ebi.ega.permissions.model.PermissionsResponse;
 import uk.ac.ebi.ega.permissions.model.Visa;
 import uk.ac.ebi.ega.permissions.service.JWTService;
 import uk.ac.ebi.ega.permissions.service.PermissionsService;
 
 import javax.validation.Valid;
-import javax.validation.ValidationException;
-import javax.validation.constraints.NotNull;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -39,6 +37,7 @@ public class PermissionsController {
     }
 
     @GetMapping(value = "/jwt/{accountId}/permissions", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("hasPermission(#accountId, 'EGAAdmin_read')")
     public List<String> getUserInfoAsGA4GH(@PathVariable("accountId") String accountId) {
         requestHandler.verifyAccountId(accountId);
         List<Visa> visas = this.permissionsService.getVisas(accountId);
@@ -53,12 +52,14 @@ public class PermissionsController {
     }
 
     @PostMapping(value = "/jwt/{accountId}/permissions", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("hasPermission(#accountId, 'DAC_write')")
     public ResponseEntity<List<JWTTokenResponse>> createPermissions(@PathVariable("accountId") String accountId,
                                                                     @RequestBody List<String> ga4ghVisaV1List) {
         return ResponseEntity.status(HttpStatus.MULTI_STATUS).body(requestHandler.createJWTPermissions(accountId, ga4ghVisaV1List));
     }
 
     @DeleteMapping(value = "/jwt/{accountId}/permissions")
+    @PreAuthorize("hasPermission(#accountId, 'DAC_write')")
     public ResponseEntity<Void> deletePermissions(@PathVariable("accountId") String accountId,
                                                   @Valid @RequestParam(value = "value") String value) {
         return requestHandler.deletePermissions(accountId, value);

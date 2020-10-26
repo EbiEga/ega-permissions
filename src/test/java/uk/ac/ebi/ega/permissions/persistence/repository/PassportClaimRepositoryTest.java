@@ -8,17 +8,17 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+
+import uk.ac.ebi.ega.permissions.persistence.entities.Authority;
 import uk.ac.ebi.ega.permissions.persistence.entities.PassportClaim;
+import uk.ac.ebi.ega.permissions.persistence.entities.VisaType;
 
 import javax.persistence.EntityManager;
 import javax.sql.DataSource;
 
-import java.util.Arrays;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
-import static uk.ac.ebi.ega.permissions.persistence.entities.PassportClaim.VisaType.ControlledAccessGrants;
 
 @ExtendWith(SpringExtension.class)
 @DataJpaTest
@@ -90,10 +90,10 @@ class PassportClaimRepositoryTest {
 
     private PassportClaim createPassportClaim(String accountId, String value) {
         return new PassportClaim(accountId,
-                PassportClaim.VisaType.ControlledAccessGrants,
+                VisaType.ControlledAccessGrants,
                 1568814383L,
                 value,
                 "https://ega-archive.org/dacs/EGAC00001111111",
-                PassportClaim.Authority.dac);
+                Authority.dac);
     }
 }

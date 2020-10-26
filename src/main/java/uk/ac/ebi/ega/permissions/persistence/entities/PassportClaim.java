@@ -8,30 +8,16 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import javax.persistence.IdClass;
-import javax.validation.constraints.NotBlank;
 
 @Entity
 @IdClass(PassportClaimId.class)
 @TypeDef(name = "visa_type", typeClass = PostgreSQLEnumType.class)
 @TypeDef(name = "visa_authority", typeClass = PostgreSQLEnumType.class)
 public class PassportClaim {
-
-    public enum VisaType {
-        AffiliationAndRole,
-        ControlledAccessGrants,
-        AcceptedTermsAndPolicies,
-        ResearcherStatus,
-        LinkedIdentities
-    }
-
-    public enum Authority {dac, system}
-
     @Id
-    @NotBlank
     private String accountId;
 
     @Id
-    @NotBlank
     private String value;
 
     @Enumerated(EnumType.STRING)
