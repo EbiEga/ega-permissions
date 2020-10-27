@@ -24,16 +24,17 @@ public class PermissionsApiDelegateImpl implements PermissionsApiDelegate {
 
     @Override
     public ResponseEntity<List<PermissionsResponse>> createPermissions(String accountId, List<PassportVisaObject> passportVisaObjects) {
-        return ResponseEntity.status(HttpStatus.MULTI_STATUS).body(requestHandler.createPermissions(accountId, passportVisaObjects));
+        return ResponseEntity.status(HttpStatus.MULTI_STATUS).body(requestHandler.createPermissions(requestHandler.getAccountIdForElixirId(accountId), passportVisaObjects));
     }
 
     @Override
     public ResponseEntity<Void> deletePermissions(String accountId, String value) {
-        return requestHandler.deletePermissions(accountId, value);
+        return requestHandler.deletePermissions(requestHandler.getAccountIdForElixirId(accountId), value);
     }
 
     @Override
     public ResponseEntity<List<Visa>> readPermissions(String accountId) {
+        accountId = requestHandler.getAccountIdForElixirId(accountId);
         requestHandler.verifyAccountId(accountId);
         return ResponseEntity.ok(this.permissionsService.getVisas(accountId));
     }
