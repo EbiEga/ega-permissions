@@ -23,6 +23,9 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 
 import javax.servlet.http.HttpServletRequest;
+import static org.springframework.http.HttpMethod.GET;
+import static org.springframework.http.HttpMethod.POST;
+import static org.springframework.http.HttpMethod.DELETE;
 
 @EnableWebSecurity
 public class OAuth2ResourceServerSecurityConfiguration extends WebSecurityConfigurerAdapter {
@@ -39,6 +42,14 @@ public class OAuth2ResourceServerSecurityConfiguration extends WebSecurityConfig
         http
             .authorizeRequests((authorizeRequests) ->
                 authorizeRequests
+                    .antMatchers(GET, "/plain/{accountId}/**", "/jwt/{accountId}/**")
+                        .access("hasPermission(#accountId, 'EGAAdmin_read')")
+                    .antMatchers(GET, "/plain/datasets/{datasetId}/**", "/jwt/datasets/{datasetId}/**")
+                        .access("hasPermission(#datasetId, 'EGAAdmin_read')")
+                    .antMatchers(POST, "/plain/{accountId}/**", "/jwt/{accountId}/**")
+                        .access("hasPermission(#accountId, 'DAC_write')")
+                    .antMatchers(DELETE, "/plain/{accountId}/**", "/jwt/{accountId}/**")
+                        .access("hasPermission(#accountId, 'DAC_write')")
                     .antMatchers(swaggerEndpointMatcher())
                     .permitAll()
                     .anyRequest().authenticated())
