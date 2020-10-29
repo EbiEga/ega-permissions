@@ -1,5 +1,6 @@
 package uk.ac.ebi.ega.permissions.configuration;
 
+import org.springframework.context.annotation.Configuration;
 import org.springframework.security.access.PermissionEvaluator;
 import org.springframework.security.core.Authentication;
 import uk.ac.ebi.ega.permissions.persistence.entities.Account;
@@ -14,6 +15,7 @@ import javax.validation.ValidationException;
 import java.io.Serializable;
 import java.util.List;
 
+@Configuration
 public class CustomPermissionEvaluator implements PermissionEvaluator {
 
     private PermissionsService permissionsService;

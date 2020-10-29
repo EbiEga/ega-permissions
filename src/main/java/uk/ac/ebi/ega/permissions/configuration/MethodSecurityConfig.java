@@ -6,22 +6,18 @@ import org.springframework.security.access.expression.method.DefaultMethodSecuri
 import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.method.configuration.GlobalMethodSecurityConfiguration;
-import uk.ac.ebi.ega.permissions.persistence.service.UserGroupDataService;
-import uk.ac.ebi.ega.permissions.service.PermissionsService;
 
 @Configuration
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class MethodSecurityConfig extends GlobalMethodSecurityConfiguration {
     @Autowired
-    private PermissionsService permissionsService;
-    @Autowired
-    private UserGroupDataService userGroupDataService;
+    private CustomPermissionEvaluator customPermissionEvaluator;
 
     @Override
     protected MethodSecurityExpressionHandler createExpressionHandler() {
         DefaultMethodSecurityExpressionHandler expressionHandler =
                 new DefaultMethodSecurityExpressionHandler();
-        expressionHandler.setPermissionEvaluator(new CustomPermissionEvaluator(permissionsService , userGroupDataService));
+        expressionHandler.setPermissionEvaluator(customPermissionEvaluator);
         return expressionHandler;
     }
 }
