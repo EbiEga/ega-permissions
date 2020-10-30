@@ -6,9 +6,11 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.security.authentication.AuthenticationManagerResolver;
+import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.util.ResourceUtils;
 import uk.ac.ebi.ega.permissions.api.PermissionsApiDelegate;
 import uk.ac.ebi.ega.permissions.configuration.tenant.TenantAuthenticationManagerResolver;
+import uk.ac.ebi.ega.permissions.controller.CustomAccessDeniedHandler;
 import uk.ac.ebi.ega.permissions.controller.RequestHandler;
 import uk.ac.ebi.ega.permissions.controller.delegate.PermissionsApiDelegateImpl;
 import uk.ac.ebi.ega.permissions.mapper.TokenPayloadMapper;
@@ -95,6 +97,11 @@ public class EgaPermissionsConfiguration {
                                                                        @Value("${ega.openid.jwt.jwk-set-uri}") String egaJwtJwkSetUri,
                                                                        @Value("${elixir.openid.jwt.issuer-uri}") String elixirJwtIssUri) {
         return new TenantAuthenticationManagerResolver(egaJwtIssUri, egaJwtJwkSetUri, elixirJwtIssUri);
+    }
+
+    @Bean
+    public AccessDeniedHandler accessDeniedHandler() {
+        return new CustomAccessDeniedHandler();
     }
 
     private void assertFileExistsAndReadable(final File file, final String message) throws FileSystemException {
