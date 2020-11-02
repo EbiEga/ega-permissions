@@ -5,6 +5,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
+
 import uk.ac.ebi.ega.permissions.exception.ServiceException;
 import uk.ac.ebi.ega.permissions.exception.SystemException;
 import uk.ac.ebi.ega.permissions.mapper.TokenPayloadMapper;
@@ -13,6 +15,7 @@ import uk.ac.ebi.ega.permissions.model.PassportVisaObject;
 import uk.ac.ebi.ega.permissions.model.PermissionsResponse;
 import uk.ac.ebi.ega.permissions.model.Visa;
 import uk.ac.ebi.ega.permissions.persistence.entities.AccountElixirId;
+import uk.ac.ebi.ega.permissions.persistence.service.UserGroupDataService;
 import uk.ac.ebi.ega.permissions.service.PermissionsService;
 
 import javax.validation.ValidationException;
@@ -27,13 +30,17 @@ public class RequestHandler {
 
     private PermissionsService permissionsService;
     private TokenPayloadMapper tokenPayloadMapper;
+    private UserGroupDataService userGroupDataService;
 
-    public RequestHandler(PermissionsService permissionsService, TokenPayloadMapper tokenPayloadMapper) {
+    public RequestHandler(PermissionsService permissionsService, TokenPayloadMapper tokenPayloadMapper,
+            UserGroupDataService userGroupDataService) {
         this.permissionsService = permissionsService;
         this.tokenPayloadMapper = tokenPayloadMapper;
+        this.userGroupDataService = userGroupDataService;
     }
 
     public List<JWTTokenResponse> createJWTPermissions(String accountId, List<String> ga4ghVisaV1List) {
+        validateJWTPermissionsDatasetBelongsToDAC(ga4ghVisaV1List);
         return ga4ghVisaV1List
                 .stream()
                 .map((strVisa) -> {
@@ -48,6 +55,7 @@ public class RequestHandler {
     }
 
     public List<PermissionsResponse> createPermissions(String accountId, List<PassportVisaObject> passportVisaObjects) {
+        validatePermissionsDatasetBelongsToDAC(passportVisaObjects);
         return passportVisaObjects
                 .stream()
                 .map((passportVisaObject) -> handlePassportVisaObjectProcessing(accountId, passportVisaObject))
@@ -56,6 +64,7 @@ public class RequestHandler {
 
     public ResponseEntity<Void> deletePermissions(String accountId, String value) {
         verifyAccountId(accountId);
+        validateDeletePermissionsDatasetBelongsToDAC(value);
         int permissionsDeleted = this.permissionsService.deletePassportVisaObject(accountId, value);
         if (permissionsDeleted >= 1) {
             return ResponseEntity.status(HttpStatus.OK).build();
@@ -100,5 +109,57 @@ public class RequestHandler {
             return accountIdForElixirId.getAccountId();
         }
         return accountId;
+    }
+    
+
+    private void validateJWTPermissionsDatasetBelongsToDAC(List<String> ga4ghVisaV1List) {
+        String bearerAccountId = getBearerAccountId();
+        if(!userGroupDataService.isEGAAdmin(bearerAccountId)) {
+            ga4ghVisaV1List
+                    .stream()
+                    .filter((strVisa) -> {
+                        try {
+                            Visa visa = tokenPayloadMapper.mapJWTClaimSetToVisa(SignedJWT.parse(strVisa).getJWTClaimsSet());
+                            String datasetId = visa.getGa4ghVisaV1().getValue();
+                            return !userGroupDataService.datasetBelongsToDAC(bearerAccountId, datasetId);
+                        } catch (ParseException ex) {
+                            return true;
+                        }
+                    })
+                    .findAny()
+                    .ifPresent(a -> {
+                        throw new ValidationException("User doesn't own dataset.");
+                    });
+        }
+    }
+
+
+    private void validatePermissionsDatasetBelongsToDAC(List<PassportVisaObject> passportVisaObjects) {
+        String bearerAccountId = getBearerAccountId();
+        if(!userGroupDataService.isEGAAdmin(bearerAccountId)) {
+            passportVisaObjects
+                    .stream()
+                    .filter((passportVisaObject) -> {
+                        String datasetId = passportVisaObject.getValue();
+                        return !userGroupDataService.datasetBelongsToDAC(bearerAccountId, datasetId);
+                    })
+                    .findAny()
+                    .ifPresent(a -> {
+                        throw new ValidationException("User doesn't own dataset.");
+                    });
+        }
+    }
+
+    private void validateDeletePermissionsDatasetBelongsToDAC(String datasetId) {
+        String bearerAccountId = getBearerAccountId();
+        if(!userGroupDataService.isEGAAdmin(bearerAccountId)) {
+            if(!userGroupDataService.datasetBelongsToDAC(bearerAccountId, datasetId))
+                throw new ValidationException("User doesn't own dataset.");
+        }
+    }
+
+    private String getBearerAccountId() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        return permissionsService.getAccountByEmail(email).get().getAccountId();
     }
 }

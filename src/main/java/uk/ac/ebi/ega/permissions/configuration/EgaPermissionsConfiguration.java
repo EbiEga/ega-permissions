@@ -63,8 +63,9 @@ public class EgaPermissionsConfiguration {
     }
 
     @Bean
-    public RequestHandler requestHandler(final PermissionsService permissionsService, final TokenPayloadMapper tokenPayloadMapper) {
-        return new RequestHandler(permissionsService, tokenPayloadMapper);
+    public RequestHandler requestHandler(final PermissionsService permissionsService,
+            final TokenPayloadMapper tokenPayloadMapper, final UserGroupDataService userGroupDataService) {
+        return new RequestHandler(permissionsService, tokenPayloadMapper, userGroupDataService);
     }
 
     @Bean
