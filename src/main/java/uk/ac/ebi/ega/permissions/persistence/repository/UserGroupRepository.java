@@ -24,4 +24,10 @@ public interface UserGroupRepository extends CrudRepository<UserGroup, UserGroup
     Optional<List<UserGroup>> findAllByUserId(String userId);
 
     Optional<List<UserGroup>> findAllByUserIdAndGroupId(String userId, String groupId);
+
+    @Query("SELECT ug from UserGroup ug inner join Dataset dc "
+            + "on ug.groupId = dc.dacStableId "
+            + "where ug.userId = :bearerAccountId and dc.datasetId = :datasetId")
+    Optional<List<UserGroup>> findAllUserDatasetBelongsToDAC(@Param("bearerAccountId")String bearerAccountId,
+                                                             @Param("datasetId") String datasetId);
 }

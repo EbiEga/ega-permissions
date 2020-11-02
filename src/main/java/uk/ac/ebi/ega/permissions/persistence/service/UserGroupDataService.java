@@ -9,7 +9,7 @@ public interface UserGroupDataService {
 
     boolean isEGAAdmin(String accountId);
 
-    boolean belongsToDac(String accountId, String dacAccountId);
+    boolean datasetBelongsToDAC(String bearerAccountId, String datasetId);
 
     boolean canControlDataset(String accountId, String datasetId);
 
