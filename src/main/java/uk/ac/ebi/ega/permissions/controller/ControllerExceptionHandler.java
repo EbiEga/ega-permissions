@@ -36,13 +36,4 @@ public class ControllerExceptionHandler {
         responseBody.put("message", ex.getMessage());
         return ResponseEntity.status(HttpStatus.NOT_FOUND.value()).body(responseBody);
     }
-
-    @ExceptionHandler(value = {AccessDeniedException.class})
-    ResponseEntity<Object> customSecurityException(AccessDeniedException ex) {
-        Map<String, String> responseBody = new HashMap<>();
-        responseBody.put("timestamp", String.valueOf(new Date()));
-        responseBody.put("status", String.valueOf(HttpStatus.UNAUTHORIZED.value()));
-        responseBody.put("message", ex.getMessage());
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED.value()).body(responseBody);
-    }
 }
