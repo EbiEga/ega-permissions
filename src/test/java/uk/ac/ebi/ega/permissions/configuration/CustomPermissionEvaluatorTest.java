@@ -15,6 +15,7 @@ import javax.validation.ValidationException;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 
 import uk.ac.ebi.ega.permissions.persistence.entities.Account;
@@ -87,16 +88,16 @@ public class CustomPermissionEvaluatorTest {
     }
 
     @Test
-    void hasPermission_WhenUserHasNoAccountMapping_ReturnValidationException() {
+    void hasPermission_WhenUserHasNoAccountMapping_ReturnAccessDeniedExceptionException() {
         when(permissionsService.getAccountByEmail(any())).thenReturn(Optional.empty());
         
         assertThatThrownBy(() -> {
             customPermissionEvaluator.hasPermission(authentication, EGA_ACCOUNT_ID, "EGAAdmin_read");
-        }).isInstanceOf(ValidationException.class);
+        }).isInstanceOf(AccessDeniedException.class);
     }
 
     @Test
-    void hasPermission_WhenUserHasNoUserGroupMapping_ReturnValidationException() {
+    void hasPermission_WhenUserHasNoUserGroupMapping_ReturnAccessDeniedExceptionException() {
         final Account account = new Account(EGA_ACCOUNT_ID, null, null, "email", null);
 
         when(permissionsService.getAccountByEmail(any())).thenReturn(Optional.of(account));
@@ -104,6 +105,6 @@ public class CustomPermissionEvaluatorTest {
 
         assertThatThrownBy(() -> {
             customPermissionEvaluator.hasPermission(authentication, EGA_ACCOUNT_ID, "EGAAdmin_read");
-        }).isInstanceOf(ValidationException.class);
+        }).isInstanceOf(AccessDeniedException.class);
     }
 }
