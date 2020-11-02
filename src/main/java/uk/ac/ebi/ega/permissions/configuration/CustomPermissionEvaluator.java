@@ -67,7 +67,7 @@ public class CustomPermissionEvaluator implements PermissionEvaluator {
         if (email.toLowerCase().endsWith(ELIXIR_ACCOUNT_SUFFIX)) {
             AccountElixirId accountIdForElixirId =
                     permissionsService.getAccountIdForElixirId(email)
-                            .orElseThrow(() -> new ValidationException("No linked EGA account for accountId ".concat(email)));
+                            .orElseThrow(() -> new AccessDeniedException("No linked EGA account for accountId ".concat(email)));
             return accountIdForElixirId.getAccountId();
         } else {
             Account account = permissionsService.getAccountByEmail(email).orElseThrow(() ->
