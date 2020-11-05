@@ -17,41 +17,48 @@
  */
 package uk.ac.ebi.ega.permissions.configuration;
 
+import org.springframework.security.authentication.AuthenticationManagerResolver;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.web.access.AccessDeniedHandler;
 
-import static org.springframework.http.HttpMethod.GET;
-import static org.springframework.http.HttpMethod.POST;
-import static org.springframework.http.HttpMethod.DELETE;
-import static org.springframework.security.config.Customizer.withDefaults;
+import javax.servlet.http.HttpServletRequest;
+
+import static org.springframework.http.HttpMethod.*;
 
 @EnableWebSecurity
 public class OAuth2ResourceServerSecurityConfiguration extends WebSecurityConfigurerAdapter {
+
+    private AuthenticationManagerResolver<HttpServletRequest> authenticationManagerResolver;
+    private AccessDeniedHandler accessDeniedHandler;
+
+    public OAuth2ResourceServerSecurityConfiguration(AuthenticationManagerResolver<HttpServletRequest> authenticationManagerResolver,
+                                                     AccessDeniedHandler accessDeniedHandler) {
+        this.authenticationManagerResolver = authenticationManagerResolver;
+        this.accessDeniedHandler = accessDeniedHandler;
+    }
 
     // @formatter:off
     @Override
     protected void configure(final HttpSecurity http) throws Exception {
         http
-            .authorizeRequests((authorizeRequests) ->
-                authorizeRequests
-                    .antMatchers(GET, "/plain/{accountId}/**", "/jwt/{accountId}/**")
-                        .access("hasPermission(#accountId, 'EGAAdmin_read')")
-                    .antMatchers(GET, "/plain/datasets/{datasetId}/**", "/jwt/datasets/{datasetId}/**")
-                        .access("hasPermission(#datasetId, 'EGAAdmin_read')")
-                    .antMatchers(POST, "/plain/{accountId}/**", "/jwt/{accountId}/**")
-                        .access("hasPermission(#accountId, 'DAC_write')")
-                    .antMatchers(DELETE, "/plain/{accountId}/**", "/jwt/{accountId}/**")
-                        .access("hasPermission(#accountId, 'DAC_write')")
-                    .antMatchers(swaggerEndpointMatcher())
-                    .permitAll()
-                    .anyRequest().authenticated())
-            .csrf()
-            .disable()
-            .oauth2ResourceServer((oauth2ResourceServer) ->
-                oauth2ResourceServer
-                    .jwt(withDefaults())
-            );
+                .authorizeRequests((authorizeRequests) ->
+                        authorizeRequests
+                                .antMatchers(GET, "/plain/{accountId}/**", "/jwt/{accountId}/**")
+                                .access("hasPermission(#accountId, 'EGAAdmin_read')")
+                                .antMatchers(GET, "/plain/datasets/{datasetId}/**", "/jwt/datasets/{datasetId}/**")
+                                .access("hasPermission(#datasetId, 'EGAAdmin_read')")
+                                .antMatchers(POST, "/plain/{accountId}/**", "/jwt/{accountId}/**")
+                                .access("hasPermission(#accountId, 'DAC_write')")
+                                .antMatchers(DELETE, "/plain/{accountId}/**", "/jwt/{accountId}/**")
+                                .access("hasPermission(#accountId, 'DAC_write')")
+                                .antMatchers(swaggerEndpointMatcher())
+                                .permitAll()
+                                .anyRequest().authenticated())
+                .csrf()
+                .disable()
+                .oauth2ResourceServer(o -> o.authenticationManagerResolver(this.authenticationManagerResolver)).exceptionHandling().accessDeniedHandler(accessDeniedHandler);
     }
 
     private String[] swaggerEndpointMatcher() {

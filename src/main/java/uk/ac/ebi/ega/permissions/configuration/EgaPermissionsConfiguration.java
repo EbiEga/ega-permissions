@@ -5,8 +5,12 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.security.authentication.AuthenticationManagerResolver;
+import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.util.ResourceUtils;
 import uk.ac.ebi.ega.permissions.api.PermissionsApiDelegate;
+import uk.ac.ebi.ega.permissions.configuration.tenant.TenantAuthenticationManagerResolver;
+import uk.ac.ebi.ega.permissions.controller.CustomAccessDeniedHandler;
 import uk.ac.ebi.ega.permissions.controller.RequestHandler;
 import uk.ac.ebi.ega.permissions.controller.delegate.PermissionsApiDelegateImpl;
 import uk.ac.ebi.ega.permissions.mapper.TokenPayloadMapper;
@@ -77,7 +81,7 @@ public class EgaPermissionsConfiguration {
     @Bean
     public JWTService jwtService(@Value("${jwks.keystore.path}") String jwksKeystorePath,
                                  @Value("${jwks.signer.default-key.id}") String defaultSignerKeyId,
-                                 @Value("${jwks.url}") String jwksURL) throws IOException, ParseException, URISyntaxException {
+                                 @Value("${ega.openid.jwt.jwk-set-uri}") String jwksURL) throws IOException, ParseException, URISyntaxException {
         final File keystoreFile = ResourceUtils.getFile(jwksKeystorePath);
         assertFileExistsAndReadable(keystoreFile, String.format("Keystore file %s should exists & must be readable", keystoreFile.toString()));
 
@@ -87,6 +91,18 @@ public class EgaPermissionsConfiguration {
                 defaultSignerKeyId,
                 JWTAlgorithm.RS256,
                 new URL(jwksURL));
+    }
+
+    @Bean
+    public AuthenticationManagerResolver authenticationManagerResolver(@Value("${ega.openid.jwt.issuer-uri}") String egaJwtIssUri,
+                                                                       @Value("${ega.openid.jwt.jwk-set-uri}") String egaJwtJwkSetUri,
+                                                                       @Value("${elixir.openid.jwt.issuer-uri}") String elixirJwtIssUri) {
+        return new TenantAuthenticationManagerResolver(egaJwtIssUri, egaJwtJwkSetUri, elixirJwtIssUri);
+    }
+
+    @Bean
+    public AccessDeniedHandler accessDeniedHandler() {
+        return new CustomAccessDeniedHandler();
     }
 
     private void assertFileExistsAndReadable(final File file, final String message) throws FileSystemException {

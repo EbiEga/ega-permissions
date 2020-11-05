@@ -1,13 +1,12 @@
 package uk.ac.ebi.ega.permissions.configuration;
 
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.PermissionEvaluator;
 import org.springframework.security.core.Authentication;
 import uk.ac.ebi.ega.permissions.persistence.entities.Account;
+import uk.ac.ebi.ega.permissions.persistence.entities.AccountElixirId;
 import uk.ac.ebi.ega.permissions.persistence.entities.UserGroup;
-
-import static uk.ac.ebi.ega.permissions.persistence.entities.AccessGroup.EGAAdmin;
-
 import uk.ac.ebi.ega.permissions.persistence.service.UserGroupDataService;
 import uk.ac.ebi.ega.permissions.service.PermissionsService;
 
@@ -15,8 +14,12 @@ import javax.validation.ValidationException;
 import java.io.Serializable;
 import java.util.List;
 
+import static uk.ac.ebi.ega.permissions.persistence.entities.AccessGroup.EGAAdmin;
+
 @Configuration
 public class CustomPermissionEvaluator implements PermissionEvaluator {
+
+    public static final String ELIXIR_ACCOUNT_SUFFIX = "@elixir-europe.org";
 
     private PermissionsService permissionsService;
     private UserGroupDataService userGroupDataService;
@@ -44,12 +47,10 @@ public class CustomPermissionEvaluator implements PermissionEvaluator {
 
     private boolean hasPrivilege(Authentication auth, String targetType, String permission) {
         String email = auth.getName();
-        Account account = permissionsService.getAccountByEmail(email).orElseThrow(() ->
-                new ValidationException(("No linked EGA account for email ").concat(email)));
 
-        String accountId = account.getAccountId();
+        String accountId = getAccountIdForElixirId(email);
         List<UserGroup> userGroups = userGroupDataService.getPermissionGroups(accountId).orElseThrow(() ->
-                new ValidationException(("No linked user group for ").concat(email)));
+                new AccessDeniedException(("No linked user group for ").concat(email)));
 
         return userGroups.stream().anyMatch(entry -> {
             String accessGroup = entry.getAccessGroup().name();
@@ -60,5 +61,18 @@ public class CustomPermissionEvaluator implements PermissionEvaluator {
             }
             return false;
         });
+    }
+
+    public String getAccountIdForElixirId(String email) {
+        if (email.toLowerCase().endsWith(ELIXIR_ACCOUNT_SUFFIX)) {
+            AccountElixirId accountIdForElixirId =
+                    permissionsService.getAccountIdForElixirId(email)
+                            .orElseThrow(() -> new AccessDeniedException("No linked EGA account for accountId ".concat(email)));
+            return accountIdForElixirId.getAccountId();
+        } else {
+            Account account = permissionsService.getAccountByEmail(email).orElseThrow(() ->
+                    new AccessDeniedException(("No linked EGA account for email ").concat(email)));
+            return account.getAccountId();
+        }
     }
 }

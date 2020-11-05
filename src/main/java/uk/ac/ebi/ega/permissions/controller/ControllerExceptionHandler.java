@@ -1,7 +1,10 @@
 package uk.ac.ebi.ega.permissions.controller;
 
+import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
@@ -11,7 +14,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-@ControllerAdvice
+@ControllerAdvice(annotations = {Controller.class, Configuration.class})
 public class ControllerExceptionHandler {
 
     //Overrides the default 500 Error response for requests not meeting the API Definition
