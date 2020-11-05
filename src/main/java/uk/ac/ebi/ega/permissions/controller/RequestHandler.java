@@ -26,6 +26,7 @@ import java.util.stream.Collectors;
 public class RequestHandler {
 
     public static final String EGA_ACCOUNT_ID_PREFIX = "EGAW";
+    public static final String ELIXIR_ACCOUNT_SUFFIX = "@elixir-europe.org";
     Logger LOGGER = LoggerFactory.getLogger(RequestHandler.class);
 
     private PermissionsService permissionsService;
@@ -64,7 +65,7 @@ public class RequestHandler {
 
     public ResponseEntity<Void> deletePermissions(String accountId, String value) {
         verifyAccountId(accountId);
-        validateDeletePermissionsDatasetBelongsToDAC(value);
+        validateDatasetBelongsToDAC(value);
         int permissionsDeleted = this.permissionsService.deletePassportVisaObject(accountId, value);
         if (permissionsDeleted >= 1) {
             return ResponseEntity.status(HttpStatus.OK).build();
@@ -150,7 +151,7 @@ public class RequestHandler {
         }
     }
 
-    private void validateDeletePermissionsDatasetBelongsToDAC(String datasetId) {
+    public void validateDatasetBelongsToDAC(String datasetId) {
         String bearerAccountId = getBearerAccountId();
         if(!userGroupDataService.isEGAAdmin(bearerAccountId)) {
             if(!userGroupDataService.datasetBelongsToDAC(bearerAccountId, datasetId))
@@ -160,6 +161,10 @@ public class RequestHandler {
 
     private String getBearerAccountId() {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        return permissionsService.getAccountByEmail(email).get().getAccountId();
+        if (email.toLowerCase().endsWith(ELIXIR_ACCOUNT_SUFFIX)) {
+            return permissionsService.getAccountIdForElixirId(email).get().getAccountId();
+        } else {
+            return permissionsService.getAccountByEmail(email).get().getAccountId();
+        }
     }
 }

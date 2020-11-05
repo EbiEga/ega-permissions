@@ -41,6 +41,7 @@ public class PermissionsApiDelegateImpl implements PermissionsApiDelegate {
 
     @Override
     public ResponseEntity<List<AccountAccess>> plainDatasetsDatasetIdUsersGet(String datasetId) {
+        requestHandler.validateDatasetBelongsToDAC(datasetId);
         return ResponseEntity.ok(this.permissionsService.getGrantedAccountsForDataset(datasetId));
     }
 }

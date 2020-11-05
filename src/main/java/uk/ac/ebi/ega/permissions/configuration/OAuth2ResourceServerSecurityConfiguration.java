@@ -45,10 +45,10 @@ public class OAuth2ResourceServerSecurityConfiguration extends WebSecurityConfig
         http
                 .authorizeRequests((authorizeRequests) ->
                         authorizeRequests
+                                .antMatchers(GET, "/plain/datasets/{datasetId}/**", "/jwt/datasets/{datasetId}/**")
+                                .access("hasPermission(#datasetId, 'DAC_read')")
                                 .antMatchers(GET, "/plain/{accountId}/**", "/jwt/{accountId}/**")
                                 .access("hasPermission(#accountId, 'EGAAdmin_read')")
-                                .antMatchers(GET, "/plain/datasets/{datasetId}/**", "/jwt/datasets/{datasetId}/**")
-                                .access("hasPermission(#datasetId, 'EGAAdmin_read')")
                                 .antMatchers(POST, "/plain/{accountId}/**", "/jwt/{accountId}/**")
                                 .access("hasPermission(#accountId, 'DAC_write')")
                                 .antMatchers(DELETE, "/plain/{accountId}/**", "/jwt/{accountId}/**")
