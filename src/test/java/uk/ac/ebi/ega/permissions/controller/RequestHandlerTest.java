@@ -12,6 +12,7 @@ import uk.ac.ebi.ega.permissions.model.PassportVisaObject;
 import uk.ac.ebi.ega.permissions.model.PermissionsResponse;
 import uk.ac.ebi.ega.permissions.model.Visa;
 import uk.ac.ebi.ega.permissions.persistence.entities.Account;
+import uk.ac.ebi.ega.permissions.persistence.service.EventDataService;
 import uk.ac.ebi.ega.permissions.persistence.service.UserGroupDataService;
 import uk.ac.ebi.ega.permissions.service.PermissionsService;
 
@@ -32,6 +33,8 @@ public class RequestHandlerTest {
     private PermissionsService permissionsService = mock(PermissionsService.class);
     private TokenPayloadMapper tokenPayloadMapper = mock(TokenPayloadMapper.class);
     private UserGroupDataService userGroupDataService = mock(UserGroupDataService.class);
+    private EventDataService eventDataService = mock(EventDataService.class);
+
     private RequestHandler requestHandler;
 
     @Test
@@ -124,7 +127,7 @@ public class RequestHandlerTest {
         final Authentication authentication = mock(Authentication.class);
         final SecurityContext securityContext = mock(SecurityContext.class);
         SecurityContextHolder.setContext(securityContext);
-        requestHandler = new RequestHandler(permissionsService, tokenPayloadMapper, userGroupDataService);
+        requestHandler = new RequestHandler(permissionsService, tokenPayloadMapper, userGroupDataService, eventDataService);
 
         Visa visa = new Visa();
         visa.setGa4ghVisaV1(new PassportVisaObject());

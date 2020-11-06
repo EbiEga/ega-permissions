@@ -2,8 +2,6 @@ package uk.ac.ebi.ega.permissions.controller;
 
 import com.nimbusds.jwt.SignedJWT;
 
-import jdk.internal.joptsimple.internal.Strings;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpMethod;
@@ -181,7 +179,7 @@ public class RequestHandler {
     private Events getEvent(String userId, String data, String method) {
         Events events = new Events();
         events.setBearerId(getBearerAccountId());
-        events.setData((data == null) ? data : data.replaceAll("\n", Strings.EMPTY));
+        events.setData((data == null) ? data : data.replaceAll("\n", ""));
         events.setMethod(method);
         events.setUserId(userId);
         return events;
