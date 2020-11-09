@@ -1,7 +1,7 @@
 package uk.ac.ebi.ega.permissions.persistence.service;
 
-import uk.ac.ebi.ega.permissions.persistence.entities.Events;
+import uk.ac.ebi.ega.permissions.persistence.entities.Event;
 
 public interface EventDataService {
-    Events saveEvent(Events events);
+    Event saveEvent(Event events);
 }

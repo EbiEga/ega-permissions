@@ -52,9 +52,10 @@ public class EgaPermissionsConfiguration {
 
     @Bean
     public PermissionsService permissionsService(final PermissionsDataService permissionsDataService,
+                                                 final EventDataService eventDataService,
                                                  final TokenPayloadMapper tokenPayloadMapper,
                                                  final VisaInfoProperties visaInfoProperties) {
-        return new PermissionsServiceImpl(permissionsDataService, tokenPayloadMapper, visaInfoProperties);
+        return new PermissionsServiceImpl(permissionsDataService, eventDataService, tokenPayloadMapper, visaInfoProperties);
     }
 
     @Bean
@@ -76,8 +77,9 @@ public class EgaPermissionsConfiguration {
 
     @Bean
     public RequestHandler requestHandler(final PermissionsService permissionsService,
-            final TokenPayloadMapper tokenPayloadMapper, final UserGroupDataService userGroupDataService, EventDataService eventDataService) {
-        return new RequestHandler(permissionsService, tokenPayloadMapper, userGroupDataService, eventDataService);
+                                         final TokenPayloadMapper tokenPayloadMapper,
+                                         final UserGroupDataService userGroupDataService) {
+        return new RequestHandler(permissionsService, tokenPayloadMapper, userGroupDataService);
     }
 
     @Bean

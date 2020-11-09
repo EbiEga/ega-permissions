@@ -1,5 +1,8 @@
 package uk.ac.ebi.ega.permissions.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.http.HttpMethod;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.util.CollectionUtils;
 import uk.ac.ebi.ega.permissions.configuration.VisaInfoProperties;
@@ -11,10 +14,13 @@ import uk.ac.ebi.ega.permissions.model.PassportVisaObject;
 import uk.ac.ebi.ega.permissions.model.Visa;
 import uk.ac.ebi.ega.permissions.persistence.entities.AccountElixirId;
 import uk.ac.ebi.ega.permissions.persistence.entities.Account;
+import uk.ac.ebi.ega.permissions.persistence.entities.Event;
 import uk.ac.ebi.ega.permissions.persistence.entities.PassportClaim;
+import uk.ac.ebi.ega.permissions.persistence.service.EventDataService;
 import uk.ac.ebi.ega.permissions.persistence.service.PermissionsDataService;
 
 import javax.persistence.PersistenceException;
+import javax.transaction.Transactional;
 import javax.validation.ValidationException;
 import java.util.Calendar;
 import java.util.Collections;
@@ -25,12 +31,18 @@ import java.util.stream.Collectors;
 
 public class PermissionsServiceImpl implements PermissionsService {
 
+    private static final String ELIXIR_ACCOUNT_SUFFIX = "@elixir-europe.org";
+    private static final String EVENT_CREATED = "CREATED";
+
     private PermissionsDataService permissionsDataService;
+    private EventDataService eventDataService;
     private TokenPayloadMapper tokenPayloadMapper;
     private VisaInfoProperties visaInfoProperties;
 
-    public PermissionsServiceImpl(PermissionsDataService permissionsDataService, TokenPayloadMapper tokenPayloadMapper, VisaInfoProperties visaInfoProperties) {
+    public PermissionsServiceImpl(PermissionsDataService permissionsDataService, EventDataService eventDataService,
+                                  TokenPayloadMapper tokenPayloadMapper, VisaInfoProperties visaInfoProperties) {
         this.permissionsDataService = permissionsDataService;
+        this.eventDataService = eventDataService;
         this.tokenPayloadMapper = tokenPayloadMapper;
         this.visaInfoProperties = visaInfoProperties;
     }
@@ -76,6 +88,7 @@ public class PermissionsServiceImpl implements PermissionsService {
     }
 
     @Override
+    @Transactional
     public PassportVisaObject savePassportVisaObject(String accountId, PassportVisaObject passportVisaObject) throws ServiceException, SystemException {
         try {
             //TODO: This will be improved later with other validations such as valid accountIds and Datasets
@@ -84,6 +97,7 @@ public class PermissionsServiceImpl implements PermissionsService {
             }
             PassportClaim savedClaim = this.permissionsDataService.savePassportClaim(tokenPayloadMapper.mapPassportVisaObjectToPassportClaim(accountId, passportVisaObject));
             passportVisaObject = this.tokenPayloadMapper.mapPassportClaimToPassportVisaObject(savedClaim);
+            eventDataService.saveEvent(getEvent(accountId, new ObjectMapper().writeValueAsString(passportVisaObject), EVENT_CREATED));
         } catch (PersistenceException | CannotCreateTransactionException | IllegalArgumentException ex) { //These are spring-data possible errors
             throw new ServiceException(String.format("Error saving permissions to the DB for [account:%s, object:%s]", accountId, passportVisaObject.getValue()), ex);
         } catch (ValidationException exception) {
@@ -95,8 +109,11 @@ public class PermissionsServiceImpl implements PermissionsService {
     }
 
     @Override
+    @Transactional
     public int deletePassportVisaObject(String accountId, String value) {
-        return this.permissionsDataService.deletePassportClaim(accountId, value);
+        int result = this.permissionsDataService.deletePassportClaim(accountId, value);
+        eventDataService.saveEvent(getEvent(accountId, value, HttpMethod.DELETE.name()));
+        return result;
     }
 
     @Override
@@ -114,5 +131,23 @@ public class PermissionsServiceImpl implements PermissionsService {
         visa.setIat(this.visaInfoProperties.getIat());
         visa.setJti(UUID.randomUUID().toString());
         return visa;
+    }
+
+    private Event getEvent(String userId, String data, String method) {
+        Event events = new Event();
+        events.setBearerId(getBearerAccountId());
+        events.setData((data == null) ? data : data.replaceAll("\n", ""));
+        events.setMethod(method);
+        events.setUserId(userId);
+        return events;
+    }
+
+    private String getBearerAccountId() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        if (email.toLowerCase().endsWith(ELIXIR_ACCOUNT_SUFFIX)) {
+            return getAccountIdForElixirId(email).get().getAccountId();
+        } else {
+            return getAccountByEmail(email).get().getAccountId();
+        }
     }
 }

@@ -1,5 +1,7 @@
 package uk.ac.ebi.ega.permissions.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jwt.SignedJWT;
 
 import org.slf4j.Logger;
@@ -17,7 +19,7 @@ import uk.ac.ebi.ega.permissions.model.PassportVisaObject;
 import uk.ac.ebi.ega.permissions.model.PermissionsResponse;
 import uk.ac.ebi.ega.permissions.model.Visa;
 import uk.ac.ebi.ega.permissions.persistence.entities.AccountElixirId;
-import uk.ac.ebi.ega.permissions.persistence.entities.Events;
+import uk.ac.ebi.ega.permissions.persistence.entities.Event;
 import uk.ac.ebi.ega.permissions.persistence.service.EventDataService;
 import uk.ac.ebi.ega.permissions.persistence.service.UserGroupDataService;
 import uk.ac.ebi.ega.permissions.service.PermissionsService;
@@ -36,14 +38,14 @@ public class RequestHandler {
     private PermissionsService permissionsService;
     private TokenPayloadMapper tokenPayloadMapper;
     private UserGroupDataService userGroupDataService;
-    private EventDataService eventDataService;
+    //private EventDataService eventDataService;
 
     public RequestHandler(PermissionsService permissionsService, TokenPayloadMapper tokenPayloadMapper,
-            UserGroupDataService userGroupDataService, EventDataService eventDataService) {
+                          UserGroupDataService userGroupDataService) {
         this.permissionsService = permissionsService;
         this.tokenPayloadMapper = tokenPayloadMapper;
         this.userGroupDataService = userGroupDataService;
-        this.eventDataService = eventDataService;
+        //this.eventDataService = eventDataService;
     }
 
     public List<JWTTokenResponse> createJWTPermissions(String accountId, List<String> ga4ghVisaV1List) {
@@ -74,7 +76,6 @@ public class RequestHandler {
         validateDatasetBelongsToDAC(value);
         int permissionsDeleted = this.permissionsService.deletePassportVisaObject(accountId, value);
         if (permissionsDeleted >= 1) {
-            eventDataService.saveEvent(getEvent(accountId, value, HttpMethod.DELETE.name()));
             return ResponseEntity.status(HttpStatus.OK).build();
         } else {
             return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
@@ -84,7 +85,6 @@ public class RequestHandler {
     private PermissionsResponse handlePassportVisaObjectProcessing(String accountId, PassportVisaObject passportVisaObject) {
         try {
             this.permissionsService.savePassportVisaObject(accountId, passportVisaObject);
-            eventDataService.saveEvent(getEvent(accountId, passportVisaObject.toString(), HttpStatus.CREATED.name()));
             final PermissionsResponse permissionsResponse = getPermissionsResponse(HttpStatus.CREATED, "Created");
             permissionsResponse.setGa4ghVisaV1(passportVisaObject);
             return permissionsResponse;
@@ -109,7 +109,7 @@ public class RequestHandler {
             throw new ValidationException("User account invalid or not found");
         }
     }
-    
+
     public String getAccountIdForElixirId(String accountId) {
         if (!accountId.startsWith(EGA_ACCOUNT_ID_PREFIX)) {
             AccountElixirId accountIdForElixirId =
@@ -119,11 +119,11 @@ public class RequestHandler {
         }
         return accountId;
     }
-    
+
 
     private void validateJWTPermissionsDatasetBelongsToDAC(List<String> ga4ghVisaV1List) {
         String bearerAccountId = getBearerAccountId();
-        if(!userGroupDataService.isEGAAdmin(bearerAccountId)) {
+        if (!userGroupDataService.isEGAAdmin(bearerAccountId)) {
             ga4ghVisaV1List
                     .stream()
                     .filter((strVisa) -> {
@@ -145,7 +145,7 @@ public class RequestHandler {
 
     private void validatePermissionsDatasetBelongsToDAC(List<PassportVisaObject> passportVisaObjects) {
         String bearerAccountId = getBearerAccountId();
-        if(!userGroupDataService.isEGAAdmin(bearerAccountId)) {
+        if (!userGroupDataService.isEGAAdmin(bearerAccountId)) {
             passportVisaObjects
                     .stream()
                     .filter((passportVisaObject) -> {
@@ -161,8 +161,8 @@ public class RequestHandler {
 
     public void validateDatasetBelongsToDAC(String datasetId) {
         String bearerAccountId = getBearerAccountId();
-        if(!userGroupDataService.isEGAAdmin(bearerAccountId)) {
-            if(!userGroupDataService.datasetBelongsToDAC(bearerAccountId, datasetId))
+        if (!userGroupDataService.isEGAAdmin(bearerAccountId)) {
+            if (!userGroupDataService.datasetBelongsToDAC(bearerAccountId, datasetId))
                 throw new ValidationException("User doesn't own dataset.");
         }
     }
@@ -174,14 +174,5 @@ public class RequestHandler {
         } else {
             return permissionsService.getAccountByEmail(email).get().getAccountId();
         }
-    }
-
-    private Events getEvent(String userId, String data, String method) {
-        Events events = new Events();
-        events.setBearerId(getBearerAccountId());
-        events.setData((data == null) ? data : data.replaceAll("\n", ""));
-        events.setMethod(method);
-        events.setUserId(userId);
-        return events;
     }
 }
