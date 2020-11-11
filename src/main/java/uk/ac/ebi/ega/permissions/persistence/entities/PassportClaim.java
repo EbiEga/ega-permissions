@@ -32,6 +32,8 @@ public class PassportClaim {
     @Type(type = "visa_authority")
     private Authority by;
 
+    private String status;
+
     public PassportClaim() {
 
     }
@@ -43,6 +45,7 @@ public class PassportClaim {
         this.value = value;
         this.source = source;
         this.by = by;
+        this.status = "approved";
     }
 
     public String getAccountId() {
@@ -91,5 +94,13 @@ public class PassportClaim {
 
     public void setBy(Authority by) {
         this.by = by;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 }

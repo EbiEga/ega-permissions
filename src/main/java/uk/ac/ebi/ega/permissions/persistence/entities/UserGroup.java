@@ -30,6 +30,8 @@ public class UserGroup {
     @Column(name = "access_level")
     private AccessLevel accessLevel;
 
+    private String status;
+
     public UserGroup() {
     }
 
@@ -38,6 +40,7 @@ public class UserGroup {
         this.groupId = groupId;
         this.accessGroup = accessGroup;
         this.accessLevel = accessLevel;
+        this.status = "approved";
     }
 
     public String getUserId() {
@@ -70,5 +73,13 @@ public class UserGroup {
 
     public void setAccessLevel(AccessLevel accessLevel) {
         this.accessLevel = accessLevel;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 }

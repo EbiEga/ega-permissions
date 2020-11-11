@@ -48,7 +48,15 @@ public class PermissionsDataServiceImpl implements PermissionsDataService {
     @Override
     @Transactional
     public int deletePassportClaim(String accountId, String value) {
-        return this.passportClaimRepository.deleteByAccountIdAndValue(accountId, value);
+        Optional<PassportClaim> optionalPassportClaim = this.passportClaimRepository.findByAccountIdAndValue(accountId, value);
+        if (!optionalPassportClaim.isPresent()) {
+            return 0;
+        } else {
+            PassportClaim passportClaim = optionalPassportClaim.get();
+            passportClaim.setStatus("revoked");
+            this.passportClaimRepository.save(passportClaim);
+            return 1;
+        }
     }
 
     @Override

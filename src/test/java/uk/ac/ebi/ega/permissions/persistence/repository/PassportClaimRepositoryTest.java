@@ -4,7 +4,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.core.AutoConfigureCache;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.data.repository.config.BootstrapMode;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -17,6 +19,7 @@ import javax.persistence.EntityManager;
 import javax.sql.DataSource;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -73,27 +76,40 @@ class PassportClaimRepositoryTest {
 
 
     @Test
-    @DisplayName("DELETE passport claim")
+    @DisplayName("SOFT DELETE passport claim")
     void deleteByAccountIdAndValue() {
         passportClaimRepository.save(createPassportClaim("account1", "object1"));
         passportClaimRepository.save(createPassportClaim("account1", "object2"));
         passportClaimRepository.save(createPassportClaim("account1", "object3"));
+
         List<PassportClaim> claimsBefore = passportClaimRepository.findAllByAccountId("account1");
-        passportClaimRepository.deleteByAccountIdAndValue("account1", "object2");
-        List<PassportClaim> claimsAfter = passportClaimRepository.findAllByAccountId("account1");
 
         assertThat(claimsBefore).hasSize(3);
-        assertThat(claimsBefore).filteredOn(e -> e.getValue().equals("object2")).hasSize(1);
+        assertThat(claimsBefore).filteredOn(e -> e.getValue().equals("object2") && e.getStatus().equals("revoked")).hasSize(0);
+        assertThat(claimsBefore).filteredOn(e -> e.getValue().equals("object2") && e.getStatus().equals("approved")).hasSize(1);
+
+        Optional<PassportClaim> claimToSoftDelete = passportClaimRepository.findByAccountIdAndValue("account1", "object2");
+
+        if(claimToSoftDelete.isPresent()){
+            PassportClaim claim = claimToSoftDelete.get();
+            claim.setStatus("revoked");
+            passportClaimRepository.save(claim);
+        }
+
+        List<PassportClaim> claimsAfter = passportClaimRepository.findAllByAccountId("account1");
+
         assertThat(claimsAfter).hasSize(2);
-        assertThat(claimsAfter).filteredOn(e -> e.getValue().equals("object2")).hasSize(0);
+        assertThat(claimsAfter).filteredOn(e -> e.getValue().equals("object2") && e.getStatus().equals("approved")).hasSize(0);
     }
 
     private PassportClaim createPassportClaim(String accountId, String value) {
-        return new PassportClaim(accountId,
+        PassportClaim claim = new PassportClaim(accountId,
                 VisaType.ControlledAccessGrants,
                 1568814383L,
                 value,
                 "https://ega-archive.org/dacs/EGAC00001111111",
                 Authority.dac);
+        //claim.setStatus("approved");
+        return claim;
     }
 }

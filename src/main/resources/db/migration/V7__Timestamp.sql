@@ -1,10 +1,16 @@
 -- Modify passport_claim table
 ALTER TABLE passport_claim
-ADD COLUMN "timestamp" timestamp DEFAULT now();
+ADD COLUMN timestamp timestamp DEFAULT now();
+
+ALTER TABLE passport_claim
+ADD COLUMN status varchar(50) DEFAULT 'approved';
 
 -- Modify user_group table
 ALTER TABLE user_group
-ADD COLUMN "timestamp" timestamp DEFAULT now();
+ADD COLUMN timestamp timestamp DEFAULT now();
+
+ALTER TABLE user_group
+ADD COLUMN status varchar(50) DEFAULT 'approved';
 
 -- Add function
 CREATE OR REPLACE FUNCTION fn_update_set_timestamp()
