@@ -4,20 +4,16 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.core.AutoConfigureCache;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.data.repository.config.BootstrapMode;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-
 import uk.ac.ebi.ega.permissions.persistence.entities.Authority;
 import uk.ac.ebi.ega.permissions.persistence.entities.PassportClaim;
 import uk.ac.ebi.ega.permissions.persistence.entities.VisaType;
 
 import javax.persistence.EntityManager;
 import javax.sql.DataSource;
-
 import java.util.List;
 import java.util.Optional;
 
@@ -90,7 +86,7 @@ class PassportClaimRepositoryTest {
 
         Optional<PassportClaim> claimToSoftDelete = passportClaimRepository.findByAccountIdAndValue("account1", "object2");
 
-        if(claimToSoftDelete.isPresent()){
+        if (claimToSoftDelete.isPresent()) {
             PassportClaim claim = claimToSoftDelete.get();
             claim.setStatus("revoked");
             passportClaimRepository.save(claim);
@@ -109,7 +105,6 @@ class PassportClaimRepositoryTest {
                 value,
                 "https://ega-archive.org/dacs/EGAC00001111111",
                 Authority.dac);
-        //claim.setStatus("approved");
         return claim;
     }
 }

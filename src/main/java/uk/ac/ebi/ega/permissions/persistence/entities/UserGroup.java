@@ -32,6 +32,8 @@ public class UserGroup {
 
     private String status;
 
+    private int peaRecord;
+
     public UserGroup() {
     }
 
@@ -41,6 +43,7 @@ public class UserGroup {
         this.accessGroup = accessGroup;
         this.accessLevel = accessLevel;
         this.status = "approved";
+        this.peaRecord = 0;
     }
 
     public String getUserId() {
@@ -81,5 +84,13 @@ public class UserGroup {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public int getPeaRecord() {
+        return peaRecord;
+    }
+
+    public void setPeaRecord(int peaRecord) {
+        this.peaRecord = peaRecord;
     }
 }

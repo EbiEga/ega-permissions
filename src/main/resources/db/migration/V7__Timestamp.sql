@@ -12,6 +12,10 @@ ADD COLUMN timestamp timestamp DEFAULT now();
 ALTER TABLE user_group
 ADD COLUMN status varchar(50) DEFAULT 'approved';
 
+ALTER TABLE user_group
+ADD COLUMN pea_record int8 default 0;
+
+
 -- Add function
 CREATE OR REPLACE FUNCTION fn_update_set_timestamp()
   RETURNS TRIGGER

@@ -14,4 +14,6 @@ public interface UserGroupDataService {
     boolean canControlDataset(String accountId, String datasetId);
 
     Optional<List<UserGroup>> getPermissionGroups(String accountId);
+
+    UserGroup save(UserGroup userGroup);
 }
