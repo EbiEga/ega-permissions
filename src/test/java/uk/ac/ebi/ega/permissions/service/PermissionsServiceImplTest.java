@@ -10,6 +10,7 @@ import uk.ac.ebi.ega.permissions.exception.ServiceException;
 import uk.ac.ebi.ega.permissions.exception.SystemException;
 import uk.ac.ebi.ega.permissions.mapper.TokenPayloadMapper;
 import uk.ac.ebi.ega.permissions.model.PassportVisaObject;
+import uk.ac.ebi.ega.permissions.persistence.service.EventDataService;
 import uk.ac.ebi.ega.permissions.persistence.service.PermissionsDataService;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -20,6 +21,7 @@ import static org.mockito.Mockito.when;
 class PermissionsServiceImplTest {
 
     private PermissionsDataService permissionsDataService = mock(PermissionsDataService.class);
+    private EventDataService eventDataService = mock(EventDataService.class);
     private TokenPayloadMapper tokenPayloadMapper = Mappers.getMapper(TokenPayloadMapper.class);
     private VisaInfoProperties visaInfoProperties = mock(VisaInfoProperties.class);
 
@@ -27,7 +29,7 @@ class PermissionsServiceImplTest {
 
     @BeforeEach
     public void setup() {
-        permissionsService = new PermissionsServiceImpl(permissionsDataService, tokenPayloadMapper, visaInfoProperties);
+        permissionsService = new PermissionsServiceImpl(permissionsDataService, eventDataService, tokenPayloadMapper, visaInfoProperties);
     }
 
     @Test

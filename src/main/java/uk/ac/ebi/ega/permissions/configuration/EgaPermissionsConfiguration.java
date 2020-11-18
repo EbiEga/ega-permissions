@@ -17,8 +17,11 @@ import uk.ac.ebi.ega.permissions.mapper.TokenPayloadMapper;
 import uk.ac.ebi.ega.permissions.model.JWTAlgorithm;
 import uk.ac.ebi.ega.permissions.persistence.repository.AccountElixirIdRepository;
 import uk.ac.ebi.ega.permissions.persistence.repository.AccountRepository;
+import uk.ac.ebi.ega.permissions.persistence.repository.EventRepository;
 import uk.ac.ebi.ega.permissions.persistence.repository.PassportClaimRepository;
 import uk.ac.ebi.ega.permissions.persistence.repository.UserGroupRepository;
+import uk.ac.ebi.ega.permissions.persistence.service.EventDataService;
+import uk.ac.ebi.ega.permissions.persistence.service.EventDataServiceImpl;
 import uk.ac.ebi.ega.permissions.persistence.service.PermissionsDataService;
 import uk.ac.ebi.ega.permissions.persistence.service.PermissionsDataServiceImpl;
 import uk.ac.ebi.ega.permissions.persistence.service.UserGroupDataService;
@@ -49,9 +52,10 @@ public class EgaPermissionsConfiguration {
 
     @Bean
     public PermissionsService permissionsService(final PermissionsDataService permissionsDataService,
+                                                 final EventDataService eventDataService,
                                                  final TokenPayloadMapper tokenPayloadMapper,
                                                  final VisaInfoProperties visaInfoProperties) {
-        return new PermissionsServiceImpl(permissionsDataService, tokenPayloadMapper, visaInfoProperties);
+        return new PermissionsServiceImpl(permissionsDataService, eventDataService, tokenPayloadMapper, visaInfoProperties);
     }
 
     @Bean
@@ -67,8 +71,14 @@ public class EgaPermissionsConfiguration {
     }
 
     @Bean
+    public EventDataService userEventDataService(final EventRepository eventRepository) {
+        return new EventDataServiceImpl(eventRepository);
+    }
+
+    @Bean
     public RequestHandler requestHandler(final PermissionsService permissionsService,
-            final TokenPayloadMapper tokenPayloadMapper, final UserGroupDataService userGroupDataService) {
+                                         final TokenPayloadMapper tokenPayloadMapper,
+                                         final UserGroupDataService userGroupDataService) {
         return new RequestHandler(permissionsService, tokenPayloadMapper, userGroupDataService);
     }
 
