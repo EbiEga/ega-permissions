@@ -12,8 +12,8 @@ import uk.ac.ebi.ega.permissions.mapper.TokenPayloadMapper;
 import uk.ac.ebi.ega.permissions.model.AccountAccess;
 import uk.ac.ebi.ega.permissions.model.PassportVisaObject;
 import uk.ac.ebi.ega.permissions.model.Visa;
-import uk.ac.ebi.ega.permissions.persistence.entities.AccountElixirId;
 import uk.ac.ebi.ega.permissions.persistence.entities.Account;
+import uk.ac.ebi.ega.permissions.persistence.entities.AccountElixirId;
 import uk.ac.ebi.ega.permissions.persistence.entities.Event;
 import uk.ac.ebi.ega.permissions.persistence.entities.PassportClaim;
 import uk.ac.ebi.ega.permissions.persistence.service.EventDataService;
@@ -22,17 +22,15 @@ import uk.ac.ebi.ega.permissions.persistence.service.PermissionsDataService;
 import javax.persistence.PersistenceException;
 import javax.transaction.Transactional;
 import javax.validation.ValidationException;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class PermissionsServiceImpl implements PermissionsService {
 
     private static final String ELIXIR_ACCOUNT_SUFFIX = "@elixir-europe.org";
-    private static final String EVENT_CREATED = "CREATED";
+    private static final String EVENT_SAVED = "SAVED";
+    private static final String EVENT_DELETED = "DELETED";
+
 
     private PermissionsDataService permissionsDataService;
     private EventDataService eventDataService;
@@ -97,7 +95,7 @@ public class PermissionsServiceImpl implements PermissionsService {
             }
             PassportClaim savedClaim = this.permissionsDataService.savePassportClaim(tokenPayloadMapper.mapPassportVisaObjectToPassportClaim(accountId, passportVisaObject));
             passportVisaObject = this.tokenPayloadMapper.mapPassportClaimToPassportVisaObject(savedClaim);
-            eventDataService.saveEvent(getEvent(accountId, new ObjectMapper().writeValueAsString(passportVisaObject), EVENT_CREATED));
+            eventDataService.saveEvent(getEvent(accountId, new ObjectMapper().writeValueAsString(passportVisaObject), EVENT_SAVED));
         } catch (PersistenceException | CannotCreateTransactionException | IllegalArgumentException ex) { //These are spring-data possible errors
             throw new ServiceException(String.format("Error saving permissions to the DB for [account:%s, object:%s]", accountId, passportVisaObject.getValue()), ex);
         } catch (ValidationException exception) {
@@ -111,13 +109,21 @@ public class PermissionsServiceImpl implements PermissionsService {
     @Override
     @Transactional
     public int deletePassportVisaObject(String accountId, String value) {
-        int result = this.permissionsDataService.deletePassportClaim(accountId, value);
-        eventDataService.saveEvent(getEvent(accountId, value, HttpMethod.DELETE.name()));
-        return result;
+        int rowsDeleted = 0;
+        try {
+            PassportClaim deletedEntity = this.permissionsDataService.deletePassportClaim(accountId, value);
+            if (deletedEntity == null) {
+                throw new ValidationException("Values for accountId and value are incorrect or not valid");
+            }
+            eventDataService.saveEvent(getEvent(accountId, new ObjectMapper().writeValueAsString(deletedEntity), EVENT_DELETED));
+        } catch (Exception ex) {
+            throw new SystemException(String.format("Error processing the request for [accountId:%s, value:%s]", accountId, value), ex);
+        }
+        return rowsDeleted;
     }
 
     @Override
-    public List<AccountAccess> getGrantedAccountsForDataset(String datasetId){
+    public List<AccountAccess> getGrantedAccountsForDataset(String datasetId) {
         return this.tokenPayloadMapper.mapPassportClaimsToAccountAccesses(this.permissionsDataService.getPassportClaimsForDataset(datasetId));
     }
 

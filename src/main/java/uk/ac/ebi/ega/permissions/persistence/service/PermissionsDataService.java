@@ -17,9 +17,11 @@ public interface PermissionsDataService {
 
     PassportClaim savePassportClaim(PassportClaim claim);
 
-    int deletePassportClaim(String accountId, String value);
+    PassportClaim deletePassportClaim(String accountId, String value);
 
     boolean accountExists(String accountId);
 
     List<PassportClaim> getPassportClaimsForDataset(String datasetId);
+
+    Optional<PassportClaim> getPassportClaimByAccountIdAndValue(String accountId, String value);
 }

@@ -30,6 +30,10 @@ public class UserGroup {
     @Column(name = "access_level")
     private AccessLevel accessLevel;
 
+    private String status;
+
+    private int peaRecord;
+
     public UserGroup() {
     }
 
@@ -38,6 +42,8 @@ public class UserGroup {
         this.groupId = groupId;
         this.accessGroup = accessGroup;
         this.accessLevel = accessLevel;
+        this.status = "approved";
+        this.peaRecord = 0;
     }
 
     public String getUserId() {
@@ -70,5 +76,21 @@ public class UserGroup {
 
     public void setAccessLevel(AccessLevel accessLevel) {
         this.accessLevel = accessLevel;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public int getPeaRecord() {
+        return peaRecord;
+    }
+
+    public void setPeaRecord(int peaRecord) {
+        this.peaRecord = peaRecord;
     }
 }

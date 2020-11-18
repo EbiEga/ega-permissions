@@ -35,4 +35,11 @@ public class UserGroupDataServiceImpl implements UserGroupDataService {
     public Optional<List<UserGroup>> getPermissionGroups(String accountId) {
         return userGroupRepository.findAllByUserId(accountId);
     }
+
+    @Override
+    public UserGroup save(UserGroup userGroup) {
+        //Make sure we mark each record we modify as non pea so the migration process handle it properly
+        userGroup.setPeaRecord(0);
+        return userGroupRepository.save(userGroup);
+    }
 }
