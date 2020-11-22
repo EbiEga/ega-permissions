@@ -136,7 +136,6 @@ public class RequestHandlerTest {
         when(authentication.getName()).thenReturn("test");
         when(permissionsService.accountExist(any())).thenReturn(true);
         when(permissionsService.getAccountByEmail("test")).thenReturn(Optional.of(new Account()));
-        when(permissionsService.deletePassportVisaObject(any(), any())).thenReturn(1);
     }
 
     private String getTestToken() {
