@@ -11,8 +11,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import javax.validation.ValidationException;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.access.AccessDeniedException;
@@ -20,8 +18,8 @@ import org.springframework.security.core.Authentication;
 
 import uk.ac.ebi.ega.permissions.persistence.entities.Account;
 import uk.ac.ebi.ega.permissions.persistence.entities.UserGroup;
-import uk.ac.ebi.ega.permissions.persistence.entities.AccessGroup;
-import uk.ac.ebi.ega.permissions.persistence.entities.AccessLevel;
+import uk.ac.ebi.ega.permissions.persistence.entities.GroupType;
+import uk.ac.ebi.ega.permissions.persistence.entities.Permission;
 import uk.ac.ebi.ega.permissions.persistence.service.UserGroupDataService;
 import uk.ac.ebi.ega.permissions.service.PermissionsService;
 
@@ -43,8 +41,8 @@ public class CustomPermissionEvaluatorTest {
     void hasPermission_WhenUserIsEGAAdminAndPermissionRequireEGAAdmin_ReturnTrue() {
         final Account account = new Account(EGA_ACCOUNT_ID, null, null, "email", null);
         final List<UserGroup> userGroups = new ArrayList<>();
-        final UserGroup userGroupRead = new UserGroup("sourceAccountId", "destinationAccountId", AccessGroup.EGAAdmin,
-                AccessLevel.read);
+        final UserGroup userGroupRead = new UserGroup("sourceAccountId", "destinationAccountId", GroupType.EGAAdmin,
+                Permission.read);
         userGroups.add(userGroupRead);
 
         when(permissionsService.getAccountByEmail(any())).thenReturn(Optional.of(account));
@@ -59,10 +57,10 @@ public class CustomPermissionEvaluatorTest {
     void hasPermission_WhenUserIsDACReadWriteAndPermissionRequireDACReadWrite_ReturnTrue() {
         final Account account = new Account(EGA_ACCOUNT_ID, null, null, "email", null);
         final List<UserGroup> userGroups = new ArrayList<>();
-        final UserGroup userGroupRead = new UserGroup("sourceAccountId", "destinationAccountId", AccessGroup.DAC,
-                AccessLevel.read);
-        final UserGroup userGroupWrite = new UserGroup("sourceAccountId", "destinationAccountId", AccessGroup.DAC,
-                AccessLevel.write);
+        final UserGroup userGroupRead = new UserGroup("sourceAccountId", "destinationAccountId", GroupType.DAC,
+                Permission.read);
+        final UserGroup userGroupWrite = new UserGroup("sourceAccountId", "destinationAccountId", GroupType.DAC,
+                Permission.write);
         userGroups.add(userGroupRead);
         userGroups.add(userGroupWrite);
 
@@ -77,8 +75,8 @@ public class CustomPermissionEvaluatorTest {
     void hasPermission_WhenUserIsOnlyDACReadAndPermissionRequireDACWrite_ReturnFalse() {
         final Account account = new Account(EGA_ACCOUNT_ID, null, null, "email", null);
         final List<UserGroup> userGroups = new ArrayList<>();
-        final UserGroup userGroupRead = new UserGroup("sourceAccountId", "destinationAccountId", AccessGroup.DAC,
-                AccessLevel.read);
+        final UserGroup userGroupRead = new UserGroup("sourceAccountId", "destinationAccountId", GroupType.DAC,
+                Permission.read);
         userGroups.add(userGroupRead);
 
         when(permissionsService.getAccountByEmail(any())).thenReturn(Optional.of(account));
