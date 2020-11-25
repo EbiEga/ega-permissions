@@ -2,8 +2,8 @@ package uk.ac.ebi.ega.permissions.persistence.repository;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static uk.ac.ebi.ega.permissions.persistence.entities.AccessGroup.EGAAdmin;
-import static uk.ac.ebi.ega.permissions.persistence.entities.AccessLevel.read;
+import static uk.ac.ebi.ega.permissions.persistence.entities.GroupType.EGAAdmin;
+import static uk.ac.ebi.ega.permissions.persistence.entities.Permission.read;
 import static uk.ac.ebi.ega.permissions.persistence.entities.Authority.dac;
 
 import java.util.List;

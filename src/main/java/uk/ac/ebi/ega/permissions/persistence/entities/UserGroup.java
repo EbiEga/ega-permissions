@@ -15,20 +15,20 @@ import javax.persistence.IdClass;
 @TypeDef(name = "pgsql_enum", typeClass = PostgreSQLEnumType.class)
 public class UserGroup {
     @Id
-    private String userId;
+    private String egaAccountStableId;
 
     @Id
-    private String groupId;
+    private String groupStableId;
 
     @Enumerated(EnumType.STRING)
     @Type(type = "pgsql_enum")
-    @Column(name = "access_group")
-    private AccessGroup accessGroup;
+    @Column(name = "group_type")
+    private GroupType groupType;
 
     @Enumerated(EnumType.STRING)
     @Type(type = "pgsql_enum")
-    @Column(name = "access_level")
-    private AccessLevel accessLevel;
+    @Column(name = "permission")
+    private Permission permission;
 
     private String status;
 
@@ -37,45 +37,45 @@ public class UserGroup {
     public UserGroup() {
     }
 
-    public UserGroup(String userId, String groupId, AccessGroup accessGroup, AccessLevel accessLevel) {
-        this.userId = userId;
-        this.groupId = groupId;
-        this.accessGroup = accessGroup;
-        this.accessLevel = accessLevel;
+    public UserGroup(String egaAccountStableId, String groupStableId, GroupType groupType, Permission permission) {
+        this.egaAccountStableId = egaAccountStableId;
+        this.groupStableId = groupStableId;
+        this.groupType = groupType;
+        this.permission = permission;
         this.status = "approved";
         this.peaRecord = 0;
     }
 
-    public String getUserId() {
-        return userId;
+    public String getEgaAccountStableId() {
+        return egaAccountStableId;
     }
 
-    public void setUserId(String userId) {
-        this.userId = userId;
+    public void setEgaAccountStableId(String userId) {
+        this.egaAccountStableId = userId;
     }
 
-    public String getGroupId() {
-        return groupId;
+    public String getGroupStableId() {
+        return groupStableId;
     }
 
-    public void setGroupId(String groupId) {
-        this.groupId = groupId;
+    public void setGroupStableId(String groupId) {
+        this.groupStableId = groupId;
     }
 
-    public AccessGroup getAccessGroup() {
-        return accessGroup;
+    public GroupType getGroupType() {
+        return groupType;
     }
 
-    public void setAccessGroup(AccessGroup accessGroup) {
-        this.accessGroup = accessGroup;
+    public void setGroupType(GroupType groupType) {
+        this.groupType = groupType;
     }
 
-    public AccessLevel getAccessLevel() {
-        return accessLevel;
+    public Permission getPermission() {
+        return permission;
     }
 
-    public void setAccessLevel(AccessLevel accessLevel) {
-        this.accessLevel = accessLevel;
+    public void setPermission(Permission permission) {
+        this.permission = permission;
     }
 
     public String getStatus() {

@@ -1,5 +1,5 @@
 package uk.ac.ebi.ega.permissions.persistence.entities;
 
-public enum AccessGroup {
+public enum GroupType {
     EGAAdmin, DAC, User
 }
