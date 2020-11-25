@@ -10,11 +10,10 @@ import uk.ac.ebi.ega.permissions.persistence.entities.UserGroup;
 import uk.ac.ebi.ega.permissions.persistence.service.UserGroupDataService;
 import uk.ac.ebi.ega.permissions.service.PermissionsService;
 
-import javax.validation.ValidationException;
 import java.io.Serializable;
 import java.util.List;
 
-import static uk.ac.ebi.ega.permissions.persistence.entities.AccessGroup.EGAAdmin;
+import static uk.ac.ebi.ega.permissions.persistence.entities.GroupType.EGAAdmin;
 
 @Configuration
 public class CustomPermissionEvaluator implements PermissionEvaluator {
@@ -53,8 +52,8 @@ public class CustomPermissionEvaluator implements PermissionEvaluator {
                 new AccessDeniedException(("No linked user group for ").concat(email)));
 
         return userGroups.stream().anyMatch(entry -> {
-            String accessGroup = entry.getAccessGroup().name();
-            String accessLevel = entry.getAccessLevel().name();
+            String accessGroup = entry.getGroupType().name();
+            String accessLevel = entry.getPermission().name();
 
             if (EGAAdmin.name().equals(accessGroup) || permission.equals(accessGroup.concat("_").concat(accessLevel))) {
                 return true;

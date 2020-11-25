@@ -5,32 +5,32 @@ import java.util.Objects;
 
 public class UserGroupId implements Serializable {
 
-    private String userId;
-    private String groupId;
+    private String egaAccountStableId;
+    private String groupStableId;
 
     public UserGroupId() {
 
     }
 
-    public UserGroupId(String userId, String groupId) {
-        this.userId = userId;
-        this.groupId = groupId;
+    public UserGroupId(String egaAccountStableId, String groupStableId) {
+        this.egaAccountStableId = egaAccountStableId;
+        this.groupStableId = groupStableId;
     }
 
-    public String getUserId() {
-        return userId;
+    public String getEgaAccountStableId() {
+        return egaAccountStableId;
     }
 
-    public void setUserId(String userId) {
-        this.userId = userId;
+    public void setEgaAccountStableId(String userId) {
+        this.egaAccountStableId = userId;
     }
 
-    public String getGroupId() {
-        return groupId;
+    public String getGroupStableId() {
+        return groupStableId;
     }
 
-    public void setGroupId(String groupId) {
-        this.groupId = groupId;
+    public void setGroupStableId(String groupId) {
+        this.groupStableId = groupId;
     }
 
     @Override
@@ -38,12 +38,12 @@ public class UserGroupId implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         UserGroupId that = (UserGroupId) o;
-        return Objects.equals(userId, that.userId) &&
-                Objects.equals(groupId, that.groupId);
+        return Objects.equals(egaAccountStableId, that.egaAccountStableId) &&
+                Objects.equals(groupStableId, that.groupStableId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(userId, groupId);
+        return Objects.hash(egaAccountStableId, groupStableId);
     }
 }

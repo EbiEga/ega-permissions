@@ -1,6 +1,6 @@
 package uk.ac.ebi.ega.permissions.persistence.service;
 
-import static uk.ac.ebi.ega.permissions.persistence.entities.AccessGroup.EGAAdmin;
+import static uk.ac.ebi.ega.permissions.persistence.entities.GroupType.EGAAdmin;
 
 import java.util.List;
 import java.util.Optional;

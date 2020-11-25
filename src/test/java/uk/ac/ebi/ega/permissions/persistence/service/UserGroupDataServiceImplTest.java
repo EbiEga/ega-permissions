@@ -10,8 +10,8 @@ import uk.ac.ebi.ega.permissions.persistence.entities.UserGroup;
 import uk.ac.ebi.ega.permissions.persistence.repository.UserGroupRepository;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static uk.ac.ebi.ega.permissions.persistence.entities.AccessGroup.EGAAdmin;
-import static uk.ac.ebi.ega.permissions.persistence.entities.AccessLevel.read;
+import static uk.ac.ebi.ega.permissions.persistence.entities.GroupType.EGAAdmin;
+import static uk.ac.ebi.ega.permissions.persistence.entities.Permission.read;
 
 @DataJpaTest
 @TestPropertySource(locations = "classpath:application-test.properties")
