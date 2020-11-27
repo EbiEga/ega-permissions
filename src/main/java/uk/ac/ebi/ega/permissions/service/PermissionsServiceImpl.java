@@ -108,8 +108,7 @@ public class PermissionsServiceImpl implements PermissionsService {
 
     @Override
     @Transactional
-    public int deletePassportVisaObject(String accountId, String value) {
-        int rowsDeleted = 0;
+    public void deletePassportVisaObject(String accountId, String value) {
         try {
             PassportClaim deletedEntity = this.permissionsDataService.deletePassportClaim(accountId, value);
             if (deletedEntity == null) {
@@ -119,7 +118,6 @@ public class PermissionsServiceImpl implements PermissionsService {
         } catch (Exception ex) {
             throw new SystemException(String.format("Error processing the request for [accountId:%s, value:%s]", accountId, value), ex);
         }
-        return rowsDeleted;
     }
 
     @Override

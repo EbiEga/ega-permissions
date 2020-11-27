@@ -65,12 +65,8 @@ public class RequestHandler {
     public ResponseEntity<Void> deletePermissions(String accountId, String value) {
         verifyAccountId(accountId);
         validateDatasetBelongsToDAC(value);
-        int permissionsDeleted = this.permissionsService.deletePassportVisaObject(accountId, value);
-        if (permissionsDeleted >= 1) {
-            return ResponseEntity.status(HttpStatus.OK).build();
-        } else {
-            return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-        }
+        this.permissionsService.deletePassportVisaObject(accountId, value);
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 
     private PermissionsResponse handlePassportVisaObjectProcessing(String accountId, PassportVisaObject passportVisaObject) {

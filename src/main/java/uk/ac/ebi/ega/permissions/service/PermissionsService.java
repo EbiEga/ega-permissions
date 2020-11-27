@@ -23,7 +23,7 @@ public interface PermissionsService {
 
     PassportVisaObject savePassportVisaObject(String accountId, PassportVisaObject passportVisaObject) throws ServiceException, SystemException;
 
-    int deletePassportVisaObject(String accountId, String value);
+    void deletePassportVisaObject(String accountId, String value);
 
     List<AccountAccess> getGrantedAccountsForDataset(String datasetId);
 }

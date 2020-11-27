@@ -46,6 +46,15 @@ paths:
         404:
           description: User account invalid or not found
           content: {}
+        401:
+          description: Unauthorized
+          content: { }
+        500:
+          description: Internal server error
+          content: { }
+        503:
+          description: Service Unavailable
+          content: { }
 
     post:
       tags:
@@ -85,6 +94,15 @@ paths:
         404:
           description: User account not found
           content: {}
+        401:
+          description: Unauthorized
+          content: { }
+        500:
+          description: Internal server error
+          content: { }
+        503:
+          description: Service Unavailable
+          content: { }
 
     delete:
       tags:
@@ -109,6 +127,21 @@ paths:
         200:
           description: OK
           content: {}
+        204:
+          description: No content (no record has been deleted)
+          content: { }
+        400:
+          description: Invalid ID supplied
+          content: { }
+        401:
+          description: Unauthorized
+          content: { }
+        500:
+          description: Internal server error
+          content: { }
+        503:
+          description: Service Unavailable
+          content: { }
 
   /plain/datasets/{datasetId}/users:
     get:
@@ -132,6 +165,15 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/AccountAccess'
+        401:
+          description: Unauthorized
+          content: { }
+        500:
+          description: Internal server error
+          content: { }
+        503:
+          description: Service Unavailable
+          content: { }
 
 components:
   schemas:
@@ -234,3 +276,16 @@ components:
           type: integer
           format: int64
           description: Timestamp when the action was added or last updated
+
+    ErrorBody:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          description: Server time
+        status:
+          type: string
+          description: Error code
+        message:
+          type: string
+          description: Error message
