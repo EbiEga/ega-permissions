@@ -4,7 +4,7 @@ CREATE SEQUENCE event_id_seq
     NO MAXVALUE
     CACHE 1;
 
-CREATE TABLE IF NOT EXISTS events (
+CREATE TABLE IF NOT EXISTS event (
 	event_id int8 NOT NULL DEFAULT nextval('event_id_seq'),
 	bearer_id varchar(255) NOT NULL,
 	user_id varchar(255) NOT NULL,
