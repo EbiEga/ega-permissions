@@ -32,10 +32,10 @@ $$;
 CREATE TRIGGER on_update_passport_claim_set_timestamp
     BEFORE UPDATE ON passport_claim
     FOR EACH ROW
-    EXECUTE function fn_update_set_timestamp();
+    EXECUTE procedure fn_update_set_timestamp();
 
 -- Add trigger to user_group
 CREATE TRIGGER on_update_user_group_set_timestamp
     BEFORE UPDATE ON user_group
     FOR EACH ROW
-    EXECUTE function fn_update_set_timestamp();
+    EXECUTE procedure fn_update_set_timestamp();
