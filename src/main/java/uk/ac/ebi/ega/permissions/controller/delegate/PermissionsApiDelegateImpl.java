@@ -2,7 +2,6 @@ package uk.ac.ebi.ega.permissions.controller.delegate;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import uk.ac.ebi.ega.permissions.api.PermissionsApiDelegate;
 import uk.ac.ebi.ega.permissions.controller.RequestHandler;
 import uk.ac.ebi.ega.permissions.model.AccountAccess;
 import uk.ac.ebi.ega.permissions.model.PassportVisaObject;
@@ -12,7 +11,7 @@ import uk.ac.ebi.ega.permissions.service.PermissionsService;
 
 import java.util.List;
 
-public class PermissionsApiDelegateImpl implements PermissionsApiDelegate {
+public class PermissionsApiDelegateImpl {
 
     private final PermissionsService permissionsService;
     private final RequestHandler requestHandler;
@@ -22,24 +21,24 @@ public class PermissionsApiDelegateImpl implements PermissionsApiDelegate {
         this.requestHandler = requestHandler;
     }
 
-    @Override
+
     public ResponseEntity<List<PermissionsResponse>> createPermissions(String accountId, List<PassportVisaObject> passportVisaObjects) {
         return ResponseEntity.status(HttpStatus.MULTI_STATUS).body(requestHandler.createPermissions(requestHandler.getAccountIdForElixirId(accountId), passportVisaObjects));
     }
 
-    @Override
+
     public ResponseEntity<Void> deletePermissions(String accountId, String value) {
         return requestHandler.deletePermissions(requestHandler.getAccountIdForElixirId(accountId), value);
     }
 
-    @Override
+
     public ResponseEntity<List<Visa>> readPermissions(String accountId) {
         accountId = requestHandler.getAccountIdForElixirId(accountId);
         requestHandler.verifyAccountId(accountId);
         return ResponseEntity.ok(this.permissionsService.getVisas(accountId));
     }
 
-    @Override
+
     public ResponseEntity<List<AccountAccess>> plainDatasetsDatasetIdUsersGet(String datasetId) {
         requestHandler.validateDatasetBelongsToDAC(datasetId);
         return ResponseEntity.ok(this.permissionsService.getGrantedAccountsForDataset(datasetId));

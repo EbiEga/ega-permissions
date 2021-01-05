@@ -16,8 +16,11 @@ servers:
 tags:
   - name: permissions
     description: EGA Data Permissions
+  - name: me
+    description: Current user endpoints
+
 paths:
-  /plain/{accountId}/permissions:
+  /{accountId}/permissions:
     get:
       tags:
         - permissions
@@ -31,15 +34,18 @@ paths:
           required: true
           schema:
             type: string
+        - name: format
+          in: query
+          schema:
+            $ref: '#/components/schemas/format'
       responses:
         200:
           description: successful operation
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Visa'
+                $ref: '#/components/schemas/Visas'
+
         400:
           description: Bad request
           content: {}
@@ -70,6 +76,10 @@ paths:
           required: true
           schema:
             type: string
+        - name: format
+          in: query
+          schema:
+            $ref: '#/components/schemas/format'
       requestBody:
         description: ID of the user account
         content:
@@ -77,7 +87,9 @@ paths:
             schema:
               type: array
               items:
-                $ref: '#/components/schemas/PassportVisaObject'
+                oneOf:
+                  - $ref: '#/components/schemas/PassportVisaObject'
+                  - type: string
         required: true
       responses:
         207:
@@ -87,7 +99,9 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/PermissionsResponse'
+                  oneOf:
+                    - $ref: '#/components/schemas/PermissionsResponse'
+                    - type: string
         400:
           description: Invalid ID supplied
           content: {}
@@ -143,12 +157,13 @@ paths:
           description: Service Unavailable
           content: { }
 
-  /plain/datasets/{datasetId}/users:
+  /datasets/{datasetId}/users:
     get:
       tags:
         - permissions
       summary: List users that have access to dataset
       description: List users that have access to dataset
+      operationId: usersWithAccessToDataset
       parameters:
         - name: datasetId
           in: path
@@ -165,6 +180,38 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/AccountAccess'
+        401:
+          description: Unauthorized
+          content: { }
+        500:
+          description: Internal server error
+          content: { }
+        503:
+          description: Service Unavailable
+          content: { }
+
+  /me/permissions:
+    get:
+      tags:
+        - me
+      summary: Get current user permissions
+      description: List current user permissions
+      operationId: myPermissions
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Visa'
+        400:
+          description: Bad request
+          content: {}
+        404:
+          description: User account invalid or not found
+          content: {}
         401:
           description: Unauthorized
           content: { }
@@ -277,6 +324,24 @@ components:
           format: int64
           description: Timestamp when the action was added or last updated
 
+    format:
+      type: string
+      enum: [JWT, PLAIN]
+      default: JWT
+
+    JWTVisa:
+      type: object
+      properties:
+        jwt:
+          type: string
+
+    Visas:
+      type: array
+      items:
+        oneOf:
+          - $ref: '#/components/schemas/Visa'
+          - $ref: '#/components/schemas/JWTVisa'
+
     ErrorBody:
       type: object
       properties:
@@ -289,3 +354,17 @@ components:
         message:
           type: string
           description: Error message
+
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: API_KEY
+
+security:
+  - BearerAuth: []
+  - ApiKeyAuth: []

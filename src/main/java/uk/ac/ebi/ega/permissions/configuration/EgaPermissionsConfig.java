@@ -8,24 +8,19 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.security.authentication.AuthenticationManagerResolver;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.util.ResourceUtils;
-import uk.ac.ebi.ega.permissions.api.PermissionsApiDelegate;
+import uk.ac.ebi.ega.permissions.api.AccountIdApiDelegate;
+import uk.ac.ebi.ega.permissions.api.DatasetsApiDelegate;
+import uk.ac.ebi.ega.permissions.api.MeApiDelegate;
 import uk.ac.ebi.ega.permissions.configuration.tenant.TenantAuthenticationManagerResolver;
 import uk.ac.ebi.ega.permissions.controller.CustomAccessDeniedHandler;
 import uk.ac.ebi.ega.permissions.controller.RequestHandler;
-import uk.ac.ebi.ega.permissions.controller.delegate.PermissionsApiDelegateImpl;
+import uk.ac.ebi.ega.permissions.controller.delegate.AccountIdApiDelegateImpl;
+import uk.ac.ebi.ega.permissions.controller.delegate.DatasetsApiDelegateImpl;
+import uk.ac.ebi.ega.permissions.controller.delegate.MeApiDelegateImpl;
 import uk.ac.ebi.ega.permissions.mapper.TokenPayloadMapper;
 import uk.ac.ebi.ega.permissions.model.JWTAlgorithm;
-import uk.ac.ebi.ega.permissions.persistence.repository.AccountElixirIdRepository;
-import uk.ac.ebi.ega.permissions.persistence.repository.AccountRepository;
-import uk.ac.ebi.ega.permissions.persistence.repository.EventRepository;
-import uk.ac.ebi.ega.permissions.persistence.repository.PassportClaimRepository;
-import uk.ac.ebi.ega.permissions.persistence.repository.UserGroupRepository;
-import uk.ac.ebi.ega.permissions.persistence.service.EventDataService;
-import uk.ac.ebi.ega.permissions.persistence.service.EventDataServiceImpl;
-import uk.ac.ebi.ega.permissions.persistence.service.PermissionsDataService;
-import uk.ac.ebi.ega.permissions.persistence.service.PermissionsDataServiceImpl;
-import uk.ac.ebi.ega.permissions.persistence.service.UserGroupDataService;
-import uk.ac.ebi.ega.permissions.persistence.service.UserGroupDataServiceImpl;
+import uk.ac.ebi.ega.permissions.persistence.repository.*;
+import uk.ac.ebi.ega.permissions.persistence.service.*;
 import uk.ac.ebi.ega.permissions.service.JWTService;
 import uk.ac.ebi.ega.permissions.service.JWTServiceImpl;
 import uk.ac.ebi.ega.permissions.service.PermissionsService;
@@ -42,12 +37,23 @@ import java.util.stream.Collectors;
 
 @Configuration
 @EnableJpaRepositories(basePackages = {"uk.ac.ebi.ega.permissions.persistence.repository"})
-public class EgaPermissionsConfiguration {
+public class EgaPermissionsConfig {
 
     @Bean
-    public PermissionsApiDelegate permissionsApiDelegate(final PermissionsService permissionsService,
-                                                         final RequestHandler requestHandler) {
-        return new PermissionsApiDelegateImpl(permissionsService, requestHandler);
+    public MeApiDelegate meApiDelegate() {
+        return new MeApiDelegateImpl();
+    }
+
+    @Bean
+    public AccountIdApiDelegate accountIdApiDelegate(final PermissionsService permissionsService,
+                                                     final JWTService jwtService,
+                                                     final RequestHandler requestHandler) {
+        return new AccountIdApiDelegateImpl(permissionsService, jwtService, requestHandler);
+    }
+
+    @Bean
+    public DatasetsApiDelegate datasetsApiDelegate() {
+        return new DatasetsApiDelegateImpl();
     }
 
     @Bean

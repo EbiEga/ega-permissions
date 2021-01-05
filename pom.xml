@@ -58,19 +58,9 @@
             </exclusions>
         </dependency>
         <dependency>
-            <groupId>io.springfox</groupId>
-            <artifactId>springfox-swagger2</artifactId>
-            <version>2.9.2</version>
-        </dependency>
-        <dependency>
-            <groupId>io.springfox</groupId>
-            <artifactId>springfox-swagger-ui</artifactId>
-            <version>2.9.2</version>
-        </dependency>
-        <dependency>
             <groupId>org.openapitools</groupId>
             <artifactId>openapi-generator</artifactId>
-            <version>4.3.1</version>
+            <version>5.0.0</version>
         </dependency>
         <dependency>
             <groupId>org.openapitools</groupId>
@@ -128,6 +118,17 @@
             <version>0.0.1</version>
             <scope>test</scope>
         </dependency>
+
+        <dependency>
+            <groupId>io.springfox</groupId>
+            <artifactId>springfox-boot-starter</artifactId>
+            <version>3.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>io.springfox</groupId>
+            <artifactId>springfox-swagger-ui</artifactId>
+            <version>3.0.0</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -137,21 +138,26 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
             <plugin>
-                <groupId>org.openapitools</groupId>
-                <artifactId>openapi-generator-maven-plugin</artifactId>
-                <version>4.3.1</version>
+                <groupId>io.swagger.codegen.v3</groupId>
+                <artifactId>swagger-codegen-maven-plugin</artifactId>
+                <version>3.0.24</version>
                 <executions>
                     <execution>
                         <goals>
                             <goal>generate</goal>
                         </goals>
                         <configuration>
-                            <inputSpec>${project.basedir}/src/main/docs/permissions-api.yml</inputSpec>
-                            <configurationFile>${project.basedir}/openapi-generator-config.json</configurationFile>
-                            <ignoreFileOverride>${project.basedir}/.openapi-generator-ignore</ignoreFileOverride>
-                            <generatorName>spring</generatorName>
+                            <language>spring</language>
+                            <inputSpec>${project.basedir}/src/main/resources/static/api-specs/permissions-api.yaml</inputSpec>
+                            <output>${project.build.directory}/generated-sources</output>
+                            <apiPackage>uk.ac.ebi.ega.permissions.api</apiPackage>
+                            <modelPackage>uk.ac.ebi.ega.permissions.model</modelPackage>
+                            <generateSupportingFiles>false</generateSupportingFiles>
                             <configOptions>
+                                <generateAliasAsModel>true</generateAliasAsModel>
                                 <delegatePattern>true</delegatePattern>
+                                <dateLibrary>java8</dateLibrary>
+                                <apiFirst>true</apiFirst>
                             </configOptions>
                         </configuration>
                     </execution>
@@ -175,5 +181,4 @@
             </plugin>
         </plugins>
     </build>
-
 </project>

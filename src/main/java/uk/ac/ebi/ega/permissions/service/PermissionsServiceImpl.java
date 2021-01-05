@@ -154,4 +154,5 @@ public class PermissionsServiceImpl implements PermissionsService {
             return getAccountByEmail(email).get().getAccountId();
         }
     }
+
 }

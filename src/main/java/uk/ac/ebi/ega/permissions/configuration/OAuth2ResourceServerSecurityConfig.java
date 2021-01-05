@@ -28,13 +28,13 @@ import javax.servlet.http.HttpServletRequest;
 import static org.springframework.http.HttpMethod.*;
 
 @EnableWebSecurity
-public class OAuth2ResourceServerSecurityConfiguration extends WebSecurityConfigurerAdapter {
+public class OAuth2ResourceServerSecurityConfig extends WebSecurityConfigurerAdapter {
 
     private AuthenticationManagerResolver<HttpServletRequest> authenticationManagerResolver;
     private AccessDeniedHandler accessDeniedHandler;
 
-    public OAuth2ResourceServerSecurityConfiguration(AuthenticationManagerResolver<HttpServletRequest> authenticationManagerResolver,
-                                                     AccessDeniedHandler accessDeniedHandler) {
+    public OAuth2ResourceServerSecurityConfig(AuthenticationManagerResolver<HttpServletRequest> authenticationManagerResolver,
+                                              AccessDeniedHandler accessDeniedHandler) {
         this.authenticationManagerResolver = authenticationManagerResolver;
         this.accessDeniedHandler = accessDeniedHandler;
     }
@@ -63,12 +63,11 @@ public class OAuth2ResourceServerSecurityConfiguration extends WebSecurityConfig
 
     private String[] swaggerEndpointMatcher() {
         return new String[]{
+                "/api-specs/**",
                 "/v2/api-docs",
-                "/configuration/ui",
+                "/v3/api-docs",
                 "/swagger-resources/**",
-                "/configuration/security",
-                "/swagger-ui.html",
-                "/webjars/**"};
+                "/swagger-ui/**"};
     }
     // @formatter:on
 }
