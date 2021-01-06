@@ -7,13 +7,11 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import uk.ac.ebi.ega.permissions.mapper.TokenPayloadMapper;
-import uk.ac.ebi.ega.permissions.model.JWTTokenResponse;
-import uk.ac.ebi.ega.permissions.model.PassportVisaObject;
-import uk.ac.ebi.ega.permissions.model.PermissionsResponse;
-import uk.ac.ebi.ega.permissions.model.Visa;
+import uk.ac.ebi.ega.permissions.model.*;
 import uk.ac.ebi.ega.permissions.persistence.entities.Account;
 import uk.ac.ebi.ega.permissions.persistence.service.EventDataService;
 import uk.ac.ebi.ega.permissions.persistence.service.UserGroupDataService;
+import uk.ac.ebi.ega.permissions.service.JWTService;
 import uk.ac.ebi.ega.permissions.service.PermissionsService;
 
 import javax.validation.ValidationException;
@@ -34,6 +32,7 @@ public class RequestHandlerTest {
     private TokenPayloadMapper tokenPayloadMapper = mock(TokenPayloadMapper.class);
     private UserGroupDataService userGroupDataService = mock(UserGroupDataService.class);
     private EventDataService eventDataService = mock(EventDataService.class);
+    private JWTService jwtService = mock(JWTService.class);
 
     private RequestHandler requestHandler;
 
@@ -41,7 +40,7 @@ public class RequestHandlerTest {
     void testCreateJWTPermissions_WhenUserIsEGAAdmin_ReturnCreatedObject() {
         when(userGroupDataService.isEGAAdmin(any())).thenReturn(true);
 
-        List<JWTTokenResponse> permissionsCreated = requestHandler.createJWTPermissions(EMPTY,
+        List<JWTPermissionsResponse> permissionsCreated = requestHandler.createJWTPermissions(EMPTY,
                 Arrays.asList(getTestToken()));
         assertEquals(permissionsCreated.size(), 1);
     }
@@ -51,7 +50,7 @@ public class RequestHandlerTest {
         when(userGroupDataService.isEGAAdmin(any())).thenReturn(false);
         when(userGroupDataService.datasetBelongsToDAC(any(), any())).thenReturn(true);
 
-        List<JWTTokenResponse> permissionsCreated = requestHandler.createJWTPermissions(EMPTY,
+        List<JWTPermissionsResponse> permissionsCreated = requestHandler.createJWTPermissions(EMPTY,
                 Arrays.asList(getTestToken()));
         assertEquals(permissionsCreated.size(), 1);
     }
@@ -70,7 +69,7 @@ public class RequestHandlerTest {
     void testCreatePermissions_WhenUserIsEGAAdmin_ReturnCreatedObject() {
         when(userGroupDataService.isEGAAdmin(any())).thenReturn(true);
 
-        List<PermissionsResponse> permissionsCreated = requestHandler.createPermissions(EMPTY,
+        List<PermissionsResponse> permissionsCreated = requestHandler.createPlainPermissions(EMPTY,
                 Arrays.asList(createPassportVisaObject()));
         assertEquals(permissionsCreated.size(), 1);
     }
@@ -80,7 +79,7 @@ public class RequestHandlerTest {
         when(userGroupDataService.isEGAAdmin(any())).thenReturn(false);
         when(userGroupDataService.datasetBelongsToDAC(any(), any())).thenReturn(true);
 
-        List<PermissionsResponse> permissionsCreated = requestHandler.createPermissions(EMPTY,
+        List<PermissionsResponse> permissionsCreated = requestHandler.createPlainPermissions(EMPTY,
                 Arrays.asList(createPassportVisaObject()));
         assertEquals(permissionsCreated.size(), 1);
     }
@@ -91,7 +90,7 @@ public class RequestHandlerTest {
         when(userGroupDataService.datasetBelongsToDAC(any(), any())).thenReturn(false);
 
         assertThatThrownBy(() -> {
-            requestHandler.createPermissions(EMPTY, Arrays.asList(createPassportVisaObject()));
+            requestHandler.createPlainPermissions(EMPTY, Arrays.asList(createPassportVisaObject()));
         }).isInstanceOf(ValidationException.class);
     }
 
@@ -127,7 +126,7 @@ public class RequestHandlerTest {
         final Authentication authentication = mock(Authentication.class);
         final SecurityContext securityContext = mock(SecurityContext.class);
         SecurityContextHolder.setContext(securityContext);
-        requestHandler = new RequestHandler(permissionsService, tokenPayloadMapper, userGroupDataService);
+        requestHandler = new RequestHandler(permissionsService, tokenPayloadMapper, userGroupDataService, jwtService);
 
         Visa visa = new Visa();
         visa.setGa4ghVisaV1(new PassportVisaObject());

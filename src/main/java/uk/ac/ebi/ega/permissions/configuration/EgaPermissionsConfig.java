@@ -40,20 +40,19 @@ import java.util.stream.Collectors;
 public class EgaPermissionsConfig {
 
     @Bean
-    public MeApiDelegate meApiDelegate() {
-        return new MeApiDelegateImpl();
+    public MeApiDelegate meApiDelegate(final RequestHandler requestHandler) {
+        return new MeApiDelegateImpl(requestHandler);
     }
 
     @Bean
     public AccountIdApiDelegate accountIdApiDelegate(final PermissionsService permissionsService,
-                                                     final JWTService jwtService,
                                                      final RequestHandler requestHandler) {
-        return new AccountIdApiDelegateImpl(permissionsService, jwtService, requestHandler);
+        return new AccountIdApiDelegateImpl(permissionsService, requestHandler);
     }
 
     @Bean
-    public DatasetsApiDelegate datasetsApiDelegate() {
-        return new DatasetsApiDelegateImpl();
+    public DatasetsApiDelegate datasetsApiDelegate(final PermissionsService permissionsService, final RequestHandler requestHandler) {
+        return new DatasetsApiDelegateImpl(permissionsService, requestHandler);
     }
 
     @Bean
@@ -84,8 +83,9 @@ public class EgaPermissionsConfig {
     @Bean
     public RequestHandler requestHandler(final PermissionsService permissionsService,
                                          final TokenPayloadMapper tokenPayloadMapper,
-                                         final UserGroupDataService userGroupDataService) {
-        return new RequestHandler(permissionsService, tokenPayloadMapper, userGroupDataService);
+                                         final UserGroupDataService userGroupDataService,
+                                         final JWTService jwtService) {
+        return new RequestHandler(permissionsService, tokenPayloadMapper, userGroupDataService, jwtService);
     }
 
     @Bean

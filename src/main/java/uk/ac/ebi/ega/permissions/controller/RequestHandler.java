@@ -1,25 +1,28 @@
 package uk.ac.ebi.ega.permissions.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.nimbusds.jose.JWSObject;
 import com.nimbusds.jwt.SignedJWT;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import uk.ac.ebi.ega.permissions.exception.ServiceException;
 import uk.ac.ebi.ega.permissions.exception.SystemException;
 import uk.ac.ebi.ega.permissions.mapper.TokenPayloadMapper;
-import uk.ac.ebi.ega.permissions.model.JWTTokenResponse;
-import uk.ac.ebi.ega.permissions.model.PassportVisaObject;
-import uk.ac.ebi.ega.permissions.model.PermissionsResponse;
-import uk.ac.ebi.ega.permissions.model.Visa;
+import uk.ac.ebi.ega.permissions.model.*;
 import uk.ac.ebi.ega.permissions.persistence.entities.AccountElixirId;
 import uk.ac.ebi.ega.permissions.persistence.service.UserGroupDataService;
+import uk.ac.ebi.ega.permissions.service.JWTService;
 import uk.ac.ebi.ega.permissions.service.PermissionsService;
 
 import javax.validation.ValidationException;
 import java.text.ParseException;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class RequestHandler {
@@ -28,18 +31,81 @@ public class RequestHandler {
     public static final String ELIXIR_ACCOUNT_SUFFIX = "@elixir-europe.org";
     Logger LOGGER = LoggerFactory.getLogger(RequestHandler.class);
 
-    private PermissionsService permissionsService;
-    private TokenPayloadMapper tokenPayloadMapper;
-    private UserGroupDataService userGroupDataService;
+    private final PermissionsService permissionsService;
+    private final TokenPayloadMapper tokenPayloadMapper;
+    private final UserGroupDataService userGroupDataService;
+    private final JWTService jwtService;
 
-    public RequestHandler(PermissionsService permissionsService, TokenPayloadMapper tokenPayloadMapper,
-                          UserGroupDataService userGroupDataService) {
+    public RequestHandler(final PermissionsService permissionsService,
+                          final TokenPayloadMapper tokenPayloadMapper,
+                          final UserGroupDataService userGroupDataService,
+                          final JWTService jwtService) {
         this.permissionsService = permissionsService;
         this.tokenPayloadMapper = tokenPayloadMapper;
         this.userGroupDataService = userGroupDataService;
+        this.jwtService = jwtService;
     }
 
-    public List<JWTTokenResponse> createJWTPermissions(String accountId, List<String> ga4ghVisaV1List) {
+    public ResponseEntity<Visas> getPermissionsForUser(String accountId, Format format) {
+        Visas response = new Visas();
+
+        if (format == null) {
+            format = Format.JWT;
+        }
+
+        accountId = getAccountIdForElixirId(accountId);
+        verifyAccountId(accountId);
+        List<Visa> visas = this.permissionsService.getVisas(accountId);
+
+        if (format == Format.JWT) {
+            response.addAll(
+                    visas.stream()
+                            .map(this::createSignedJWT)
+                            .map(JWSObject::serialize)
+                            .map(e -> {
+                                JWTVisa jwtVisa = new JWTVisa();
+                                jwtVisa.setJwt(e);
+                                return jwtVisa;
+                            })
+                            .collect(Collectors.toList())
+            );
+        } else if (format == Format.PLAIN) {
+            response.addAll(visas);
+        }
+
+        return ResponseEntity.ok(response);
+    }
+
+    public ResponseEntity<PermissionsResponses> createPermissions(String accountId,
+                                                                  List<Object> body,
+                                                                  Format format) {
+
+        PermissionsResponses responses = new PermissionsResponses();
+        List<PassportVisaObject> passportVisaObjects;
+        List<String> passportVisaStrings;
+
+        if (format == null) {
+            format = Format.JWT;
+        }
+
+        ObjectMapper mapper = new ObjectMapper();
+
+        //TODO: Handle mapper exception and improve conversion
+        if (format == Format.PLAIN) {
+            passportVisaObjects = body.parallelStream().map(v -> mapper.convertValue(v, PassportVisaObject.class)).collect(Collectors.toList());
+            List<PermissionsResponse> permissionResponses = createPlainPermissions(getAccountIdForElixirId(accountId), passportVisaObjects);
+            responses.addAll(permissionResponses);
+
+        } else if (format == Format.JWT) {
+            passportVisaStrings = body.parallelStream().map(v -> mapper.convertValue(v, JWTPassportVisaObject.class).getJwt()).collect(Collectors.toList());
+            List<JWTPermissionsResponse> jwtResponses = createJWTPermissions(getAccountIdForElixirId(accountId), passportVisaStrings);
+            responses.addAll(jwtResponses);
+        }
+
+        return ResponseEntity.ok(responses);
+    }
+
+    public List<JWTPermissionsResponse> createJWTPermissions(String accountId, List<String> ga4ghVisaV1List) {
         validateJWTPermissionsDatasetBelongsToDAC(ga4ghVisaV1List);
         return ga4ghVisaV1List
                 .stream()
@@ -47,14 +113,22 @@ public class RequestHandler {
                     try {
                         Visa visa = tokenPayloadMapper.mapJWTClaimSetToVisa(SignedJWT.parse(strVisa).getJWTClaimsSet());
                         PermissionsResponse preResponse = handlePassportVisaObjectProcessing(accountId, visa.getGa4ghVisaV1());
-                        return new JWTTokenResponse(strVisa, preResponse.getStatus(), preResponse.getMessage());
+                        JWTPermissionsResponse response = new JWTPermissionsResponse();
+                        response.setGa4ghVisaV1(strVisa);
+                        response.setStatus(preResponse.getStatus());
+                        response.setMessage(preResponse.getMessage());
+                        return response;
                     } catch (ParseException ex) {
-                        return new JWTTokenResponse(strVisa, HttpStatus.INTERNAL_SERVER_ERROR.value(), "Error decoding the JWT Token");
+                        JWTPermissionsResponse response = new JWTPermissionsResponse();
+                        response.setGa4ghVisaV1(strVisa);
+                        response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+                        response.setMessage("Error decoding the JWT Token");
+                        return response;
                     }
                 }).collect(Collectors.toList());
     }
 
-    public List<PermissionsResponse> createPermissions(String accountId, List<PassportVisaObject> passportVisaObjects) {
+    public List<PermissionsResponse> createPlainPermissions(String accountId, List<PassportVisaObject> passportVisaObjects) {
         validatePermissionsDatasetBelongsToDAC(passportVisaObjects);
         return passportVisaObjects
                 .stream()
@@ -154,6 +228,14 @@ public class RequestHandler {
         }
     }
 
+    public Optional<String> getCurrentUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication instanceof AnonymousAuthenticationToken) {
+            return Optional.empty();
+        }
+        return Optional.of(authentication.getName());
+    }
+
     private String getBearerAccountId() {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         if (email.toLowerCase().endsWith(ELIXIR_ACCOUNT_SUFFIX)) {
@@ -161,5 +243,14 @@ public class RequestHandler {
         } else {
             return permissionsService.getAccountByEmail(email).get().getAccountId();
         }
+    }
+
+    private SignedJWT createSignedJWT(final Visa visa) {
+        //Create JWT token
+        final SignedJWT ga4ghSignedJWT = this.jwtService.createJWT(visa);
+
+        //Sign JWT token by signer
+        this.jwtService.signJWT(ga4ghSignedJWT);
+        return ga4ghSignedJWT;
     }
 }

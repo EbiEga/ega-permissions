@@ -35,18 +35,18 @@ class PermissionsControllerPlainIT {
     int port;
 
     @Test
-    @DisplayName("NOT_FOUND Response when GET request sent to /plain/{accountId}/permissions endpoint")
+    @DisplayName("NOT_FOUND Response when GET request sent to /{accountId}/permissions endpoint with format PLAIN")
     public void shouldReturnNotFoundWithInvalidUserAccountId() throws Exception {
-        final String baseUrl = "http://localhost:" + port + "/plain/EGAW0000001000/permissions";
+        final String baseUrl = "http://localhost:" + port + "/EGAW0000001000/permissions?format=PLAIN";
         URI uri = new URI(baseUrl);
         ResponseEntity result = this.restTemplate.getForEntity(uri, Object.class);
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
     }
 
     @Test
-    @DisplayName("OK Response when GET request sent to /plain/{accountId}/permissions endpoint")
+    @DisplayName("OK Response when GET request sent to /{accountId}/permissions endpoint with format PLAIN")
     public void shouldReturnOkWithUserPermissions() throws Exception {
-        final String baseUrl = "http://localhost:" + port + "/plain/EGAW0000002000/permissions";
+        final String baseUrl = "http://localhost:" + port + "/EGAW0000002000/permissions?format=PLAIN";
         URI uri = new URI(baseUrl);
 
         PassportVisaObject passportVisaObject = new PassportVisaObject();
@@ -65,7 +65,7 @@ class PermissionsControllerPlainIT {
     }
 
     @Test
-    @DisplayName("MULTI_STATUS Response when POST request sent to /plain/{accountId}/permissions endpoint")
+    @DisplayName("MULTI_STATUS Response when POST request sent to /plain/{accountId}/permissions endpoint with format PLAIN")
     public void shouldReturnMultiStatusWithResponses() throws Exception {
         final String baseUrl = "http://localhost:" + port + "/plain/EGAW0000003000/permissions";
         URI uri = new URI(baseUrl);
@@ -96,7 +96,7 @@ class PermissionsControllerPlainIT {
     @Test
     @DisplayName("OK Response when DELETE request sent to /plain/{accountId}/permissions endpoint")
     public void shouldReturnOkWithNoResponseBody() throws Exception {
-        final String baseUrl = "http://localhost:" + port + "/plain/EGAW0000004000/permissions";
+        final String baseUrl = "http://localhost:" + port + "/EGAW0000004000/permissions";
         URI uri = new URI(baseUrl);
 
         PassportVisaObject passportVisaObject = new PassportVisaObject();
@@ -121,9 +121,9 @@ class PermissionsControllerPlainIT {
     }
 
     @Test
-    @DisplayName("NOT_FOUND Response when DELETE request sent to /plain/{accountId}/permissions endpoint")
+    @DisplayName("NOT_FOUND Response when DELETE request sent to /plain/{accountId}/permissions endpoint with format PLAIN")
     public void shouldReturnNotFoundForDeleteOperation() throws Exception {
-        final String baseUrl = "http://localhost:" + port + "/plain/EGAW0000005000/permissions";
+        final String baseUrl = "http://localhost:" + port + "/EGAW0000005000/permissions?format=PLAIN";
 
         HttpHeaders headers = new HttpHeaders();
         headers.set("Accept", MediaType.APPLICATION_JSON_VALUE);
@@ -138,7 +138,7 @@ class PermissionsControllerPlainIT {
     }
 
     @Test
-    @DisplayName("OK Response when GET request sent to /plain/datasets/{datasetId}/users endpoint")
+    @DisplayName("OK Response when GET request sent to /plain/datasets/{datasetId}/users endpoint with format PLAIN")
     public void shouldReturnOkWithAccountUsers() throws Exception {
         final String baseUrl = "http://localhost:" + port + "/plain/datasets/EGAD00002222222/users";
         URI uri = new URI(baseUrl);

@@ -12,7 +12,9 @@ info:
   version: 1.0.0
 servers:
   - url: http://localhost:8080
-    description: localhost
+    description: Local
+  - url: https://ega.ebi.ac.uk:8053/ega-permissions
+    description: Test
 tags:
   - name: permissions
     description: EGA Data Permissions
@@ -85,11 +87,8 @@ paths:
         content:
           application/json:
             schema:
-              type: array
-              items:
-                oneOf:
-                  - $ref: '#/components/schemas/PassportVisaObject'
-                  - type: string
+              $ref: '#/components/schemas/PassportVisaObjects'
+
         required: true
       responses:
         207:
@@ -97,11 +96,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  oneOf:
-                    - $ref: '#/components/schemas/PermissionsResponse'
-                    - type: string
+                $ref: '#/components/schemas/PermissionsResponses'
         400:
           description: Invalid ID supplied
           content: {}
@@ -197,15 +192,18 @@ paths:
       summary: Get current user permissions
       description: List current user permissions
       operationId: myPermissions
+      parameters:
+        - name: format
+          in: query
+          schema:
+            $ref: '#/components/schemas/format'
       responses:
         200:
           description: successful operation
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Visa'
+                $ref: '#/components/schemas/Visas'
         400:
           description: Bad request
           content: {}
@@ -246,6 +244,8 @@ components:
             Visa Assertion Source requires such a claim to be no longer valid
         ga4gh_visa_v1:
           $ref: '#/components/schemas/PassportVisaObject'
+        format:
+          $ref: '#/components/schemas/format'
       required:
         - sub
       example:
@@ -260,6 +260,27 @@ components:
           value: https://ega-archive.org/datasets/EGAD00001002069
           source: https://ega-archive.org/dacs/EGAC00001000514
           by: dac
+        format: PLAIN
+
+    JWTVisa:
+      type: object
+      properties:
+        jwt:
+          type: string
+        format:
+          $ref: '#/components/schemas/format'
+      example:
+        jwt: "[string_token_part1].[string_token_part2].[string_token_part3]"
+        format: JWT
+
+    Visas:
+      type: array
+      items:
+        oneOf:
+          - $ref: '#/components/schemas/Visa'
+          - $ref: '#/components/schemas/JWTVisa'
+        discriminator:
+          propertyName: format
 
     PassportVisaObject:
       type: object
@@ -280,6 +301,8 @@ components:
         by:
           type: string
           description: Indicates that the person, service, or broker that applied the action on behalf of the 'source'
+        format:
+          $ref: '#/components/schemas/format'
       required:
         - type
         - asserted
@@ -291,6 +314,27 @@ components:
         value: https://ega-archive.org/datasets/EGAD00001002069
         source: https://ega-archive.org/dacs/EGAC00001000514
         by: dac
+        format: PLAIN
+
+    JWTPassportVisaObject:
+      type: object
+      properties:
+        jwt:
+          type: string
+        format:
+          $ref: '#/components/schemas/format'
+      example:
+        jwt: "[string_token_part1].[string_token_part2].[string_token_part3]"
+        format: JWT
+
+    PassportVisaObjects:
+      type: array
+      items:
+        oneOf:
+          - $ref: '#/components/schemas/PassportVisaObject'
+          - $ref: '#/components/schemas/JWTPassportVisaObject'
+        discriminator:
+          propertyName: format
 
     PermissionsResponse:
       type: object
@@ -303,6 +347,8 @@ components:
         message:
           type: string
           description: Optional message
+        format:
+          $ref: '#/components/schemas/format'
       example:
         ga4gh_visa_v1:
           type: ControlledAccessGrants
@@ -312,6 +358,36 @@ components:
           by: dac
         status: 201
         message: Success
+        format: PLAIN
+
+    JWTPermissionsResponse:
+      type: object
+      properties:
+        ga4gh_visa_v1:
+          type: string
+          description: JWT string representation
+        status:
+          type: integer
+          description: HTTP Status Code
+        message:
+          type: string
+          description: Optional message
+        format:
+          $ref: '#/components/schemas/format'
+      example:
+        ga4gh_visa_v1: "[string_token_part1].[string_token_part2].[string_token_part3]"
+        status: 201
+        message: Success
+        format: JWT
+
+    PermissionsResponses:
+      type: array
+      items:
+        oneOf:
+          - $ref: '#/components/schemas/PermissionsResponse'
+          - $ref: '#/components/schemas/JWTPermissionsResponse'
+        discriminator:
+          propertyName: format
 
     AccountAccess:
       type: object
@@ -328,19 +404,6 @@ components:
       type: string
       enum: [JWT, PLAIN]
       default: JWT
-
-    JWTVisa:
-      type: object
-      properties:
-        jwt:
-          type: string
-
-    Visas:
-      type: array
-      items:
-        oneOf:
-          - $ref: '#/components/schemas/Visa'
-          - $ref: '#/components/schemas/JWTVisa'
 
     ErrorBody:
       type: object
