@@ -18,6 +18,7 @@
 package uk.ac.ebi.ega.permissions.controller;
 
 import com.nimbusds.jwt.SignedJWT;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -31,6 +32,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -74,6 +76,8 @@ import static uk.ac.ebi.ega.permissions.controller.RequestHandler.EGA_ACCOUNT_ID
 @ExtendWith(MockitoExtension.class)
 @SpringBootTest(classes = {EgaPermissionsApplicationTest.class, SecurityAutoConfiguration.class},
         webEnvironment = DEFINED_PORT)
+@ActiveProfiles("test")
+@Disabled //TODO: The controller no longer exists, will keep this for later so it can be refactored and added to the new implementation
 public class PermissionsControllerTest {
 
     private static final String ELIXIR_ACCOUNT_ID = "test@elixir-europe.org";
@@ -109,8 +113,7 @@ public class PermissionsControllerTest {
         final String accessToken = obtainAccessToken();
         final HttpEntity<Void> httpEntity = new HttpEntity<>(getAccessTokenHeader(accessToken));
 
-        assertStatus(restTemplate
-                .exchange(getPermissionsURI(EGA_ACCOUNT_ID), GET, httpEntity, String.class), OK);
+        assertStatus(restTemplate.exchange(getPermissionsURI(EGA_ACCOUNT_ID), GET, httpEntity, String.class), OK);
     }
 
     @Test
@@ -194,7 +197,7 @@ public class PermissionsControllerTest {
 
         assertStatus(restTemplate.exchange(getPermissionsURI(EGA_ACCOUNT_ID), DELETE, httpEntity, Void.class), UNAUTHORIZED);
     }
-    
+
     private void commonMock() {
         doNothing()
                 .when(requestHandler)
@@ -251,7 +254,7 @@ public class PermissionsControllerTest {
     private URI getPermissionsURI(String accountId) throws URISyntaxException {
         return UriComponentsBuilder
                 .fromUri(new URI(applicationTestURL))
-                .path("/jwt/{accountId}/permissions")
+                .path("/{accountId}/permissions?format=JWT")
                 .build(accountId);
     }
 

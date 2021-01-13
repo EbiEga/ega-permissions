@@ -32,8 +32,6 @@ import org.springframework.security.oauth2.server.authorization.client.Registere
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 
-import java.util.UUID;
-
 import static java.util.UUID.randomUUID;
 import static org.springframework.http.HttpMethod.POST;
 import static org.springframework.security.oauth2.core.AuthorizationGrantType.CLIENT_CREDENTIALS;
@@ -42,22 +40,22 @@ import static org.springframework.security.oauth2.server.authorization.web.JwkSe
 import static org.springframework.security.oauth2.server.authorization.web.OAuth2AuthorizationEndpointFilter.DEFAULT_AUTHORIZATION_ENDPOINT_URI;
 import static org.springframework.security.oauth2.server.authorization.web.OAuth2TokenEndpointFilter.DEFAULT_TOKEN_ENDPOINT_URI;
 
-@EnableWebSecurity
+//@EnableWebSecurity
 public class OAuth2Configuration extends WebSecurityConfigurerAdapter {
 
     // @formatter:off
     @Override
     protected void configure(final HttpSecurity http) throws Exception {
         http
-            .authorizeRequests(authorizeRequests ->
-                authorizeRequests
-                    .antMatchers(authorizationEndpointMatcher())
-                    .permitAll()
-                    .anyRequest()
-                    .authenticated())
-            .csrf(csrf -> csrf.ignoringRequestMatchers(tokenEndpointMatcher()))
-            .oauth2ResourceServer(OAuth2ResourceServerConfigurer::jwt)
-            .apply(new OAuth2AuthorizationServerConfigurer<>());
+                .authorizeRequests(authorizeRequests ->
+                        authorizeRequests
+                                .antMatchers(authorizationEndpointMatcher())
+                                .permitAll()
+                                .anyRequest()
+                                .authenticated())
+                .csrf(csrf -> csrf.ignoringRequestMatchers(tokenEndpointMatcher()))
+                .oauth2ResourceServer(OAuth2ResourceServerConfigurer::jwt)
+                .apply(new OAuth2AuthorizationServerConfigurer<>());
     }
 
     @Bean

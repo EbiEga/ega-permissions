@@ -2,7 +2,7 @@ package uk.ac.ebi.ega.permissions.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.HttpMethod;
-import org.springframework.security.core.context.SecurityContextHolder;
+//import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.util.CollectionUtils;
 import uk.ac.ebi.ega.permissions.configuration.VisaInfoProperties;
@@ -32,17 +32,23 @@ public class PermissionsServiceImpl implements PermissionsService {
     private static final String EVENT_DELETED = "DELETED";
 
 
-    private PermissionsDataService permissionsDataService;
-    private EventDataService eventDataService;
-    private TokenPayloadMapper tokenPayloadMapper;
-    private VisaInfoProperties visaInfoProperties;
+    private final PermissionsDataService permissionsDataService;
+    private final EventDataService eventDataService;
+    private final TokenPayloadMapper tokenPayloadMapper;
+    private final VisaInfoProperties visaInfoProperties;
+    private final SecurityService securityService;
 
-    public PermissionsServiceImpl(PermissionsDataService permissionsDataService, EventDataService eventDataService,
-                                  TokenPayloadMapper tokenPayloadMapper, VisaInfoProperties visaInfoProperties) {
+    public PermissionsServiceImpl(final PermissionsDataService permissionsDataService,
+                                  final EventDataService eventDataService,
+                                  final TokenPayloadMapper tokenPayloadMapper,
+                                  final VisaInfoProperties visaInfoProperties,
+                                  final SecurityService securityService) {
         this.permissionsDataService = permissionsDataService;
         this.eventDataService = eventDataService;
         this.tokenPayloadMapper = tokenPayloadMapper;
         this.visaInfoProperties = visaInfoProperties;
+        this.securityService = securityService;
+
     }
 
     @Override
@@ -147,7 +153,7 @@ public class PermissionsServiceImpl implements PermissionsService {
     }
 
     private String getBearerAccountId() {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        String email = securityService.getCurrentUser().orElseThrow(() -> new ValidationException("Invalid user"));
         if (email.toLowerCase().endsWith(ELIXIR_ACCOUNT_SUFFIX)) {
             return getAccountIdForElixirId(email).get().getAccountId();
         } else {

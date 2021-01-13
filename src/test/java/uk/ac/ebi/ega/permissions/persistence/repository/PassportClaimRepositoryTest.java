@@ -6,8 +6,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import uk.ac.ebi.ega.permissions.TestApplication;
 import uk.ac.ebi.ega.permissions.persistence.entities.Authority;
 import uk.ac.ebi.ega.permissions.persistence.entities.PassportClaim;
 import uk.ac.ebi.ega.permissions.persistence.entities.VisaType;
@@ -21,6 +23,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(SpringExtension.class)
 @DataJpaTest
+@ContextConfiguration(classes = {TestApplication.class})
 @TestPropertySource(locations = "classpath:application-test.properties")
 class PassportClaimRepositoryTest {
 

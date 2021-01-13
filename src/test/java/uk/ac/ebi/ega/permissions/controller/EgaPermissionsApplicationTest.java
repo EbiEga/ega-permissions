@@ -30,11 +30,11 @@ import uk.ac.ebi.ega.permissions.service.PermissionsServiceImpl;
 
 import static org.mockito.Mockito.mock;
 
-@SpringBootApplication(exclude = {
-        DataSourceAutoConfiguration.class,
-        DataSourceTransactionManagerAutoConfiguration.class,
-        HibernateJpaAutoConfiguration.class
-})
+//@SpringBootApplication(exclude = {
+//        DataSourceAutoConfiguration.class,
+//        DataSourceTransactionManagerAutoConfiguration.class,
+//        HibernateJpaAutoConfiguration.class
+//})
 public class EgaPermissionsApplicationTest {
     public static void main(final String[] args) {
         SpringApplication.run(EgaPermissionsApplicationTest.class, args);

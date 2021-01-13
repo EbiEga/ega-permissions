@@ -9,10 +9,12 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import uk.ac.ebi.ega.permissions.mapper.TokenPayloadMapper;
 import uk.ac.ebi.ega.permissions.model.*;
 import uk.ac.ebi.ega.permissions.persistence.entities.Account;
+import uk.ac.ebi.ega.permissions.persistence.entities.AccountElixirId;
 import uk.ac.ebi.ega.permissions.persistence.service.EventDataService;
 import uk.ac.ebi.ega.permissions.persistence.service.UserGroupDataService;
 import uk.ac.ebi.ega.permissions.service.JWTService;
 import uk.ac.ebi.ega.permissions.service.PermissionsService;
+import uk.ac.ebi.ega.permissions.service.SecurityService;
 
 import javax.validation.ValidationException;
 import java.util.Arrays;
@@ -33,6 +35,7 @@ public class RequestHandlerTest {
     private UserGroupDataService userGroupDataService = mock(UserGroupDataService.class);
     private EventDataService eventDataService = mock(EventDataService.class);
     private JWTService jwtService = mock(JWTService.class);
+    private SecurityService securityService = mock(SecurityService.class);
 
     private RequestHandler requestHandler;
 
@@ -126,7 +129,7 @@ public class RequestHandlerTest {
         final Authentication authentication = mock(Authentication.class);
         final SecurityContext securityContext = mock(SecurityContext.class);
         SecurityContextHolder.setContext(securityContext);
-        requestHandler = new RequestHandler(permissionsService, tokenPayloadMapper, userGroupDataService, jwtService);
+        requestHandler = new RequestHandler(permissionsService, tokenPayloadMapper, userGroupDataService, jwtService, securityService);
 
         Visa visa = new Visa();
         visa.setGa4ghVisaV1(new PassportVisaObject());
@@ -135,6 +138,9 @@ public class RequestHandlerTest {
         when(authentication.getName()).thenReturn("test");
         when(permissionsService.accountExist(any())).thenReturn(true);
         when(permissionsService.getAccountByEmail("test")).thenReturn(Optional.of(new Account()));
+
+        when(securityService.getCurrentUser()).thenReturn(Optional.of("test@ebi.ac.uk"));
+        when(permissionsService.getAccountByEmail(any())).thenReturn(Optional.of(new Account()));
     }
 
     private String getTestToken() {

@@ -28,13 +28,13 @@ import javax.servlet.http.HttpServletRequest;
 import static org.springframework.http.HttpMethod.*;
 
 @EnableWebSecurity
-public class OAuth2ResourceServerSecurityConfig extends WebSecurityConfigurerAdapter {
+public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     private AuthenticationManagerResolver<HttpServletRequest> authenticationManagerResolver;
     private AccessDeniedHandler accessDeniedHandler;
 
-    public OAuth2ResourceServerSecurityConfig(AuthenticationManagerResolver<HttpServletRequest> authenticationManagerResolver,
-                                              AccessDeniedHandler accessDeniedHandler) {
+    public WebSecurityConfig(AuthenticationManagerResolver<HttpServletRequest> authenticationManagerResolver,
+                             AccessDeniedHandler accessDeniedHandler) {
         this.authenticationManagerResolver = authenticationManagerResolver;
         this.accessDeniedHandler = accessDeniedHandler;
     }

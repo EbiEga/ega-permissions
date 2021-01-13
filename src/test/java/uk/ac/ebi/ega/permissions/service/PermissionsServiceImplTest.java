@@ -24,12 +24,12 @@ class PermissionsServiceImplTest {
     private EventDataService eventDataService = mock(EventDataService.class);
     private TokenPayloadMapper tokenPayloadMapper = Mappers.getMapper(TokenPayloadMapper.class);
     private VisaInfoProperties visaInfoProperties = mock(VisaInfoProperties.class);
-
+    private SecurityService securityService = mock(SecurityService.class);
     private PermissionsService permissionsService;
 
     @BeforeEach
     public void setup() {
-        permissionsService = new PermissionsServiceImpl(permissionsDataService, eventDataService, tokenPayloadMapper, visaInfoProperties);
+        permissionsService = new PermissionsServiceImpl(permissionsDataService, eventDataService, tokenPayloadMapper, visaInfoProperties, securityService);
     }
 
     @Test

@@ -1,14 +1,14 @@
 package uk.ac.ebi.ega.permissions.controller.delegate;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.ResponseEntity;
 import uk.ac.ebi.ega.permissions.api.AccountIdApiDelegate;
 import uk.ac.ebi.ega.permissions.controller.RequestHandler;
-import uk.ac.ebi.ega.permissions.model.*;
+import uk.ac.ebi.ega.permissions.model.Format;
+import uk.ac.ebi.ega.permissions.model.PermissionsResponses;
+import uk.ac.ebi.ega.permissions.model.Visas;
 import uk.ac.ebi.ega.permissions.service.PermissionsService;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class AccountIdApiDelegateImpl implements AccountIdApiDelegate {
 

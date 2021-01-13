@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.security.authentication.AuthenticationManagerResolver;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.util.ResourceUtils;
@@ -21,10 +20,7 @@ import uk.ac.ebi.ega.permissions.mapper.TokenPayloadMapper;
 import uk.ac.ebi.ega.permissions.model.JWTAlgorithm;
 import uk.ac.ebi.ega.permissions.persistence.repository.*;
 import uk.ac.ebi.ega.permissions.persistence.service.*;
-import uk.ac.ebi.ega.permissions.service.JWTService;
-import uk.ac.ebi.ega.permissions.service.JWTServiceImpl;
-import uk.ac.ebi.ega.permissions.service.PermissionsService;
-import uk.ac.ebi.ega.permissions.service.PermissionsServiceImpl;
+import uk.ac.ebi.ega.permissions.service.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -36,7 +32,6 @@ import java.text.ParseException;
 import java.util.stream.Collectors;
 
 @Configuration
-@EnableJpaRepositories(basePackages = {"uk.ac.ebi.ega.permissions.persistence.repository"})
 public class EgaPermissionsConfig {
 
     @Bean
@@ -59,8 +54,9 @@ public class EgaPermissionsConfig {
     public PermissionsService permissionsService(final PermissionsDataService permissionsDataService,
                                                  final EventDataService eventDataService,
                                                  final TokenPayloadMapper tokenPayloadMapper,
-                                                 final VisaInfoProperties visaInfoProperties) {
-        return new PermissionsServiceImpl(permissionsDataService, eventDataService, tokenPayloadMapper, visaInfoProperties);
+                                                 final VisaInfoProperties visaInfoProperties,
+                                                 final SecurityService securityService) {
+        return new PermissionsServiceImpl(permissionsDataService, eventDataService, tokenPayloadMapper, visaInfoProperties, securityService);
     }
 
     @Bean
@@ -84,8 +80,9 @@ public class EgaPermissionsConfig {
     public RequestHandler requestHandler(final PermissionsService permissionsService,
                                          final TokenPayloadMapper tokenPayloadMapper,
                                          final UserGroupDataService userGroupDataService,
-                                         final JWTService jwtService) {
-        return new RequestHandler(permissionsService, tokenPayloadMapper, userGroupDataService, jwtService);
+                                         final JWTService jwtService,
+                                         final SecurityService securityService) {
+        return new RequestHandler(permissionsService, tokenPayloadMapper, userGroupDataService, jwtService, securityService);
     }
 
     @Bean
