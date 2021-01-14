@@ -1,3 +1,20 @@
+/*
+ *
+ * Copyright 2020 EMBL - European Bioinformatics Institute
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
 package uk.ac.ebi.ega.permissions.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -10,7 +27,15 @@ import org.springframework.http.ResponseEntity;
 import uk.ac.ebi.ega.permissions.exception.ServiceException;
 import uk.ac.ebi.ega.permissions.exception.SystemException;
 import uk.ac.ebi.ega.permissions.mapper.TokenPayloadMapper;
-import uk.ac.ebi.ega.permissions.model.*;
+import uk.ac.ebi.ega.permissions.model.Format;
+import uk.ac.ebi.ega.permissions.model.JWTPassportVisaObject;
+import uk.ac.ebi.ega.permissions.model.JWTPermissionsResponse;
+import uk.ac.ebi.ega.permissions.model.JWTVisa;
+import uk.ac.ebi.ega.permissions.model.PassportVisaObject;
+import uk.ac.ebi.ega.permissions.model.PermissionsResponse;
+import uk.ac.ebi.ega.permissions.model.PermissionsResponses;
+import uk.ac.ebi.ega.permissions.model.Visa;
+import uk.ac.ebi.ega.permissions.model.Visas;
 import uk.ac.ebi.ega.permissions.persistence.entities.AccountElixirId;
 import uk.ac.ebi.ega.permissions.persistence.service.UserGroupDataService;
 import uk.ac.ebi.ega.permissions.service.JWTService;
@@ -51,18 +76,14 @@ public class RequestHandler {
         return getPermissionsForUser(currentUser, format);
     }
 
-    public ResponseEntity<Visas> getPermissionsForUser(String accountId, Format format) {
+    public ResponseEntity<Visas> getPermissionsForUser(String userId, Format format) {
         Visas response = new Visas();
 
-        if (format == null) {
-            format = Format.JWT;
-        }
-
-        accountId = getAccountIdForElixirId(accountId);
+        String accountId = getAccountIdForElixirId(userId);
         verifyAccountId(accountId);
         List<Visa> visas = this.permissionsService.getVisas(accountId);
 
-        if (format == Format.JWT) {
+        if (format == null || format == Format.JWT) {
             response.addAll(
                     visas.stream()
                             .map(this::createSignedJWT)
@@ -74,7 +95,7 @@ public class RequestHandler {
                             })
                             .collect(Collectors.toList())
             );
-        } else if (format == Format.PLAIN) {
+        } else {
             response.addAll(visas);
         }
 
@@ -89,14 +110,10 @@ public class RequestHandler {
         List<PassportVisaObject> passportVisaObjects;
         List<String> passportVisaStrings;
 
-        if (format == null) {
-            format = Format.JWT;
-        }
-
         ObjectMapper mapper = new ObjectMapper();
 
         //TODO: Handle mapper exception and improve conversion
-        if (format == Format.PLAIN) {
+        if (format == null || format == Format.PLAIN) {
             passportVisaObjects = body.parallelStream().map(v -> mapper.convertValue(v, PassportVisaObject.class)).collect(Collectors.toList());
             List<PermissionsResponse> permissionResponses = createPlainPermissions(getAccountIdForElixirId(accountId), passportVisaObjects);
             responses.addAll(permissionResponses);

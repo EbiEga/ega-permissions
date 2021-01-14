@@ -25,7 +25,9 @@ import org.springframework.security.web.access.AccessDeniedHandler;
 
 import javax.servlet.http.HttpServletRequest;
 
-import static org.springframework.http.HttpMethod.*;
+import static org.springframework.http.HttpMethod.DELETE;
+import static org.springframework.http.HttpMethod.GET;
+import static org.springframework.http.HttpMethod.POST;
 
 @EnableWebSecurity
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {

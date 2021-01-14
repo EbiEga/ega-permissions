@@ -1,3 +1,20 @@
+/*
+ *
+ * Copyright 2020 EMBL - European Bioinformatics Institute
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
 package uk.ac.ebi.ega.permissions.configuration;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -18,9 +35,22 @@ import uk.ac.ebi.ega.permissions.controller.delegate.DatasetsApiDelegateImpl;
 import uk.ac.ebi.ega.permissions.controller.delegate.MeApiDelegateImpl;
 import uk.ac.ebi.ega.permissions.mapper.TokenPayloadMapper;
 import uk.ac.ebi.ega.permissions.model.JWTAlgorithm;
-import uk.ac.ebi.ega.permissions.persistence.repository.*;
-import uk.ac.ebi.ega.permissions.persistence.service.*;
-import uk.ac.ebi.ega.permissions.service.*;
+import uk.ac.ebi.ega.permissions.persistence.repository.AccountElixirIdRepository;
+import uk.ac.ebi.ega.permissions.persistence.repository.AccountRepository;
+import uk.ac.ebi.ega.permissions.persistence.repository.EventRepository;
+import uk.ac.ebi.ega.permissions.persistence.repository.PassportClaimRepository;
+import uk.ac.ebi.ega.permissions.persistence.repository.UserGroupRepository;
+import uk.ac.ebi.ega.permissions.persistence.service.EventDataService;
+import uk.ac.ebi.ega.permissions.persistence.service.EventDataServiceImpl;
+import uk.ac.ebi.ega.permissions.persistence.service.PermissionsDataService;
+import uk.ac.ebi.ega.permissions.persistence.service.PermissionsDataServiceImpl;
+import uk.ac.ebi.ega.permissions.persistence.service.UserGroupDataService;
+import uk.ac.ebi.ega.permissions.persistence.service.UserGroupDataServiceImpl;
+import uk.ac.ebi.ega.permissions.service.JWTService;
+import uk.ac.ebi.ega.permissions.service.JWTServiceImpl;
+import uk.ac.ebi.ega.permissions.service.PermissionsService;
+import uk.ac.ebi.ega.permissions.service.PermissionsServiceImpl;
+import uk.ac.ebi.ega.permissions.service.SecurityService;
 
 import java.io.File;
 import java.io.IOException;
