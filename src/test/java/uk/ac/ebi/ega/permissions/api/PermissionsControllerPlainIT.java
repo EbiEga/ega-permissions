@@ -109,7 +109,7 @@ class PermissionsControllerPlainIT {
     }
 
     @Test
-    @DisplayName("MULTI_STATUS Response when POST request sent to /plain/{accountId}/permissions endpoint with format PLAIN")
+    @DisplayName("MULTI_STATUS Response when POST request sent to /{accountId}/permissions endpoint with format PLAIN")
     public void shouldReturnMultiStatusWithResponses() throws Exception {
         final String baseUrl = "http://localhost:" + port + "/EGAW0000003000/permissions?format=PLAIN";
         URI uri = new URI(baseUrl);
@@ -165,7 +165,7 @@ class PermissionsControllerPlainIT {
     }
 
     @Test
-    @DisplayName("NOT_FOUND Response when DELETE request sent to /plain/{accountId}/permissions endpoint with format PLAIN")
+    @DisplayName("NOT_FOUND Response when DELETE request sent to /{accountId}/permissions endpoint with format PLAIN")
     public void shouldReturnNotFoundForDeleteOperation() throws Exception {
         final String baseUrl = "http://localhost:" + port + "/EGAW0000005000/permissions?format=PLAIN";
 
@@ -201,6 +201,28 @@ class PermissionsControllerPlainIT {
         AccountAccess[] accesses = result.getBody();
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(accesses).hasSize(1);
+    }
+
+    @Test
+    @DisplayName("OK Response when GET request sent to /me/permissions endpoint with format PLAIN")
+    public void shouldReturnOkWithCurrentUserPermissions() throws Exception {
+        String baseUrl = "http://localhost:" + port + "/EGAW0000001000/permissions?format=PLAIN";
+
+        PassportVisaObject passportVisaObject = new PassportVisaObject();
+        passportVisaObject.setSource("https://ega-archive.org/dacs/EGAC00001111111");
+        passportVisaObject.setType("ControlledAccessGrants");
+        passportVisaObject.setValue("https://ega-archive.org/datasets/EGAD00002222222");
+        passportVisaObject.setAsserted(1568814383L);
+        passportVisaObject.setBy("dac");
+
+        this.restTemplate.postForEntity(new URI(baseUrl), Arrays.asList(passportVisaObject), PermissionsResponse[].class);
+
+        baseUrl = "http://localhost:" + port + "/me/permissions?format=PLAIN";
+
+        ResponseEntity<Object[]> result = this.restTemplate.getForEntity(new URI(baseUrl), Object[].class);
+        Object[] permissions = result.getBody();
+        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(permissions).hasSize(1);
     }
 
 }

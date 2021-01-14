@@ -73,7 +73,8 @@ public class RequestHandler {
 
     public ResponseEntity<Visas> getPermissionForCurrentUser(Format format) {
         String currentUser = securityService.getCurrentUser().orElseThrow(() -> new ServiceException("Operation not allowed for Anonymous users"));
-        return getPermissionsForUser(currentUser, format);
+        String accountId = permissionsService.getAccountByEmail(currentUser).orElseThrow(() -> new ServiceException("Current user is not allowed to access this resource")).getAccountId();
+        return getPermissionsForUser(accountId, format);
     }
 
     public ResponseEntity<Visas> getPermissionsForUser(String userId, Format format) {

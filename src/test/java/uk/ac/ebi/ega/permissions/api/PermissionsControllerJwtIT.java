@@ -136,7 +136,7 @@ class PermissionsControllerJwtIT {
     }
 
     @Test
-    @DisplayName("OK Response when DELETE request sent to /jwt/{accountId}/permissions endpoint")
+    @DisplayName("OK Response when DELETE request sent to /{accountId}/permissions endpoint")
     public void shouldReturnOkWithNoResponseBody() throws Exception {
         final String baseUrl = "http://localhost:" + port + "/EGAW0000004000/permissions?format=JWT";
         URI uri = new URI(baseUrl);
