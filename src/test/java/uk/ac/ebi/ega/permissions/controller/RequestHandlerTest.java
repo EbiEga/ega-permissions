@@ -1,3 +1,20 @@
+/*
+ *
+ * Copyright 2020 EMBL - European Bioinformatics Institute
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
 package uk.ac.ebi.ega.permissions.controller;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -7,14 +24,16 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import uk.ac.ebi.ega.permissions.mapper.TokenPayloadMapper;
-import uk.ac.ebi.ega.permissions.model.JWTTokenResponse;
+import uk.ac.ebi.ega.permissions.model.JWTPermissionsResponse;
 import uk.ac.ebi.ega.permissions.model.PassportVisaObject;
 import uk.ac.ebi.ega.permissions.model.PermissionsResponse;
 import uk.ac.ebi.ega.permissions.model.Visa;
 import uk.ac.ebi.ega.permissions.persistence.entities.Account;
 import uk.ac.ebi.ega.permissions.persistence.service.EventDataService;
 import uk.ac.ebi.ega.permissions.persistence.service.UserGroupDataService;
+import uk.ac.ebi.ega.permissions.service.JWTService;
 import uk.ac.ebi.ega.permissions.service.PermissionsService;
+import uk.ac.ebi.ega.permissions.service.SecurityService;
 
 import javax.validation.ValidationException;
 import java.util.Arrays;
@@ -34,6 +53,8 @@ public class RequestHandlerTest {
     private TokenPayloadMapper tokenPayloadMapper = mock(TokenPayloadMapper.class);
     private UserGroupDataService userGroupDataService = mock(UserGroupDataService.class);
     private EventDataService eventDataService = mock(EventDataService.class);
+    private JWTService jwtService = mock(JWTService.class);
+    private SecurityService securityService = mock(SecurityService.class);
 
     private RequestHandler requestHandler;
 
@@ -41,7 +62,7 @@ public class RequestHandlerTest {
     void testCreateJWTPermissions_WhenUserIsEGAAdmin_ReturnCreatedObject() {
         when(userGroupDataService.isEGAAdmin(any())).thenReturn(true);
 
-        List<JWTTokenResponse> permissionsCreated = requestHandler.createJWTPermissions(EMPTY,
+        List<JWTPermissionsResponse> permissionsCreated = requestHandler.createJWTPermissions(EMPTY,
                 Arrays.asList(getTestToken()));
         assertEquals(permissionsCreated.size(), 1);
     }
@@ -51,7 +72,7 @@ public class RequestHandlerTest {
         when(userGroupDataService.isEGAAdmin(any())).thenReturn(false);
         when(userGroupDataService.datasetBelongsToDAC(any(), any())).thenReturn(true);
 
-        List<JWTTokenResponse> permissionsCreated = requestHandler.createJWTPermissions(EMPTY,
+        List<JWTPermissionsResponse> permissionsCreated = requestHandler.createJWTPermissions(EMPTY,
                 Arrays.asList(getTestToken()));
         assertEquals(permissionsCreated.size(), 1);
     }
@@ -70,7 +91,7 @@ public class RequestHandlerTest {
     void testCreatePermissions_WhenUserIsEGAAdmin_ReturnCreatedObject() {
         when(userGroupDataService.isEGAAdmin(any())).thenReturn(true);
 
-        List<PermissionsResponse> permissionsCreated = requestHandler.createPermissions(EMPTY,
+        List<PermissionsResponse> permissionsCreated = requestHandler.createPlainPermissions(EMPTY,
                 Arrays.asList(createPassportVisaObject()));
         assertEquals(permissionsCreated.size(), 1);
     }
@@ -80,7 +101,7 @@ public class RequestHandlerTest {
         when(userGroupDataService.isEGAAdmin(any())).thenReturn(false);
         when(userGroupDataService.datasetBelongsToDAC(any(), any())).thenReturn(true);
 
-        List<PermissionsResponse> permissionsCreated = requestHandler.createPermissions(EMPTY,
+        List<PermissionsResponse> permissionsCreated = requestHandler.createPlainPermissions(EMPTY,
                 Arrays.asList(createPassportVisaObject()));
         assertEquals(permissionsCreated.size(), 1);
     }
@@ -91,7 +112,7 @@ public class RequestHandlerTest {
         when(userGroupDataService.datasetBelongsToDAC(any(), any())).thenReturn(false);
 
         assertThatThrownBy(() -> {
-            requestHandler.createPermissions(EMPTY, Arrays.asList(createPassportVisaObject()));
+            requestHandler.createPlainPermissions(EMPTY, Arrays.asList(createPassportVisaObject()));
         }).isInstanceOf(ValidationException.class);
     }
 
@@ -127,7 +148,7 @@ public class RequestHandlerTest {
         final Authentication authentication = mock(Authentication.class);
         final SecurityContext securityContext = mock(SecurityContext.class);
         SecurityContextHolder.setContext(securityContext);
-        requestHandler = new RequestHandler(permissionsService, tokenPayloadMapper, userGroupDataService);
+        requestHandler = new RequestHandler(permissionsService, tokenPayloadMapper, userGroupDataService, jwtService, securityService);
 
         Visa visa = new Visa();
         visa.setGa4ghVisaV1(new PassportVisaObject());
@@ -136,6 +157,9 @@ public class RequestHandlerTest {
         when(authentication.getName()).thenReturn("test");
         when(permissionsService.accountExist(any())).thenReturn(true);
         when(permissionsService.getAccountByEmail("test")).thenReturn(Optional.of(new Account()));
+
+        when(securityService.getCurrentUser()).thenReturn(Optional.of("test@ebi.ac.uk"));
+        when(permissionsService.getAccountByEmail(any())).thenReturn(Optional.of(new Account()));
     }
 
     private String getTestToken() {

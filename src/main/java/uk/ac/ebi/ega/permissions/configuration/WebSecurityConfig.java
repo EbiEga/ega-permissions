@@ -25,16 +25,18 @@ import org.springframework.security.web.access.AccessDeniedHandler;
 
 import javax.servlet.http.HttpServletRequest;
 
-import static org.springframework.http.HttpMethod.*;
+import static org.springframework.http.HttpMethod.DELETE;
+import static org.springframework.http.HttpMethod.GET;
+import static org.springframework.http.HttpMethod.POST;
 
 @EnableWebSecurity
-public class OAuth2ResourceServerSecurityConfiguration extends WebSecurityConfigurerAdapter {
+public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     private AuthenticationManagerResolver<HttpServletRequest> authenticationManagerResolver;
     private AccessDeniedHandler accessDeniedHandler;
 
-    public OAuth2ResourceServerSecurityConfiguration(AuthenticationManagerResolver<HttpServletRequest> authenticationManagerResolver,
-                                                     AccessDeniedHandler accessDeniedHandler) {
+    public WebSecurityConfig(AuthenticationManagerResolver<HttpServletRequest> authenticationManagerResolver,
+                             AccessDeniedHandler accessDeniedHandler) {
         this.authenticationManagerResolver = authenticationManagerResolver;
         this.accessDeniedHandler = accessDeniedHandler;
     }
@@ -45,13 +47,13 @@ public class OAuth2ResourceServerSecurityConfiguration extends WebSecurityConfig
         http
                 .authorizeRequests((authorizeRequests) ->
                         authorizeRequests
-                                .antMatchers(GET, "/plain/datasets/{datasetId}/**", "/jwt/datasets/{datasetId}/**")
+                                .antMatchers(GET, "/datasets/{datasetId}/**")
                                 .access("hasPermission(#datasetId, 'DAC_read')")
-                                .antMatchers(GET, "/plain/{accountId}/**", "/jwt/{accountId}/**")
+                                .antMatchers(GET, "/{accountId}/**")
                                 .access("hasPermission(#accountId, 'EGAAdmin_read')")
-                                .antMatchers(POST, "/plain/{accountId}/**", "/jwt/{accountId}/**")
+                                .antMatchers(POST, "/{accountId}/**")
                                 .access("hasPermission(#accountId, 'DAC_write')")
-                                .antMatchers(DELETE, "/plain/{accountId}/**", "/jwt/{accountId}/**")
+                                .antMatchers(DELETE, "/{accountId}/**")
                                 .access("hasPermission(#accountId, 'DAC_write')")
                                 .antMatchers(swaggerEndpointMatcher())
                                 .permitAll()
@@ -63,12 +65,11 @@ public class OAuth2ResourceServerSecurityConfiguration extends WebSecurityConfig
 
     private String[] swaggerEndpointMatcher() {
         return new String[]{
+                "/api-specs/**",
                 "/v2/api-docs",
-                "/configuration/ui",
+                "/v3/api-docs",
                 "/swagger-resources/**",
-                "/configuration/security",
-                "/swagger-ui.html",
-                "/webjars/**"};
+                "/swagger-ui/**"};
     }
     // @formatter:on
 }

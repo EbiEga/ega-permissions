@@ -1,6 +1,6 @@
 /*
  *
- * Copyright 2020 EMBL - European Bioinformatics Institute
+ * Copyright 2021 EMBL - European Bioinformatics Institute
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,33 +17,15 @@
  */
 package uk.ac.ebi.ega.permissions.configuration;
 
-public class VisaInfoProperties {
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import uk.ac.ebi.ega.permissions.service.SecurityService;
+import uk.ac.ebi.ega.permissions.service.SecurityServiceImpl;
 
-    private String issuer;
-    private long expireAfter;
-    private int iat;
-
-    public String getIssuer() {
-        return issuer;
-    }
-
-    public void setIssuer(String issuer) {
-        this.issuer = issuer;
-    }
-
-    public long getExpireAfter() {
-        return expireAfter;
-    }
-
-    public void setExpireAfter(long expireAfter) {
-        this.expireAfter = expireAfter;
-    }
-
-    public int getIat() {
-        return iat;
-    }
-
-    public void setIat(int iat) {
-        this.iat = iat;
+@Configuration
+public class SecurityUtilsConfig {
+    @Bean
+    public SecurityService securityService() {
+        return new SecurityServiceImpl();
     }
 }

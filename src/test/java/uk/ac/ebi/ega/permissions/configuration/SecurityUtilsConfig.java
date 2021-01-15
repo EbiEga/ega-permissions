@@ -17,33 +17,22 @@
  */
 package uk.ac.ebi.ega.permissions.configuration;
 
-public class VisaInfoProperties {
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import uk.ac.ebi.ega.permissions.service.SecurityService;
 
-    private String issuer;
-    private long expireAfter;
-    private int iat;
+import java.util.Optional;
 
-    public String getIssuer() {
-        return issuer;
-    }
+@Configuration
+public class SecurityUtilsConfig {
 
-    public void setIssuer(String issuer) {
-        this.issuer = issuer;
-    }
-
-    public long getExpireAfter() {
-        return expireAfter;
-    }
-
-    public void setExpireAfter(long expireAfter) {
-        this.expireAfter = expireAfter;
-    }
-
-    public int getIat() {
-        return iat;
-    }
-
-    public void setIat(int iat) {
-        this.iat = iat;
+    @Bean
+    public SecurityService securityService() {
+        return new SecurityService() {
+            @Override
+            public Optional<String> getCurrentUser() {
+                return Optional.of("test@ebi.ac.uk");
+            }
+        };
     }
 }

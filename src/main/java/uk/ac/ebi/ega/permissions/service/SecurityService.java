@@ -15,35 +15,11 @@
  * limitations under the License.
  *
  */
-package uk.ac.ebi.ega.permissions.configuration;
+package uk.ac.ebi.ega.permissions.service;
 
-public class VisaInfoProperties {
+import java.util.Optional;
 
-    private String issuer;
-    private long expireAfter;
-    private int iat;
+public interface SecurityService {
 
-    public String getIssuer() {
-        return issuer;
-    }
-
-    public void setIssuer(String issuer) {
-        this.issuer = issuer;
-    }
-
-    public long getExpireAfter() {
-        return expireAfter;
-    }
-
-    public void setExpireAfter(long expireAfter) {
-        this.expireAfter = expireAfter;
-    }
-
-    public int getIat() {
-        return iat;
-    }
-
-    public void setIat(int iat) {
-        this.iat = iat;
-    }
+    Optional<String> getCurrentUser();
 }

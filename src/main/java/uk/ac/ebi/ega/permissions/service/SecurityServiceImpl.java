@@ -17,16 +17,22 @@
  */
 package uk.ac.ebi.ega.permissions.service;
 
-import com.nimbusds.jwt.SignedJWT;
-import uk.ac.ebi.ega.permissions.exception.JWTException;
-import uk.ac.ebi.ega.permissions.model.Visa;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 
-public interface JWTService {
+import java.util.Optional;
 
-    SignedJWT createJWT(Visa jwtData);
+public class SecurityServiceImpl implements SecurityService {
 
-    void signJWT(SignedJWT signedJWT) throws JWTException;
+    @Override
+    public Optional<String> getCurrentUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication instanceof AnonymousAuthenticationToken) {
+            return Optional.empty();
+        }
+        return Optional.of(authentication.getName());
 
-    boolean isValidSignature(SignedJWT signedJWT);
 
+    }
 }

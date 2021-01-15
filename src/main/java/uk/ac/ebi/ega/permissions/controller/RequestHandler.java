@@ -1,21 +1,46 @@
+/*
+ *
+ * Copyright 2020 EMBL - European Bioinformatics Institute
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
 package uk.ac.ebi.ega.permissions.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.nimbusds.jose.JWSObject;
 import com.nimbusds.jwt.SignedJWT;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
 import uk.ac.ebi.ega.permissions.exception.ServiceException;
 import uk.ac.ebi.ega.permissions.exception.SystemException;
 import uk.ac.ebi.ega.permissions.mapper.TokenPayloadMapper;
-import uk.ac.ebi.ega.permissions.model.JWTTokenResponse;
+import uk.ac.ebi.ega.permissions.model.Format;
+import uk.ac.ebi.ega.permissions.model.JWTPassportVisaObject;
+import uk.ac.ebi.ega.permissions.model.JWTPermissionsResponse;
+import uk.ac.ebi.ega.permissions.model.JWTVisa;
 import uk.ac.ebi.ega.permissions.model.PassportVisaObject;
 import uk.ac.ebi.ega.permissions.model.PermissionsResponse;
+import uk.ac.ebi.ega.permissions.model.PermissionsResponses;
 import uk.ac.ebi.ega.permissions.model.Visa;
+import uk.ac.ebi.ega.permissions.model.Visas;
 import uk.ac.ebi.ega.permissions.persistence.entities.AccountElixirId;
 import uk.ac.ebi.ega.permissions.persistence.service.UserGroupDataService;
+import uk.ac.ebi.ega.permissions.service.JWTService;
 import uk.ac.ebi.ega.permissions.service.PermissionsService;
+import uk.ac.ebi.ega.permissions.service.SecurityService;
 
 import javax.validation.ValidationException;
 import java.text.ParseException;
@@ -28,18 +53,82 @@ public class RequestHandler {
     public static final String ELIXIR_ACCOUNT_SUFFIX = "@elixir-europe.org";
     Logger LOGGER = LoggerFactory.getLogger(RequestHandler.class);
 
-    private PermissionsService permissionsService;
-    private TokenPayloadMapper tokenPayloadMapper;
-    private UserGroupDataService userGroupDataService;
+    private final PermissionsService permissionsService;
+    private final TokenPayloadMapper tokenPayloadMapper;
+    private final UserGroupDataService userGroupDataService;
+    private final JWTService jwtService;
+    private final SecurityService securityService;
 
-    public RequestHandler(PermissionsService permissionsService, TokenPayloadMapper tokenPayloadMapper,
-                          UserGroupDataService userGroupDataService) {
+    public RequestHandler(final PermissionsService permissionsService,
+                          final TokenPayloadMapper tokenPayloadMapper,
+                          final UserGroupDataService userGroupDataService,
+                          final JWTService jwtService,
+                          final SecurityService securityService) {
         this.permissionsService = permissionsService;
         this.tokenPayloadMapper = tokenPayloadMapper;
         this.userGroupDataService = userGroupDataService;
+        this.jwtService = jwtService;
+        this.securityService = securityService;
     }
 
-    public List<JWTTokenResponse> createJWTPermissions(String accountId, List<String> ga4ghVisaV1List) {
+    public ResponseEntity<Visas> getPermissionForCurrentUser(Format format) {
+        String currentUser = securityService.getCurrentUser().orElseThrow(() -> new ServiceException("Operation not allowed for Anonymous users"));
+        String accountId = permissionsService.getAccountByEmail(currentUser).orElseThrow(() -> new ServiceException("Current user is not allowed to access this resource")).getAccountId();
+        return getPermissionsForUser(accountId, format);
+    }
+
+    public ResponseEntity<Visas> getPermissionsForUser(String userId, Format format) {
+        Visas response = new Visas();
+
+        String accountId = getAccountIdForElixirId(userId);
+        verifyAccountId(accountId);
+        List<Visa> visas = this.permissionsService.getVisas(accountId);
+
+        if (format == null || format == Format.JWT) {
+            response.addAll(
+                    visas.stream()
+                            .map(this::createSignedJWT)
+                            .map(JWSObject::serialize)
+                            .map(e -> {
+                                JWTVisa jwtVisa = new JWTVisa();
+                                jwtVisa.setJwt(e);
+                                return jwtVisa;
+                            })
+                            .collect(Collectors.toList())
+            );
+        } else {
+            response.addAll(visas);
+        }
+
+        return ResponseEntity.ok(response);
+    }
+
+    public ResponseEntity<PermissionsResponses> createPermissions(String accountId,
+                                                                  List<Object> body,
+                                                                  Format format) {
+
+        PermissionsResponses responses = new PermissionsResponses();
+        List<PassportVisaObject> passportVisaObjects;
+        List<String> passportVisaStrings;
+
+        ObjectMapper mapper = new ObjectMapper();
+
+        //TODO: Handle mapper exception and improve conversion
+        if (format == null || format == Format.PLAIN) {
+            passportVisaObjects = body.parallelStream().map(v -> mapper.convertValue(v, PassportVisaObject.class)).collect(Collectors.toList());
+            List<PermissionsResponse> permissionResponses = createPlainPermissions(getAccountIdForElixirId(accountId), passportVisaObjects);
+            responses.addAll(permissionResponses);
+
+        } else if (format == Format.JWT) {
+            passportVisaStrings = body.parallelStream().map(v -> mapper.convertValue(v, JWTPassportVisaObject.class).getJwt()).collect(Collectors.toList());
+            List<JWTPermissionsResponse> jwtResponses = createJWTPermissions(getAccountIdForElixirId(accountId), passportVisaStrings);
+            responses.addAll(jwtResponses);
+        }
+
+        return ResponseEntity.status(HttpStatus.MULTI_STATUS).body(responses);
+    }
+
+    public List<JWTPermissionsResponse> createJWTPermissions(String accountId, List<String> ga4ghVisaV1List) {
         validateJWTPermissionsDatasetBelongsToDAC(ga4ghVisaV1List);
         return ga4ghVisaV1List
                 .stream()
@@ -47,14 +136,22 @@ public class RequestHandler {
                     try {
                         Visa visa = tokenPayloadMapper.mapJWTClaimSetToVisa(SignedJWT.parse(strVisa).getJWTClaimsSet());
                         PermissionsResponse preResponse = handlePassportVisaObjectProcessing(accountId, visa.getGa4ghVisaV1());
-                        return new JWTTokenResponse(strVisa, preResponse.getStatus(), preResponse.getMessage());
+                        JWTPermissionsResponse response = new JWTPermissionsResponse();
+                        response.setGa4ghVisaV1(strVisa);
+                        response.setStatus(preResponse.getStatus());
+                        response.setMessage(preResponse.getMessage());
+                        return response;
                     } catch (ParseException ex) {
-                        return new JWTTokenResponse(strVisa, HttpStatus.INTERNAL_SERVER_ERROR.value(), "Error decoding the JWT Token");
+                        JWTPermissionsResponse response = new JWTPermissionsResponse();
+                        response.setGa4ghVisaV1(strVisa);
+                        response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+                        response.setMessage("Error decoding the JWT Token");
+                        return response;
                     }
                 }).collect(Collectors.toList());
     }
 
-    public List<PermissionsResponse> createPermissions(String accountId, List<PassportVisaObject> passportVisaObjects) {
+    public List<PermissionsResponse> createPlainPermissions(String accountId, List<PassportVisaObject> passportVisaObjects) {
         validatePermissionsDatasetBelongsToDAC(passportVisaObjects);
         return passportVisaObjects
                 .stream()
@@ -155,11 +252,20 @@ public class RequestHandler {
     }
 
     private String getBearerAccountId() {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        String email = securityService.getCurrentUser().orElseThrow(() -> new ValidationException("Anonymous user not allowd."));
         if (email.toLowerCase().endsWith(ELIXIR_ACCOUNT_SUFFIX)) {
             return permissionsService.getAccountIdForElixirId(email).get().getAccountId();
         } else {
             return permissionsService.getAccountByEmail(email).get().getAccountId();
         }
+    }
+
+    private SignedJWT createSignedJWT(final Visa visa) {
+        //Create JWT token
+        final SignedJWT ga4ghSignedJWT = this.jwtService.createJWT(visa);
+
+        //Sign JWT token by signer
+        this.jwtService.signJWT(ga4ghSignedJWT);
+        return ga4ghSignedJWT;
     }
 }

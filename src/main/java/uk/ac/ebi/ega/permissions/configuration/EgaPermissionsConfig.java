@@ -1,18 +1,38 @@
+/*
+ *
+ * Copyright 2020 EMBL - European Bioinformatics Institute
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
 package uk.ac.ebi.ega.permissions.configuration;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.security.authentication.AuthenticationManagerResolver;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.util.ResourceUtils;
-import uk.ac.ebi.ega.permissions.api.PermissionsApiDelegate;
+import uk.ac.ebi.ega.permissions.api.AccountIdApiDelegate;
+import uk.ac.ebi.ega.permissions.api.DatasetsApiDelegate;
+import uk.ac.ebi.ega.permissions.api.MeApiDelegate;
 import uk.ac.ebi.ega.permissions.configuration.tenant.TenantAuthenticationManagerResolver;
 import uk.ac.ebi.ega.permissions.controller.CustomAccessDeniedHandler;
 import uk.ac.ebi.ega.permissions.controller.RequestHandler;
-import uk.ac.ebi.ega.permissions.controller.delegate.PermissionsApiDelegateImpl;
+import uk.ac.ebi.ega.permissions.controller.delegate.AccountIdApiDelegateImpl;
+import uk.ac.ebi.ega.permissions.controller.delegate.DatasetsApiDelegateImpl;
+import uk.ac.ebi.ega.permissions.controller.delegate.MeApiDelegateImpl;
 import uk.ac.ebi.ega.permissions.mapper.TokenPayloadMapper;
 import uk.ac.ebi.ega.permissions.model.JWTAlgorithm;
 import uk.ac.ebi.ega.permissions.persistence.repository.AccountElixirIdRepository;
@@ -30,6 +50,7 @@ import uk.ac.ebi.ega.permissions.service.JWTService;
 import uk.ac.ebi.ega.permissions.service.JWTServiceImpl;
 import uk.ac.ebi.ega.permissions.service.PermissionsService;
 import uk.ac.ebi.ega.permissions.service.PermissionsServiceImpl;
+import uk.ac.ebi.ega.permissions.service.SecurityService;
 
 import java.io.File;
 import java.io.IOException;
@@ -41,21 +62,31 @@ import java.text.ParseException;
 import java.util.stream.Collectors;
 
 @Configuration
-@EnableJpaRepositories(basePackages = {"uk.ac.ebi.ega.permissions.persistence.repository"})
-public class EgaPermissionsConfiguration {
+public class EgaPermissionsConfig {
 
     @Bean
-    public PermissionsApiDelegate permissionsApiDelegate(final PermissionsService permissionsService,
-                                                         final RequestHandler requestHandler) {
-        return new PermissionsApiDelegateImpl(permissionsService, requestHandler);
+    public MeApiDelegate meApiDelegate(final RequestHandler requestHandler) {
+        return new MeApiDelegateImpl(requestHandler);
+    }
+
+    @Bean
+    public AccountIdApiDelegate accountIdApiDelegate(final PermissionsService permissionsService,
+                                                     final RequestHandler requestHandler) {
+        return new AccountIdApiDelegateImpl(permissionsService, requestHandler);
+    }
+
+    @Bean
+    public DatasetsApiDelegate datasetsApiDelegate(final PermissionsService permissionsService, final RequestHandler requestHandler) {
+        return new DatasetsApiDelegateImpl(permissionsService, requestHandler);
     }
 
     @Bean
     public PermissionsService permissionsService(final PermissionsDataService permissionsDataService,
                                                  final EventDataService eventDataService,
                                                  final TokenPayloadMapper tokenPayloadMapper,
-                                                 final VisaInfoProperties visaInfoProperties) {
-        return new PermissionsServiceImpl(permissionsDataService, eventDataService, tokenPayloadMapper, visaInfoProperties);
+                                                 final VisaInfoProperties visaInfoProperties,
+                                                 final SecurityService securityService) {
+        return new PermissionsServiceImpl(permissionsDataService, eventDataService, tokenPayloadMapper, visaInfoProperties, securityService);
     }
 
     @Bean
@@ -78,8 +109,10 @@ public class EgaPermissionsConfiguration {
     @Bean
     public RequestHandler requestHandler(final PermissionsService permissionsService,
                                          final TokenPayloadMapper tokenPayloadMapper,
-                                         final UserGroupDataService userGroupDataService) {
-        return new RequestHandler(permissionsService, tokenPayloadMapper, userGroupDataService);
+                                         final UserGroupDataService userGroupDataService,
+                                         final JWTService jwtService,
+                                         final SecurityService securityService) {
+        return new RequestHandler(permissionsService, tokenPayloadMapper, userGroupDataService, jwtService, securityService);
     }
 
     @Bean
