@@ -29,7 +29,7 @@ paths:
       tags:
         - permissions
       summary: Read Permissions
-      description: Read permissionsw
+      description: Read permissions
       operationId: readPermissions
       parameters:
         - name: accountId
