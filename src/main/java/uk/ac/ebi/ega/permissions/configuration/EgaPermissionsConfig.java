@@ -1,6 +1,6 @@
 /*
  *
- * Copyright 2020 EMBL - European Bioinformatics Institute
+ * Copyright 2020-2021 EMBL - European Bioinformatics Institute
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,18 +25,22 @@ import org.springframework.security.authentication.AuthenticationManagerResolver
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.util.ResourceUtils;
 import uk.ac.ebi.ega.permissions.api.AccountIdApiDelegate;
+import uk.ac.ebi.ega.permissions.api.ApiKeyApiDelegate;
 import uk.ac.ebi.ega.permissions.api.DatasetsApiDelegate;
 import uk.ac.ebi.ega.permissions.api.MeApiDelegate;
 import uk.ac.ebi.ega.permissions.configuration.tenant.TenantAuthenticationManagerResolver;
 import uk.ac.ebi.ega.permissions.controller.CustomAccessDeniedHandler;
 import uk.ac.ebi.ega.permissions.controller.RequestHandler;
 import uk.ac.ebi.ega.permissions.controller.delegate.AccountIdApiDelegateImpl;
+import uk.ac.ebi.ega.permissions.controller.delegate.ApiKeyApiDelegateImpl;
 import uk.ac.ebi.ega.permissions.controller.delegate.DatasetsApiDelegateImpl;
 import uk.ac.ebi.ega.permissions.controller.delegate.MeApiDelegateImpl;
+import uk.ac.ebi.ega.permissions.mapper.ApiKeyMapper;
 import uk.ac.ebi.ega.permissions.mapper.TokenPayloadMapper;
 import uk.ac.ebi.ega.permissions.model.JWTAlgorithm;
 import uk.ac.ebi.ega.permissions.persistence.repository.AccountElixirIdRepository;
 import uk.ac.ebi.ega.permissions.persistence.repository.AccountRepository;
+import uk.ac.ebi.ega.permissions.persistence.repository.ApiKeyRepository;
 import uk.ac.ebi.ega.permissions.persistence.repository.EventRepository;
 import uk.ac.ebi.ega.permissions.persistence.repository.PassportClaimRepository;
 import uk.ac.ebi.ega.permissions.persistence.repository.UserGroupRepository;
@@ -46,11 +50,14 @@ import uk.ac.ebi.ega.permissions.persistence.service.PermissionsDataService;
 import uk.ac.ebi.ega.permissions.persistence.service.PermissionsDataServiceImpl;
 import uk.ac.ebi.ega.permissions.persistence.service.UserGroupDataService;
 import uk.ac.ebi.ega.permissions.persistence.service.UserGroupDataServiceImpl;
+import uk.ac.ebi.ega.permissions.service.ApiKeyService;
+import uk.ac.ebi.ega.permissions.service.ApiKeyServiceImpl;
 import uk.ac.ebi.ega.permissions.service.JWTService;
 import uk.ac.ebi.ega.permissions.service.JWTServiceImpl;
 import uk.ac.ebi.ega.permissions.service.PermissionsService;
 import uk.ac.ebi.ega.permissions.service.PermissionsServiceImpl;
 import uk.ac.ebi.ega.permissions.service.SecurityService;
+import uk.ac.ebi.ega.permissions.utils.EncryptionUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -146,6 +153,26 @@ public class EgaPermissionsConfig {
     @Bean
     public AccessDeniedHandler accessDeniedHandler() {
         return new CustomAccessDeniedHandler();
+    }
+
+    @Bean
+    public EncryptionUtils encryptionUtils(@Value("${apiKey.user-algorithm}") String userAlgorithm,
+                                           @Value("${apiKey.ega-algorithm}") String egaAlgorithm) {
+        return new EncryptionUtils(userAlgorithm, egaAlgorithm);
+
+    }
+
+    @Bean
+    public ApiKeyService apiKeyService(@Value("${apiKey.ega-password}") String egaPassword,
+                                       final ApiKeyMapper apiKeyMapper,
+                                       final ApiKeyRepository apiKeyRepository,
+                                       final EncryptionUtils encryptionUtils) {
+        return new ApiKeyServiceImpl(egaPassword, apiKeyMapper, apiKeyRepository, encryptionUtils);
+    }
+
+    @Bean
+    public ApiKeyApiDelegate apikeyApiDelegate(final ApiKeyService apiKeyService) {
+        return new ApiKeyApiDelegateImpl(apiKeyService);
     }
 
     private void assertFileExistsAndReadable(final File file, final String message) throws FileSystemException {

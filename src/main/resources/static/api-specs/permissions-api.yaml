@@ -20,6 +20,8 @@ tags:
     description: EGA Data Permissions
   - name: me
     description: Current user endpoints
+  - name: apikey
+    description: API Key Endpoints
 
 paths:
   /{accountId}/permissions:
@@ -220,6 +222,77 @@ paths:
           description: Service Unavailable
           content: { }
 
+  /api_key/generate:
+    get:
+      tags:
+        - apikey
+      summary: Generate a new token
+      description: Return a message with the id, the expiration date and the api token
+      operationId: generateApiKey
+      parameters:
+        - name: id
+          in: query
+          description: ID for the API_KEY
+          required: true
+          schema:
+            type: string
+        - name: expiration_date
+          in: query
+          description: Expiration date
+          required: true
+          schema:
+            type: string
+        - name: reason
+          in: query
+          description: Reason
+          required: false
+          schema:
+            type: string
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreatedAPIKey'
+
+  /api_key:
+    get:
+      tags:
+        - apikey
+      summary: List all tokens
+      description: Return the ids of the keys, reasons and their expiration_date
+      operationId: getApiKeys
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/APIKeyListItem'
+
+  /api_key/{key}:
+    delete:
+      tags:
+        - apikey
+      summary: Delete API Key
+      description: Remove an API_TOKEN whenever it is no longer needed
+      operationId: deleteApiKey
+      parameters:
+        - name: key
+          in: path
+          description: ID of Key to be removed
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: OK
+          content: {}
+
+
 components:
   schemas:
     Visa:
@@ -417,6 +490,34 @@ components:
         message:
           type: string
           description: Error message
+
+    APIKeyListItem:
+      type: object
+      properties:
+        id:
+          type: string
+          description: ID of the API Key
+        expiration_date:
+          type: integer
+          format: int64
+          description: Expiration date of the API Key
+        reason:
+          type: string
+          description: Any relevant text provided by the user
+
+    CreatedAPIKey:
+      type: object
+      properties:
+        id:
+          type: string
+          description: ID of the API Key
+        expiration_date:
+          type: integer
+          format: int64
+          description: Expiration date of the API Key
+        token:
+          type: string
+          description: Token
 
   securitySchemes:
     BearerAuth:
