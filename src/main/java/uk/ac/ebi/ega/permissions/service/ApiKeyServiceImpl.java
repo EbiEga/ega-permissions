@@ -100,19 +100,27 @@ public class ApiKeyServiceImpl implements ApiKeyService {
 
     @Override
     public boolean verifyToken(String token) throws Exception {
-        byte[] decryptedToken = encryptionUtils.decryptWithPassword(egaPassword.getBytes(), decodeString(token));
-        String[] tokenParts = new String(decryptedToken).split("\\.");
+        ApiKey apiKey;
+        String encryptedSalt;
+        try {
+            byte[] decryptedToken = encryptionUtils.decryptWithPassword(egaPassword.getBytes(), decodeString(token));
+            String[] tokenParts = new String(decryptedToken).split("\\.");
 
-        assertLength(tokenParts);
+            assertLength(tokenParts);
 
-        String username = tokenParts[0];
-        String keyId = tokenParts[1];
-        String encryptedSalt = tokenParts[2];
+            String username = tokenParts[0];
+            String keyId = tokenParts[1];
+            encryptedSalt = tokenParts[2];
 
-        ApiKey apiKey = this.apiKeyRepository.findApiKeyByUsernameAndKeyName(username, keyId)
-                .orElseThrow(() -> new SystemException("The API_KEY is not valid"));
+            apiKey = this.apiKeyRepository.findApiKeyByUsernameAndKeyName(username, keyId)
+                    .orElseThrow(() -> new SystemException("The API_KEY is not valid"));
 
-        assertTokenExpiration(apiKey);
+            assertTokenExpiration(apiKey);
+        } catch (AssertionError ex) {
+            return false;
+        } catch (Exception ex) {
+            throw new SystemException("Error verifying the API_KEY Token", ex);
+        }
 
         byte[] decryptedSalt = encryptionUtils.decryptWithKey(decodeString(apiKey.getPrivateKey()), decodeString(encryptedSalt));
         return encodeBytes(decryptedSalt).equals(apiKey.getSalt());
@@ -125,12 +133,7 @@ public class ApiKeyServiceImpl implements ApiKeyService {
     }
 
     private void assertTokenExpiration(ApiKey apiKey) {
-        try {
-            assertTrue(apiKey.getExpiration().before(new Date()));
-        } catch (AssertionError e) {
-            throw new SystemException("Invalid or expired API_KEY Token");
-        }
-
+        assertTrue(apiKey.getExpiration().after(new Date()));
     }
 
     private String encodeBytes(byte[] input) {
