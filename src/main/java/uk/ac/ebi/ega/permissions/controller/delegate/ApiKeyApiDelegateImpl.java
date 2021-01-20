@@ -43,15 +43,14 @@ public class ApiKeyApiDelegateImpl implements ApiKeyApiDelegate {
     public ResponseEntity<CreatedAPIKey> generateApiKey(String id, String expirationDate, String reason) {
 
         String username = getUsername();
-        Date expiration;
 
         try {
-            expiration = new SimpleDateFormat("yyyy-MM-dd").parse(expirationDate);
+            Date expiration = new SimpleDateFormat("yyyy-MM-dd").parse(expirationDate);
             return ResponseEntity.ok(this.apiKeyService.createApiKey(new ApiKeyParams(username, id, expiration, reason)));
         } catch (ParseException e) {
-            throw new SystemException("Error parsing expiration date");
+            throw new SystemException("Error parsing expiration date", e);
         } catch (Exception e) {
-            throw new SystemException("Error generating the API_KEY for user: " + username);
+            throw new SystemException("Error generating the API_KEY for user: " + username, e);
         }
     }
 

@@ -39,15 +39,9 @@ public class EncryptionUtils {
     }
 
     public KeyPair generateKeyPair() throws NoSuchAlgorithmException {
-
         KeyPairGenerator keyGen = KeyPairGenerator.getInstance(keyAlgorithm);
-        SecureRandom random = new SecureRandom();
-
-        // 512 is keysize
-        keyGen.initialize(512, random);
-
-        KeyPair generateKeyPair = keyGen.generateKeyPair();
-        return generateKeyPair;
+        keyGen.initialize(512, new SecureRandom()); // 512 is keysize
+        return keyGen.generateKeyPair();
     }
 
     public byte[] encryptWithKey(byte[] publicKey, byte[] inputData) throws Exception {

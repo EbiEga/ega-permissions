@@ -31,6 +31,8 @@ import java.util.Base64;
 import java.util.Date;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 public class ApiKeyServiceImpl implements ApiKeyService {
 
     private final String egaPassword;
@@ -101,9 +103,7 @@ public class ApiKeyServiceImpl implements ApiKeyService {
         byte[] decryptedToken = encryptionUtils.decryptWithPassword(egaPassword.getBytes(), decodeString(token));
         String[] tokenParts = new String(decryptedToken).split("\\.");
 
-        if (tokenParts.length != 3) {
-            throw new SystemException("Error verifying the API_KEY");
-        }
+        assertLength(tokenParts);
 
         String username = tokenParts[0];
         String keyId = tokenParts[1];
@@ -112,12 +112,25 @@ public class ApiKeyServiceImpl implements ApiKeyService {
         ApiKey apiKey = this.apiKeyRepository.findApiKeyByUsernameAndKeyName(username, keyId)
                 .orElseThrow(() -> new SystemException("The API_KEY is not valid"));
 
-        if(apiKey.getExpiration().before(new Date())){
-            return false; // Token expired
-        }
+        assertTokenExpiration(apiKey);
 
         byte[] decryptedSalt = encryptionUtils.decryptWithKey(decodeString(apiKey.getPrivateKey()), decodeString(encryptedSalt));
         return encodeBytes(decryptedSalt).equals(apiKey.getSalt());
+    }
+
+    private void assertLength(String[] tokenParts) {
+        if (tokenParts.length != 3) {
+            throw new SystemException("Error verifying the API_KEY");
+        }
+    }
+
+    private void assertTokenExpiration(ApiKey apiKey) {
+        try {
+            assertTrue(apiKey.getExpiration().before(new Date()));
+        } catch (AssertionError e) {
+            throw new SystemException("Invalid or expired API_KEY Token");
+        }
+
     }
 
     private String encodeBytes(byte[] input) {
