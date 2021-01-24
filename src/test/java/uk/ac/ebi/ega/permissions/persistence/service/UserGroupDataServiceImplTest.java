@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestPropertySource;
 import uk.ac.ebi.ega.permissions.TestApplication;
 import uk.ac.ebi.ega.permissions.persistence.entities.UserGroup;
 import uk.ac.ebi.ega.permissions.persistence.repository.UserGroupRepository;
@@ -17,7 +16,6 @@ import static uk.ac.ebi.ega.permissions.persistence.entities.Permission.read;
 
 @DataJpaTest
 @ContextConfiguration(classes = {TestApplication.class})
-@TestPropertySource(locations = "classpath:application-test.properties")
 class UserGroupDataServiceImplTest {
 
     @Autowired

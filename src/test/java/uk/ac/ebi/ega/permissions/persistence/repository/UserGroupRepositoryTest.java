@@ -1,31 +1,28 @@
 package uk.ac.ebi.ega.permissions.persistence.repository;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static uk.ac.ebi.ega.permissions.persistence.entities.GroupType.EGAAdmin;
-import static uk.ac.ebi.ega.permissions.persistence.entities.Permission.read;
-import static uk.ac.ebi.ega.permissions.persistence.entities.Authority.dac;
-
-import java.util.List;
-import java.util.Optional;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-
 import uk.ac.ebi.ega.permissions.TestApplication;
 import uk.ac.ebi.ega.permissions.persistence.entities.PassportClaim;
 import uk.ac.ebi.ega.permissions.persistence.entities.UserGroup;
 import uk.ac.ebi.ega.permissions.persistence.entities.VisaType;
 
+import java.util.List;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static uk.ac.ebi.ega.permissions.persistence.entities.Authority.dac;
+import static uk.ac.ebi.ega.permissions.persistence.entities.GroupType.EGAAdmin;
+import static uk.ac.ebi.ega.permissions.persistence.entities.Permission.read;
+
 @ExtendWith(SpringExtension.class)
 @DataJpaTest
 @ContextConfiguration(classes = {TestApplication.class})
-@TestPropertySource(locations = "classpath:application-test.properties")
 public class UserGroupRepositoryTest {
     @Autowired
     private UserGroupRepository userGroupRepository;

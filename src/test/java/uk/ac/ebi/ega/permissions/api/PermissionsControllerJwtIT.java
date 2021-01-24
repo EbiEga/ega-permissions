@@ -19,6 +19,7 @@ package uk.ac.ebi.ega.permissions.api;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -30,6 +31,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.util.UriComponentsBuilder;
 import uk.ac.ebi.ega.permissions.TestApplication;
@@ -41,7 +43,6 @@ import uk.ac.ebi.ega.permissions.persistence.entities.GroupType;
 import uk.ac.ebi.ega.permissions.persistence.entities.Permission;
 import uk.ac.ebi.ega.permissions.persistence.entities.UserGroup;
 import uk.ac.ebi.ega.permissions.persistence.repository.AccountRepository;
-import uk.ac.ebi.ega.permissions.persistence.repository.PassportClaimRepository;
 import uk.ac.ebi.ega.permissions.persistence.repository.UserGroupRepository;
 
 import java.net.URI;
@@ -54,14 +55,12 @@ import static org.assertj.core.api.Assertions.assertThat;
         TestApplication.class,
         TestEntityManagerConfig.class},
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ActiveProfiles("test")
+@ActiveProfiles(profiles = "unsecuretest")
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class PermissionsControllerJwtIT {
 
     @Autowired
     private TestRestTemplate restTemplate;
-
-    @Autowired
-    private PassportClaimRepository passportClaimRepository;
 
     @Autowired
     private AccountRepository accountRepository;

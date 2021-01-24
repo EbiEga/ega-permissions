@@ -1,6 +1,7 @@
 package uk.ac.ebi.ega.permissions.configuration;
 
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.PermissionEvaluator;
 import org.springframework.security.core.Authentication;
@@ -16,6 +17,7 @@ import java.util.List;
 import static uk.ac.ebi.ega.permissions.persistence.entities.GroupType.EGAAdmin;
 
 @Configuration
+@Profile({"production"})
 public class CustomPermissionEvaluator implements PermissionEvaluator {
 
     public static final String ELIXIR_ACCOUNT_SUFFIX = "@elixir-europe.org";
