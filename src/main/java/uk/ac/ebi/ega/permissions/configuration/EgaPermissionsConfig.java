@@ -28,6 +28,7 @@ import uk.ac.ebi.ega.permissions.api.AccountIdApiDelegate;
 import uk.ac.ebi.ega.permissions.api.ApiKeyApiDelegate;
 import uk.ac.ebi.ega.permissions.api.DatasetsApiDelegate;
 import uk.ac.ebi.ega.permissions.api.MeApiDelegate;
+import uk.ac.ebi.ega.permissions.configuration.apikey.ApiKeyAuthenticationFilter;
 import uk.ac.ebi.ega.permissions.configuration.tenant.TenantAuthenticationManagerResolver;
 import uk.ac.ebi.ega.permissions.controller.CustomAccessDeniedHandler;
 import uk.ac.ebi.ega.permissions.controller.RequestHandler;
@@ -173,6 +174,11 @@ public class EgaPermissionsConfig {
     @Bean
     public ApiKeyApiDelegate apikeyApiDelegate(final ApiKeyService apiKeyService) {
         return new ApiKeyApiDelegateImpl(apiKeyService);
+    }
+
+    @Bean
+    public ApiKeyAuthenticationFilter apiKeyAuthenticationFilter(final ApiKeyService apiKeyService) {
+        return new ApiKeyAuthenticationFilter(apiKeyService);
     }
 
     private void assertFileExistsAndReadable(final File file, final String message) throws FileSystemException {

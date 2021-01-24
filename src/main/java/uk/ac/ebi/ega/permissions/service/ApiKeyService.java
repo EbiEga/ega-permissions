@@ -23,16 +23,16 @@ import java.util.List;
 
 public interface ApiKeyService {
 
- CreatedAPIKey createApiKey(ApiKeyParams params) throws Exception;
+    CreatedAPIKey createApiKey(ApiKeyParams params) throws Exception;
 
- void saveApiKeyDetails(ApiKeyParams params);
+    void saveApiKeyDetails(ApiKeyParams params);
 
- ApiKeyParams generateKeys(ApiKeyParams params) throws Exception;
+    ApiKeyParams generateKeys(ApiKeyParams params) throws Exception;
 
- List<APIKeyListItem> getApiKeysForUser(String username);
+    List<APIKeyListItem> getApiKeysForUser(String username);
 
- void deleteApiKey(String username, String keyId);
+    void deleteApiKey(String username, String keyId);
 
- boolean verifyToken(String token) throws Exception;
+    String verifyToken(String token) throws Exception;
 
 }

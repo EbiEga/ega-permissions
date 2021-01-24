@@ -26,15 +26,18 @@ import uk.ac.ebi.ega.permissions.utils.EncryptionUtils;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Base64;
 import java.util.Date;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-class   ApiKeyServiceImplTest {
+
+class ApiKeyServiceImplTest {
 
     private final String keyAlgorithm = "RSA";
     private final String pbeAlgorithm = "AES";
@@ -63,7 +66,7 @@ class   ApiKeyServiceImplTest {
 
         when(apiKeyRepository.findApiKeyByUsernameAndKeyName(any(), any())).thenReturn(Optional.of(apiKey));
 
-        assertThat(apiKeyService.verifyToken(params.getToken())).isTrue();
+        assertThat(apiKeyService.verifyToken(params.getToken())).isEqualTo("user@ebi.ac.uk");
     }
 
     @Test
@@ -77,8 +80,28 @@ class   ApiKeyServiceImplTest {
 
         when(apiKeyRepository.findApiKeyByUsernameAndKeyName(any(), any())).thenReturn(Optional.of(apiKey));
 
-        assertThat(apiKeyService.verifyToken(encryptedParams.getToken())).isFalse();
+        assertThatThrownBy(() -> {
+            apiKeyService.verifyToken(encryptedParams.getToken());
+        }).isInstanceOf(AssertionError.class).hasMessage("API_KEY is invalid (Expired)");
     }
 
+    @Test
+    void verifyRealString() throws Exception {
+
+        String exampleToken = "RUGXEDws5wougP25CarC6vZa+ttY0oSb+/1ceC9TWcX+Fmi17+ZIplmaGDRYorH8dVP0ORVgTs71ayD8nOMY2CfdAs052dIWZyphU+mfsd0IKNwU8YSS2KLIlxuOk0aZiX4+rhVVF9FklLUuzqJ1FQUAC2zI3Yjk0MR845Mj1f8=";
+        byte[] decryptedToken = encryptionUtils.decryptWithPassword("Bar12345Bar12345".getBytes(), decodeString(exampleToken));
+
+        String[] tokenParts = new String(decryptedToken).split("\\.");
+
+        String username = tokenParts[0];
+        String keyId = tokenParts[1];
+
+        assertThat(new String(decodeString(username))).endsWith("@ebi.ac.uk");
+        assertThat(new String(decodeString(keyId))).isEqualTo("test1");
+    }
+
+    private byte[] decodeString(String input) {
+        return Base64.getDecoder().decode(input);
+    }
 
 }

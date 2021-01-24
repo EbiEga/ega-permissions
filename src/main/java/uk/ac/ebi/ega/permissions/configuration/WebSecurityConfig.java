@@ -1,6 +1,6 @@
 /*
  *
- * Copyright 2020 EMBL - European Bioinformatics Institute
+ * Copyright 2020-2021 EMBL - European Bioinformatics Institute
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,8 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.web.access.AccessDeniedHandler;
+import org.springframework.security.web.authentication.AnonymousAuthenticationFilter;
+import uk.ac.ebi.ega.permissions.configuration.apikey.ApiKeyAuthenticationFilter;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -34,17 +36,21 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     private AuthenticationManagerResolver<HttpServletRequest> authenticationManagerResolver;
     private AccessDeniedHandler accessDeniedHandler;
+    private ApiKeyAuthenticationFilter apiKeyAuthenticationFilter;
 
     public WebSecurityConfig(AuthenticationManagerResolver<HttpServletRequest> authenticationManagerResolver,
-                             AccessDeniedHandler accessDeniedHandler) {
+                             AccessDeniedHandler accessDeniedHandler,
+                             ApiKeyAuthenticationFilter apiKeyAuthenticationFilter) {
         this.authenticationManagerResolver = authenticationManagerResolver;
         this.accessDeniedHandler = accessDeniedHandler;
+        this.apiKeyAuthenticationFilter = apiKeyAuthenticationFilter;
     }
 
     // @formatter:off
     @Override
     protected void configure(final HttpSecurity http) throws Exception {
         http
+                .addFilterBefore(apiKeyAuthenticationFilter, AnonymousAuthenticationFilter.class)
                 .authorizeRequests((authorizeRequests) ->
                         authorizeRequests
                                 .antMatchers(GET, "/datasets/{datasetId}/**")
@@ -60,7 +66,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                                 .anyRequest().authenticated())
                 .csrf()
                 .disable()
-                .oauth2ResourceServer(o -> o.authenticationManagerResolver(this.authenticationManagerResolver)).exceptionHandling().accessDeniedHandler(accessDeniedHandler);
+                .oauth2ResourceServer(o -> o.authenticationManagerResolver(this.authenticationManagerResolver))
+                .exceptionHandling()
+                .accessDeniedHandler(accessDeniedHandler);
     }
 
     private String[] swaggerEndpointMatcher() {

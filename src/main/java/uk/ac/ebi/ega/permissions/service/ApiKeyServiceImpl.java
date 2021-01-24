@@ -31,8 +31,6 @@ import java.util.Base64;
 import java.util.Date;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 public class ApiKeyServiceImpl implements ApiKeyService {
 
     private final String egaPassword;
@@ -98,42 +96,54 @@ public class ApiKeyServiceImpl implements ApiKeyService {
         this.apiKeyRepository.removeAllByUsernameAndKeyName(username, keyId);
     }
 
+    /***
+     *
+     * @param token Encrypted API_KEY
+     * @return The username if the API_KEY is valid, throws an exception otherwise
+     * @throws Exception
+     */
     @Override
-    public boolean verifyToken(String token) throws Exception {
+    public String verifyToken(String token) throws Exception {
         ApiKey apiKey;
         String encryptedSalt;
+        String username;
+
         try {
             byte[] decryptedToken = encryptionUtils.decryptWithPassword(egaPassword.getBytes(), decodeString(token));
             String[] tokenParts = new String(decryptedToken).split("\\.");
 
-            assertLength(tokenParts);
+            assertTokenLength(tokenParts);
 
-            String username = tokenParts[0];
-            String keyId = tokenParts[1];
+            username = new String(decodeString(tokenParts[0]));
+            String keyId = new String(decodeString(tokenParts[1]));
             encryptedSalt = tokenParts[2];
 
             apiKey = this.apiKeyRepository.findApiKeyByUsernameAndKeyName(username, keyId)
                     .orElseThrow(() -> new SystemException("The API_KEY is not valid"));
 
             assertTokenExpiration(apiKey);
-        } catch (AssertionError ex) {
-            return false;
+
+            byte[] decryptedSalt = encryptionUtils.decryptWithKey(decodeString(apiKey.getPrivateKey()), decodeString(encryptedSalt));
+
+            assertSaltIsValid(encodeBytes(decryptedSalt), apiKey.getSalt());
+
         } catch (Exception ex) {
             throw new SystemException("Error verifying the API_KEY Token", ex);
         }
 
-        byte[] decryptedSalt = encryptionUtils.decryptWithKey(decodeString(apiKey.getPrivateKey()), decodeString(encryptedSalt));
-        return encodeBytes(decryptedSalt).equals(apiKey.getSalt());
+        return username;
     }
 
-    private void assertLength(String[] tokenParts) {
-        if (tokenParts.length != 3) {
-            throw new SystemException("Error verifying the API_KEY");
-        }
+    private void assertSaltIsValid(String decryptedSalt, String savedSalt) {
+        assert decryptedSalt.equals(savedSalt) : "The API_KEY is invalid.";
+    }
+
+    private void assertTokenLength(String[] tokenParts) {
+        assert tokenParts.length == 3 : "API_KEY token length is invalid";
     }
 
     private void assertTokenExpiration(ApiKey apiKey) {
-        assertTrue(apiKey.getExpiration().after(new Date()));
+        assert apiKey.getExpiration().after(new Date()) : "API_KEY is invalid (Expired)";
     }
 
     private String encodeBytes(byte[] input) {
