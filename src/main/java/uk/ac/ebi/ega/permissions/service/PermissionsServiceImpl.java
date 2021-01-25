@@ -25,6 +25,7 @@ import uk.ac.ebi.ega.permissions.exception.ServiceException;
 import uk.ac.ebi.ega.permissions.exception.SystemException;
 import uk.ac.ebi.ega.permissions.mapper.TokenPayloadMapper;
 import uk.ac.ebi.ega.permissions.model.AccountAccess;
+import uk.ac.ebi.ega.permissions.model.Format;
 import uk.ac.ebi.ega.permissions.model.PassportVisaObject;
 import uk.ac.ebi.ega.permissions.model.Visa;
 import uk.ac.ebi.ega.permissions.persistence.entities.Account;
@@ -103,6 +104,8 @@ public class PermissionsServiceImpl implements PermissionsService {
             innerVisa.setExp(visa.getExp());
             innerVisa.setSub(visa.getSub());
             innerVisa.setIat(visa.getIat());
+            innerVisa.setFormat(Format.PLAIN);
+            e.setFormat(Format.PLAIN);
             innerVisa.setGa4ghVisaV1(e);
             return innerVisa;
         }).collect(Collectors.toList());
