@@ -5,16 +5,19 @@ services:
   - docker:dind
 
 stages:
-  - test
   - build
+  - test
   - package
 
-unit-test:
+maven-build:
   # This template uses jdk11 for verifying and deploying images
   image: maven:3.6.3-jdk-11
-  stage: test
+  stage: build
   script:
-    - mvn test
+    - mvn package -B -DskipTests=true
+  artifacts:
+    paths:
+      - target/
   # Cache downloaded dependencies and plugins between builds.
   # To keep cache across branches add 'key: "$CI_JOB_NAME"'
   cache:
@@ -29,12 +32,12 @@ unit-test:
     # `installAtEnd` and `deployAtEnd` are only effective with recent version of the corresponding plugins.
     MAVEN_CLI_OPTS: "--batch-mode --errors --fail-at-end --show-version -DinstallAtEnd=true -DdeployAtEnd=true"
 
-maven-build:
+unit-test:
   # This template uses jdk11 for verifying and deploying images
   image: maven:3.6.3-jdk-11
-  stage: build
+  stage: test
   script:
-    - mvn package -B -DskipTests=true
+    - mvn surefire:test
   artifacts:
     paths:
       - target/*.jar
@@ -51,6 +54,7 @@ maven-build:
     # when running from the command line.
     # `installAtEnd` and `deployAtEnd` are only effective with recent version of the corresponding plugins.
     MAVEN_CLI_OPTS: "--batch-mode --errors --fail-at-end --show-version -DinstallAtEnd=true -DdeployAtEnd=true"
+
 
 docker-build:
   stage: package
