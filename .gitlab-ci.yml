@@ -13,8 +13,6 @@ unit-test:
   # This template uses jdk11 for verifying and deploying images
   image: maven:3.6.3-jdk-11
   stage: test
-  before_script:
-    - mvn install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
   script:
     - mvn test
   # Cache downloaded dependencies and plugins between builds.
@@ -35,8 +33,6 @@ maven-build:
   # This template uses jdk11 for verifying and deploying images
   image: maven:3.6.3-jdk-11
   stage: build
-  before_script:
-    - mvn install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
   script:
     - mvn package -B -DskipTests=true
   artifacts:
