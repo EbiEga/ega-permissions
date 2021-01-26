@@ -66,7 +66,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                                 .anyRequest().authenticated())
                 .csrf()
                 .disable()
-                .oauth2ResourceServer(o -> o.authenticationManagerResolver(this.authenticationManagerResolver))
+                .oauth2ResourceServer(configurer -> configurer.authenticationManagerResolver(this.authenticationManagerResolver))
                 .exceptionHandling()
                 .accessDeniedHandler(accessDeniedHandler);
     }

@@ -19,12 +19,12 @@ public class TestApplication {
 
     public static class DummyPermissionEvaluator implements PermissionEvaluator {
         @Override
-        public boolean hasPermission(Authentication authentication, Object o, Object o1) {
+        public boolean hasPermission(Authentication auth, Object targetDomainObject, Object permission) {
             return true;
         }
 
         @Override
-        public boolean hasPermission(Authentication authentication, Serializable serializable, String s, Object o) {
+        public boolean hasPermission(Authentication auth, Serializable targetId, String targetType, Object permission) {
             return true;
         }
     }

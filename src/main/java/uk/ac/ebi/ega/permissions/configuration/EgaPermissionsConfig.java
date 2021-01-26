@@ -21,6 +21,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
+import org.springframework.security.access.PermissionEvaluator;
 import org.springframework.security.authentication.AuthenticationManagerResolver;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.util.ResourceUtils;
@@ -121,6 +123,13 @@ public class EgaPermissionsConfig {
                                          final JWTService jwtService,
                                          final SecurityService securityService) {
         return new RequestHandler(permissionsService, tokenPayloadMapper, userGroupDataService, jwtService, securityService);
+    }
+
+    @Bean
+    @Profile({"production"})
+    PermissionEvaluator permissionEvaluator(final PermissionsService permissionsService,
+                                            final UserGroupDataService userGroupDataService){
+        return new CustomPermissionEvaluator(permissionsService, userGroupDataService);
     }
 
     @Bean
