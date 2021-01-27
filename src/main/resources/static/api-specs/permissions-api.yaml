@@ -24,18 +24,24 @@ tags:
     description: API Key Endpoints
 
 paths:
-  /{accountId}/permissions:
+  /permissions:
     get:
       tags:
         - permissions
-      summary: Read Permissions
-      description: Read permissions
+      summary: Read Permissions.
+      description: Read permissions. Parameter accountId must be present either in the QueryString or Header request. Header takes priority.
       operationId: readPermissions
       parameters:
-        - name: accountId
-          in: path
+        - name: account-id
+          in: query
           description: ID of the user account
-          required: true
+          required: false
+          schema:
+            type: string
+        - name: x-account-id
+          in: header
+          description: ID of the user account
+          required: false
           schema:
             type: string
         - name: format
@@ -71,13 +77,19 @@ paths:
         - permissions
       summary: Create Permissions
       description: Create permissions. The account_id can be a namespace qualified
-        ID, for example EGA or ELIXIR ID.
+        ID, for example EGA or ELIXIR ID. Parameter accountId must be present either in the QueryString or Header request. Header takes priority.
       operationId: createPermissions
       parameters:
-        - name: accountId
-          in: path
+        - name: account-id
+          in: query
           description: ID of the user account
-          required: true
+          required: false
+          schema:
+            type: string
+        - name: x-account-id
+          in: header
+          description: ID of the user account
+          required: false
           schema:
             type: string
         - name: format
@@ -119,13 +131,19 @@ paths:
       tags:
         - permissions
       summary: Delete Permission
-      description: Delete Permission
+      description: Delete Permission. Parameter accountId must be present either in the QueryString or Header request. Header takes priority.
       operationId: deletePermissions
       parameters:
-        - name: accountId
-          in: path
+        - name: account-id
+          in: query
           description: ID of the user account
-          required: true
+          required: false
+          schema:
+            type: string
+        - name: x-account-id
+          in: header
+          description: ID of the user account
+          required: false
           schema:
             type: string
         - name: value
