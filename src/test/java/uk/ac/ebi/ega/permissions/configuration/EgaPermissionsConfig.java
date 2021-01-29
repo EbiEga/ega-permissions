@@ -1,28 +1,30 @@
 /*
- *
- * Copyright 2020-2021 EMBL - European Bioinformatics Institute
+ * Copyright 2021-2021 EMBL - European Bioinformatics Institute
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
 package uk.ac.ebi.ega.permissions.configuration;
 
+import org.mapstruct.factory.Mappers;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.access.PermissionEvaluator;
 import org.springframework.security.authentication.AuthenticationManagerResolver;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.util.ResourceUtils;
 import uk.ac.ebi.ega.permissions.api.AccountIdApiDelegate;
@@ -59,20 +61,54 @@ import uk.ac.ebi.ega.permissions.service.JWTServiceImpl;
 import uk.ac.ebi.ega.permissions.service.PermissionsService;
 import uk.ac.ebi.ega.permissions.service.PermissionsServiceImpl;
 import uk.ac.ebi.ega.permissions.service.SecurityService;
-import uk.ac.ebi.ega.permissions.service.SecurityServiceImpl;
 import uk.ac.ebi.ega.permissions.utils.EncryptionUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Serializable;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.FileSystemException;
 import java.nio.file.Files;
 import java.text.ParseException;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
+@Profile("unsecuretest")
 @Configuration
 public class EgaPermissionsConfig {
+
+    @Bean
+    public ApiKeyMapper apiKeyMapper() {
+        return Mappers.getMapper(ApiKeyMapper.class);
+    }
+
+    @Bean
+    public TokenPayloadMapper tokenPayloadMapper() {
+        return Mappers.getMapper(TokenPayloadMapper.class);
+    }
+
+    @Primary
+    @Bean
+    public PermissionEvaluator customPermissionEvaluator() {
+        return new PermissionEvaluator() {
+            @Override
+            public boolean hasPermission(Authentication auth, Object targetDomainObject, Object permission) {
+                return true;
+            }
+
+            @Override
+            public boolean hasPermission(Authentication auth, Serializable targetId, String targetType, Object permission) {
+                return true;
+            }
+        };
+    }
+
+    @Primary
+    @Bean
+    public SecurityService securityService() {
+        return () -> Optional.of("test@ebi.ac.uk");
+    }
 
     @Bean
     public MeApiDelegate meApiDelegate(final RequestHandler requestHandler) {
@@ -166,17 +202,6 @@ public class EgaPermissionsConfig {
     }
 
     @Bean
-    public PermissionEvaluator permissionEvaluator(final PermissionsService permissionsService,
-                                            final UserGroupDataService userGroupDataService) {
-        return new CustomPermissionEvaluator(permissionsService, userGroupDataService);
-    }
-
-    @Bean
-    public SecurityService securityService() {
-        return new SecurityServiceImpl();
-    }
-
-    @Bean
     public ApiKeyService apiKeyService(@Value("${apiKey.ega-password}") String egaPassword,
                                        final ApiKeyMapper apiKeyMapper,
                                        final ApiKeyRepository apiKeyRepository,
@@ -199,4 +224,5 @@ public class EgaPermissionsConfig {
             throw new FileSystemException(message);
         }
     }
+
 }

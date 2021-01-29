@@ -66,7 +66,7 @@ class ApiKeyServiceImplTest {
 
         when(apiKeyRepository.findApiKeyByUsernameAndKeyName(any(), any())).thenReturn(Optional.of(apiKey));
 
-        assertThat(apiKeyService.verifyToken(params.getToken())).isEqualTo("user@ebi.ac.uk");
+        assertThat(apiKeyService.getUserFromToken(params.getToken())).get().isEqualTo("user@ebi.ac.uk");
     }
 
     @Test
@@ -81,7 +81,7 @@ class ApiKeyServiceImplTest {
         when(apiKeyRepository.findApiKeyByUsernameAndKeyName(any(), any())).thenReturn(Optional.of(apiKey));
 
         assertThatThrownBy(() -> {
-            apiKeyService.verifyToken(encryptedParams.getToken());
+            apiKeyService.getUserFromToken(encryptedParams.getToken());
         }).isInstanceOf(AssertionError.class).hasMessage("API_KEY is invalid (Expired)");
     }
 

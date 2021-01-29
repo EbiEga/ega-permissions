@@ -15,7 +15,7 @@
  * limitations under the License.
  *
  */
-package uk.ac.ebi.ega.permissions.configuration;
+package uk.ac.ebi.ega.permissions.configuration.security;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.access.PermissionEvaluator;

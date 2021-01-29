@@ -15,6 +15,7 @@
  */
 package uk.ac.ebi.ega.permissions.configuration.apikey;
 
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.context.SecurityContextHolder;
 import uk.ac.ebi.ega.permissions.service.ApiKeyService;
@@ -41,25 +42,19 @@ public class ApiKeyAuthenticationFilter implements Filter {
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws IOException, ServletException {
-        if (request instanceof HttpServletRequest && response instanceof HttpServletResponse) {
-            String apiKey = getApiKey((HttpServletRequest) request);
-            if (apiKey != null) {
-                try {
-                    String username = apiKeyService.verifyToken(apiKey);
-                    if (!username.isBlank()) {
-                        ApiKeyAuthenticationToken apiToken = new ApiKeyAuthenticationToken(username, apiKey, AuthorityUtils.NO_AUTHORITIES);
-                        SecurityContextHolder.getContext().setAuthentication(apiToken);
-                    } else {
-                        errorResponse("Invalid API Key", response);
-                        return;
-                    }
-                } catch (Exception exception) {
-                    errorResponse("Error verifying the provided API_KEY: " + apiKey, response);
-                    return;
+        String apiKey = null;
+        try {
+            if (request instanceof HttpServletRequest && response instanceof HttpServletResponse) {
+                apiKey = getApiKey((HttpServletRequest) request);
+                if (apiKey != null) {
+                    String username = apiKeyService.getUserFromToken(apiKey).orElseThrow(() -> new AccessDeniedException("API_KEY Token is invalid"));
+                    SecurityContextHolder.getContext().setAuthentication(new ApiKeyAuthenticationToken(username, apiKey, AuthorityUtils.NO_AUTHORITIES));
                 }
             }
+            chain.doFilter(request, response);
+        } catch (Exception ex) {
+            errorResponse("Error processing API_KEY: " + apiKey, response);
         }
-        chain.doFilter(request, response);
     }
 
     private String getApiKey(HttpServletRequest httpRequest) {
