@@ -20,6 +20,7 @@ import uk.ac.ebi.ega.permissions.model.ApiKeyParams;
 import uk.ac.ebi.ega.permissions.model.CreatedAPIKey;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface ApiKeyService {
 
@@ -33,6 +34,6 @@ public interface ApiKeyService {
 
     void deleteApiKey(String username, String keyId);
 
-    String verifyToken(String token) throws Exception;
+    Optional<String> getUserFromToken(String token);
 
 }

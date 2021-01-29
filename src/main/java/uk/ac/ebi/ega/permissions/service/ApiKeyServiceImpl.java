@@ -15,6 +15,8 @@
  */
 package uk.ac.ebi.ega.permissions.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.ac.ebi.ega.permissions.exception.SystemException;
 import uk.ac.ebi.ega.permissions.mapper.ApiKeyMapper;
 import uk.ac.ebi.ega.permissions.model.APIKeyListItem;
@@ -30,8 +32,11 @@ import java.security.SecureRandom;
 import java.util.Base64;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 public class ApiKeyServiceImpl implements ApiKeyService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ApiKeyServiceImpl.class);
 
     private final String egaPassword;
     private final ApiKeyMapper apiKeyMapper;
@@ -99,23 +104,27 @@ public class ApiKeyServiceImpl implements ApiKeyService {
     /***
      *
      * @param token Encrypted API_KEY
-     * @return The username if the API_KEY is valid, throws an exception otherwise
+     * @return Optional containing the username if the API_KEY is valid, empty otherwise
      * @throws Exception
      */
     @Override
-    public String verifyToken(String token) throws Exception {
+    public Optional<String> getUserFromToken(String token) {
         ApiKey apiKey;
         String encryptedSalt;
-        String username;
+        String username = null;
+        String keyId = null;
 
         try {
-            byte[] decryptedToken = encryptionUtils.decryptWithPassword(egaPassword.getBytes(), decodeString(token));
+            byte[] decryptedToken;
+
+            decryptedToken = encryptionUtils.decryptWithPassword(egaPassword.getBytes(), decodeString(token));
+
             String[] tokenParts = new String(decryptedToken).split("\\.");
 
             assertTokenLength(tokenParts);
 
             username = new String(decodeString(tokenParts[0]));
-            String keyId = new String(decodeString(tokenParts[1]));
+            keyId = new String(decodeString(tokenParts[1]));
             encryptedSalt = tokenParts[2];
 
             apiKey = this.apiKeyRepository.findApiKeyByUsernameAndKeyName(username, keyId)
@@ -127,11 +136,12 @@ public class ApiKeyServiceImpl implements ApiKeyService {
 
             assertSaltIsValid(encodeBytes(decryptedSalt), apiKey.getSalt());
 
-        } catch (Exception ex) {
-            throw new SystemException("Error verifying the API_KEY Token", ex);
+        } catch (Exception exception) {
+            LOGGER.error("Error trying to verify API_KEY Token. Candidate username: {} - keyId:{}", username, keyId);
+            username = null;
         }
 
-        return username;
+        return Optional.ofNullable(username);
     }
 
     private void assertSaltIsValid(String decryptedSalt, String savedSalt) {
