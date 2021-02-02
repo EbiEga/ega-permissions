@@ -26,9 +26,15 @@ import uk.ac.ebi.ega.permissions.persistence.entities.ApiKey;
 import uk.ac.ebi.ega.permissions.persistence.repository.ApiKeyRepository;
 import uk.ac.ebi.ega.permissions.utils.EncryptionUtils;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import javax.transaction.Transactional;
+import java.security.InvalidKeyException;
 import java.security.KeyPair;
+import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.security.spec.InvalidKeySpecException;
 import java.util.Base64;
 import java.util.Date;
 import java.util.List;
@@ -105,19 +111,14 @@ public class ApiKeyServiceImpl implements ApiKeyService {
      *
      * @param token Encrypted API_KEY
      * @return Optional containing the username if the API_KEY is valid, empty otherwise
-     * @throws Exception
      */
     @Override
     public Optional<String> getUserFromToken(String token) {
-        ApiKey apiKey;
-        String encryptedSalt;
         String username = null;
         String keyId = null;
 
         try {
-            byte[] decryptedToken;
-
-            decryptedToken = encryptionUtils.decryptWithPassword(egaPassword.getBytes(), decodeString(token));
+            byte[] decryptedToken = encryptionUtils.decryptWithPassword(egaPassword.getBytes(), decodeString(token));
 
             String[] tokenParts = new String(decryptedToken).split("\\.");
 
@@ -125,9 +126,9 @@ public class ApiKeyServiceImpl implements ApiKeyService {
 
             username = new String(decodeString(tokenParts[0]));
             keyId = new String(decodeString(tokenParts[1]));
-            encryptedSalt = tokenParts[2];
+            String encryptedSalt = tokenParts[2];
 
-            apiKey = this.apiKeyRepository.findApiKeyByUsernameAndKeyName(username, keyId)
+            ApiKey apiKey = this.apiKeyRepository.findApiKeyByUsernameAndKeyName(username, keyId)
                     .orElseThrow(() -> new SystemException("The API_KEY is not valid"));
 
             assertTokenExpiration(apiKey);
@@ -135,13 +136,18 @@ public class ApiKeyServiceImpl implements ApiKeyService {
             byte[] decryptedSalt = encryptionUtils.decryptWithKey(decodeString(apiKey.getPrivateKey()), decodeString(encryptedSalt));
 
             assertSaltIsValid(encodeBytes(decryptedSalt), apiKey.getSalt());
-
+            return Optional.of(username);
+        } catch (NoSuchPaddingException | NoSuchAlgorithmException | InvalidKeyException | BadPaddingException | IllegalBlockSizeException | InvalidKeySpecException exception) {
+            LOGGER.error("Internal error trying to verify API_KEY Token. Username: {} - keyId:{}", username, keyId);
+            return Optional.empty();
+        } catch (AssertionError exception) {
+            LOGGER.warn("Invalid API_KEY found in request. Username: {} - KeyId:{}", username, keyId);
+            return Optional.empty();
         } catch (Exception exception) {
-            LOGGER.error("Error trying to verify API_KEY Token. Candidate username: {} - keyId:{}", username, keyId);
-            username = null;
+            LOGGER.error("An unexpected error occurred trying to verify an API_KEY. Username: {} - KeyId:{}", username, keyId);
+            return Optional.empty();
         }
 
-        return Optional.ofNullable(username);
     }
 
     private void assertSaltIsValid(String decryptedSalt, String savedSalt) {

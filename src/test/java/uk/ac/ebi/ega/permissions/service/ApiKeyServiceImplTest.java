@@ -15,9 +15,13 @@
  */
 package uk.ac.ebi.ega.permissions.service;
 
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
+import org.slf4j.LoggerFactory;
 import uk.ac.ebi.ega.permissions.mapper.ApiKeyMapper;
 import uk.ac.ebi.ega.permissions.model.ApiKeyParams;
 import uk.ac.ebi.ega.permissions.persistence.entities.ApiKey;
@@ -28,10 +32,10 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Base64;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -71,6 +75,13 @@ class ApiKeyServiceImplTest {
 
     @Test
     void generateAndVerifyToken_Expired() throws Exception {
+        Logger LOGGER = (Logger) LoggerFactory.getLogger(ApiKeyServiceImpl.class);
+
+        ListAppender<ILoggingEvent> listAppender = new ListAppender<>();
+        listAppender.start();
+
+        LOGGER.addAppender(listAppender);
+
         Date pastDate = Date.from(Instant.now().minus(Duration.ofHours(1)));
 
         ApiKeyParams inputParams = new ApiKeyParams("user@ebi.ac.uk", "MyTestKeyID", pastDate, "Reason");
@@ -80,9 +91,10 @@ class ApiKeyServiceImplTest {
 
         when(apiKeyRepository.findApiKeyByUsernameAndKeyName(any(), any())).thenReturn(Optional.of(apiKey));
 
-        assertThatThrownBy(() -> {
-            apiKeyService.getUserFromToken(encryptedParams.getToken());
-        }).isInstanceOf(AssertionError.class).hasMessage("API_KEY is invalid (Expired)");
+        assertThat(apiKeyService.getUserFromToken(encryptedParams.getToken())).isEmpty();
+
+        List<ILoggingEvent> logsList = listAppender.list;
+        assertThat(logsList.get(0).getMessage()).isEqualTo("Invalid API_KEY found in request. Username: {} - KeyId:{}");
     }
 
     @Test
