@@ -33,7 +33,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.util.UriComponentsBuilder;
 import uk.ac.ebi.ega.permissions.model.AccountAccess;
@@ -53,7 +52,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @ActiveProfiles(profiles = "unsecuretest")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @EnableAutoConfiguration(exclude = {DataSourceAutoConfiguration.class})
 @ComponentScan(basePackages = "uk.ac.ebi.ega.permissions")
 class PermissionsControllerPlainIT {

@@ -33,7 +33,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.util.UriComponentsBuilder;
 import uk.ac.ebi.ega.permissions.model.PassportVisaObject;
@@ -43,6 +42,7 @@ import uk.ac.ebi.ega.permissions.persistence.entities.GroupType;
 import uk.ac.ebi.ega.permissions.persistence.entities.Permission;
 import uk.ac.ebi.ega.permissions.persistence.entities.UserGroup;
 import uk.ac.ebi.ega.permissions.persistence.repository.AccountRepository;
+import uk.ac.ebi.ega.permissions.persistence.repository.PassportClaimRepository;
 import uk.ac.ebi.ega.permissions.persistence.repository.UserGroupRepository;
 
 import java.net.URI;
@@ -53,7 +53,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @ActiveProfiles(profiles = "unsecuretest")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @EnableAutoConfiguration(exclude = {DataSourceAutoConfiguration.class})
 @ComponentScan(basePackages = "uk.ac.ebi.ega.permissions")
 class PermissionsControllerJwtIT {
@@ -67,6 +66,9 @@ class PermissionsControllerJwtIT {
     @Autowired
     private UserGroupRepository userGroupRepository;
 
+    @Autowired
+    private PassportClaimRepository passportClaimRepository;
+
     @LocalServerPort
     int port;
 
@@ -78,6 +80,8 @@ class PermissionsControllerJwtIT {
 
         UserGroup userGroup = new UserGroup("EGAW0000001000", "", GroupType.EGAAdmin, Permission.write);
         userGroupRepository.save(userGroup);
+
+        passportClaimRepository.deleteAll();
     }
 
     @Test

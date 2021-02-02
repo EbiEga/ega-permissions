@@ -15,8 +15,12 @@
  */
 package uk.ac.ebi.ega.permissions.utils;
 
+import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.SecretKeySpec;
+import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.KeyFactory;
 import java.security.KeyPair;
@@ -25,6 +29,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
+import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 
@@ -44,7 +49,7 @@ public class EncryptionUtils {
         return keyGen.generateKeyPair();
     }
 
-    public byte[] encryptWithKey(byte[] publicKey, byte[] inputData) throws Exception {
+    public byte[] encryptWithKey(byte[] publicKey, byte[] inputData) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, BadPaddingException, IllegalBlockSizeException {
 
         PublicKey key = KeyFactory.getInstance(keyAlgorithm)
                 .generatePublic(new X509EncodedKeySpec(publicKey));
@@ -55,10 +60,9 @@ public class EncryptionUtils {
         return cipher.doFinal(inputData);
     }
 
-    public byte[] decryptWithKey(byte[] privateKey, byte[] inputData) throws Exception {
+    public byte[] decryptWithKey(byte[] privateKey, byte[] inputData) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, BadPaddingException, IllegalBlockSizeException, InvalidKeyException {
 
-        PrivateKey key = KeyFactory.getInstance(keyAlgorithm)
-                .generatePrivate(new PKCS8EncodedKeySpec(privateKey));
+        PrivateKey key = KeyFactory.getInstance(keyAlgorithm).generatePrivate(new PKCS8EncodedKeySpec(privateKey));
 
         Cipher cipher = Cipher.getInstance(keyAlgorithm);
         cipher.init(Cipher.DECRYPT_MODE, key);
@@ -66,14 +70,14 @@ public class EncryptionUtils {
         return cipher.doFinal(inputData);
     }
 
-    public byte[] encryptWithPassword(byte[] password, byte[] inputData) throws Exception {
+    public byte[] encryptWithPassword(byte[] password, byte[] inputData) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, BadPaddingException, IllegalBlockSizeException {
         Key aesKey = new SecretKeySpec(password, pbeAlgorithm);
         Cipher cipher = Cipher.getInstance(pbeAlgorithm);
         cipher.init(Cipher.ENCRYPT_MODE, aesKey);
         return cipher.doFinal(inputData);
     }
 
-    public byte[] decryptWithPassword(byte[] password, byte[] inputData) throws Exception {
+    public byte[] decryptWithPassword(byte[] password, byte[] inputData) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, BadPaddingException, IllegalBlockSizeException {
         Key aesKey = new SecretKeySpec(password, pbeAlgorithm);
         Cipher cipher = Cipher.getInstance(pbeAlgorithm);
         cipher.init(Cipher.DECRYPT_MODE, aesKey);

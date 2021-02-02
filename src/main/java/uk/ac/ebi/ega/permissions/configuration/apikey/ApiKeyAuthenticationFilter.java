@@ -41,19 +41,19 @@ public class ApiKeyAuthenticationFilter implements Filter {
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
-            throws IOException, ServletException {
+            throws IOException {
         String apiKey = null;
         try {
             if (request instanceof HttpServletRequest && response instanceof HttpServletResponse) {
                 apiKey = getApiKey((HttpServletRequest) request);
                 if (apiKey != null) {
-                    String username = apiKeyService.getUserFromToken(apiKey).orElseThrow(() -> new AccessDeniedException("API_KEY Token is invalid"));
+                    String username = apiKeyService.getUserFromToken(apiKey).orElseThrow(() -> new AccessDeniedException("Error verifying API_KEY"));
                     SecurityContextHolder.getContext().setAuthentication(new ApiKeyAuthenticationToken(username, apiKey, AuthorityUtils.NO_AUTHORITIES));
                 }
             }
             chain.doFilter(request, response);
         } catch (Exception ex) {
-            errorResponse("Error processing API_KEY: " + apiKey, response);
+            errorResponse("Error verifying API_KEY: " + apiKey, response);
         }
     }
 
