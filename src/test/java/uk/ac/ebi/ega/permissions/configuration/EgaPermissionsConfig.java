@@ -27,18 +27,18 @@ import org.springframework.security.authentication.AuthenticationManagerResolver
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.util.ResourceUtils;
-import uk.ac.ebi.ega.permissions.api.AccountIdApiDelegate;
 import uk.ac.ebi.ega.permissions.api.ApiKeyApiDelegate;
 import uk.ac.ebi.ega.permissions.api.DatasetsApiDelegate;
 import uk.ac.ebi.ega.permissions.api.MeApiDelegate;
+import uk.ac.ebi.ega.permissions.api.PermissionsApiDelegate;
 import uk.ac.ebi.ega.permissions.configuration.apikey.ApiKeyAuthenticationFilter;
 import uk.ac.ebi.ega.permissions.configuration.tenant.TenantAuthenticationManagerResolver;
 import uk.ac.ebi.ega.permissions.controller.CustomAccessDeniedHandler;
 import uk.ac.ebi.ega.permissions.controller.RequestHandler;
-import uk.ac.ebi.ega.permissions.controller.delegate.AccountIdApiDelegateImpl;
 import uk.ac.ebi.ega.permissions.controller.delegate.ApiKeyApiDelegateImpl;
 import uk.ac.ebi.ega.permissions.controller.delegate.DatasetsApiDelegateImpl;
 import uk.ac.ebi.ega.permissions.controller.delegate.MeApiDelegateImpl;
+import uk.ac.ebi.ega.permissions.controller.delegate.PermissionsApiDelegateImpl;
 import uk.ac.ebi.ega.permissions.mapper.ApiKeyMapper;
 import uk.ac.ebi.ega.permissions.mapper.TokenPayloadMapper;
 import uk.ac.ebi.ega.permissions.model.JWTAlgorithm;
@@ -116,9 +116,9 @@ public class EgaPermissionsConfig {
     }
 
     @Bean
-    public AccountIdApiDelegate accountIdApiDelegate(final PermissionsService permissionsService,
-                                                     final RequestHandler requestHandler) {
-        return new AccountIdApiDelegateImpl(permissionsService, requestHandler);
+    public PermissionsApiDelegate accountIdApiDelegate(final PermissionsService permissionsService,
+                                                       final RequestHandler requestHandler) {
+        return new PermissionsApiDelegateImpl(permissionsService, requestHandler);
     }
 
     @Bean

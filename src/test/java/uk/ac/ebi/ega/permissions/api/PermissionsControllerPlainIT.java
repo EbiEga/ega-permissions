@@ -79,18 +79,18 @@ class PermissionsControllerPlainIT {
 
 
     @Test
-    @DisplayName("NOT_FOUND Response when GET request sent to /{accountId}/permissions endpoint with format PLAIN")
+    @DisplayName("NOT_FOUND Response when GET request sent to /permissions endpoint with format PLAIN")
     public void shouldReturnNotFoundWithInvalidUserAccountId() throws Exception {
-        final String baseUrl = "http://localhost:" + port + "/EGAW0000001000/permissions?format=PLAIN";
+        final String baseUrl = "http://localhost:" + port + "/permissions?account-id=EGAW0000001000&format=PLAIN";
         URI uri = new URI(baseUrl);
         ResponseEntity result = this.restTemplate.getForEntity(uri, Object.class);
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
     }
 
     @Test
-    @DisplayName("OK Response when GET request sent to /{accountId}/permissions endpoint with format PLAIN")
+    @DisplayName("OK Response when GET request sent to /permissions endpoint with format PLAIN")
     public void shouldReturnOkWithUserPermissions() throws Exception {
-        final String baseUrl = "http://localhost:" + port + "/EGAW0000002000/permissions?format=PLAIN";
+        final String baseUrl = "http://localhost:" + port + "/permissions?account-id=EGAW0000002000&format=PLAIN";
         URI uri = new URI(baseUrl);
 
         PassportVisaObject passportVisaObject = new PassportVisaObject();
@@ -111,7 +111,7 @@ class PermissionsControllerPlainIT {
     @Test
     @DisplayName("MULTI_STATUS Response when POST request sent to /{accountId}/permissions endpoint with format PLAIN")
     public void shouldReturnMultiStatusWithResponses() throws Exception {
-        final String baseUrl = "http://localhost:" + port + "/EGAW0000003000/permissions?format=PLAIN";
+        final String baseUrl = "http://localhost:" + port + "/permissions?account-id=EGAW0000003000&format=PLAIN";
         URI uri = new URI(baseUrl);
 
         PassportVisaObject passportVisaObject1 = new PassportVisaObject();
@@ -138,9 +138,9 @@ class PermissionsControllerPlainIT {
     }
 
     @Test
-    @DisplayName("OK Response when DELETE request sent to /{accountId}/permissions endpoint")
+    @DisplayName("OK Response when DELETE request sent to /permissions endpoint")
     public void shouldReturnOkWithNoResponseBody() throws Exception {
-        final String baseUrl = "http://localhost:" + port + "/EGAW0000004000/permissions?format=PLAIN";
+        final String baseUrl = "http://localhost:" + port + "/permissions?account-id=EGAW0000004000&format=PLAIN";
         URI uri = new URI(baseUrl);
 
         PassportVisaObject passportVisaObject = new PassportVisaObject();
@@ -165,9 +165,9 @@ class PermissionsControllerPlainIT {
     }
 
     @Test
-    @DisplayName("NOT_FOUND Response when DELETE request sent to /{accountId}/permissions endpoint with format PLAIN")
+    @DisplayName("NOT_FOUND Response when DELETE request sent to /permissions endpoint with format PLAIN")
     public void shouldReturnNotFoundForDeleteOperation() throws Exception {
-        final String baseUrl = "http://localhost:" + port + "/EGAW0000005000/permissions?format=PLAIN";
+        final String baseUrl = "http://localhost:" + port + "/permissions?account-id=EGAW0000005000&format=PLAIN";
 
         HttpHeaders headers = new HttpHeaders();
         headers.set("Accept", MediaType.APPLICATION_JSON_VALUE);
@@ -184,7 +184,7 @@ class PermissionsControllerPlainIT {
     @Test
     @DisplayName("OK Response when GET request sent to /datasets/{datasetId}/users endpoint with format PLAIN")
     public void shouldReturnOkWithAccountUsers() throws Exception {
-        String baseUrl = "http://localhost:" + port + "/EGAW0000004000/permissions?format=PLAIN";
+        String baseUrl = "http://localhost:" + port + "/permissions?account-id=EGAW0000004000&format=PLAIN";
 
         PassportVisaObject passportVisaObject = new PassportVisaObject();
         passportVisaObject.setSource("https://ega-archive.org/dacs/EGAC00001111111");
@@ -206,7 +206,7 @@ class PermissionsControllerPlainIT {
     @Test
     @DisplayName("OK Response when GET request sent to /me/permissions endpoint with format PLAIN")
     public void shouldReturnOkWithCurrentUserPermissions() throws Exception {
-        String baseUrl = "http://localhost:" + port + "/EGAW0000001000/permissions?format=PLAIN";
+        String baseUrl = "http://localhost:" + port + "/permissions?account-id=EGAW0000001000&format=PLAIN";
 
         PassportVisaObject passportVisaObject = new PassportVisaObject();
         passportVisaObject.setSource("https://ega-archive.org/dacs/EGAC00001111111");

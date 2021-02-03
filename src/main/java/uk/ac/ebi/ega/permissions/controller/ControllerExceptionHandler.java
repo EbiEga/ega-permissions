@@ -36,20 +36,22 @@ public class ControllerExceptionHandler {
     //Overrides the default 500 Error response for requests not meeting the API Definition
     @ExceptionHandler(value = {ConstraintViolationException.class})
     ResponseEntity<Object> constraintViolationException(ConstraintViolationException ex) {
-        Map<String, String> responseBody = new HashMap<>();
-        responseBody.put("timestamp", String.valueOf(new Date()));
-        responseBody.put("status", String.valueOf(HttpStatus.BAD_REQUEST.value()));
-        responseBody.put("message", ex.getMessage());
+        Map<String, String> responseBody = getResponseBody(HttpStatus.BAD_REQUEST, ex);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST.value()).body(responseBody);
     }
 
 
     @ExceptionHandler(value = {ValidationException.class})
     ResponseEntity<Object> validationExceptions(ValidationException ex) {
+        Map<String, String> responseBody = getResponseBody(HttpStatus.NOT_FOUND, ex);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND.value()).body(responseBody);
+    }
+
+    private Map<String, String> getResponseBody(HttpStatus status, Exception ex) {
         Map<String, String> responseBody = new HashMap<>();
         responseBody.put("timestamp", String.valueOf(new Date()));
-        responseBody.put("status", String.valueOf(HttpStatus.NOT_FOUND.value()));
+        responseBody.put("status", String.valueOf(status.value()));
         responseBody.put("message", ex.getMessage());
-        return ResponseEntity.status(HttpStatus.NOT_FOUND.value()).body(responseBody);
+        return responseBody;
     }
 }

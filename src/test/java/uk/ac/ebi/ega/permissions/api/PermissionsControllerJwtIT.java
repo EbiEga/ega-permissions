@@ -85,19 +85,24 @@ class PermissionsControllerJwtIT {
     }
 
     @Test
-    @DisplayName("NOT_FOUND Response when GET request sent to /{accountId}/permissions endpoint")
+    @DisplayName("NOT_FOUND Response when GET request sent to /permissions endpoint")
     public void shouldReturnNotFoundWithInvalidUserAccountId() throws Exception {
-
-        final String baseUrl = "http://localhost:" + port + "/EGAW0000001000/permissions?format=JWT";
+        final String baseUrl = "http://localhost:" + port + "/permissions?format=JWT";
         URI uri = new URI(baseUrl);
-        ResponseEntity result = this.restTemplate.getForEntity(uri, Object.class);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("x-account-id", "EGAW0000001000");
+
+        HttpEntity<Object> entity = new HttpEntity(headers);
+        ResponseEntity<Object> result = restTemplate.exchange(uri, HttpMethod.GET, entity, Object.class);
+
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
     }
 
     @Test
-    @DisplayName("OK Response when GET request sent to /{accountId}/permissions endpoint")
+    @DisplayName("OK Response when GET request sent to /permissions endpoint")
     public void shouldReturnOkWithUserPermissions() throws Exception {
-        String baseUrl = "http://localhost:" + port + "/EGAW0000002000/permissions?format=PLAIN";
+        String baseUrl = "http://localhost:" + port + "/permissions?account-id=EGAW0000002000&format=PLAIN";
 
         PassportVisaObject passportVisaObject = new PassportVisaObject();
         passportVisaObject.setSource("https://ega-archive.org/dacs/EGAC00001111111");
@@ -108,17 +113,23 @@ class PermissionsControllerJwtIT {
 
         this.restTemplate.postForEntity(new URI(baseUrl), Arrays.asList(passportVisaObject), PermissionsResponse[].class);
 
-        baseUrl = "http://localhost:" + port + "/EGAW0000002000/permissions?format=JWT";
-        ResponseEntity<Object[]> result = this.restTemplate.getForEntity(new URI(baseUrl), Object[].class);
+        baseUrl = "http://localhost:" + port + "/permissions?format=JWT";
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("x-account-id", "EGAW0000002000");
+
+        HttpEntity<Object> entity = new HttpEntity(headers);
+        ResponseEntity<Object[]> result = restTemplate.exchange(new URI(baseUrl), HttpMethod.GET, entity, Object[].class);
+
         Object[] permissions = result.getBody();
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(permissions).hasSize(1);
     }
 
     @Test
-    @DisplayName("MULTI_STATUS Response when POST request sent to /{accountId}/permissions endpoint")
+    @DisplayName("MULTI_STATUS Response when POST request sent to /permissions endpoint")
     public void shouldReturnMultiStatusWithResponses() throws Exception {
-        final String baseUrl = "http://localhost:" + port + "/EGAW0000003000/permissions?format=JWT";
+        final String baseUrl = "http://localhost:" + port + "/permissions?format=JWT";
         URI uri = new URI(baseUrl);
 
         String jwt1 = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJlbWlsaW8iLCJnYTRnaF92aXNhX3YxIjp7ImFzc2VydGVkIjoxNTY4ODE0MzgzLCJieSI6ImRhYyIsInNvdXJjZSI6Imh0dHBzOi8vZWdhLWFyY2hpdmUub3JnL2RhY3MvRUdBQzAwMDAxMDAwNTE0IiwidHlwZSI6IkNvbnRyb2xsZWRBY2Nlc3NHcmFudHMiLCJ2YWx1ZSI6Imh0dHBzOi8vZWdhLWFyY2hpdmUub3JnL2RhdGFzZXRzL0VHQUQwMDAwMTAwMjA4MCJ9LCJpc3MiOiJodHRwczovL2VnYS5lYmkuYWMudWs6ODA1My9lZ2Etb3BlbmlkLWNvbm5lY3Qtc2VydmVyLyIsImV4cCI6MTU5ODk1Mjg1MCwiaWF0IjoxNTkyODI0NTE0LCJqdGkiOiI0MmQ5NzIzZC00OTNmLTQ3NGEtOGU0Yi03ZmRkZGE1YzM5ZjEifQ.JkWP6emg3irl4-97ZfCvri-SOK4WRUqHncledf5yg14";
@@ -132,8 +143,12 @@ class PermissionsControllerJwtIT {
         object2.put("jwt", jwt2);
         object2.put("format", "JWT");
 
-        ResponseEntity<Object[]> result = this.restTemplate.postForEntity(uri, Arrays.asList(object1, object2),
-                Object[].class);
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("x-account-id", "EGAW0000003000");
+
+        HttpEntity<Object[]> entities = new HttpEntity(Arrays.asList(object1, object2), headers);
+
+        ResponseEntity<Object[]> result = this.restTemplate.postForEntity(uri, entities, Object[].class);
         Object[] responses = result.getBody();
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.MULTI_STATUS);
         assertThat(responses).hasSize(2);
@@ -142,8 +157,7 @@ class PermissionsControllerJwtIT {
     @Test
     @DisplayName("OK Response when DELETE request sent to /{accountId}/permissions endpoint")
     public void shouldReturnOkWithNoResponseBody() throws Exception {
-        final String baseUrl = "http://localhost:" + port + "/EGAW0000004000/permissions?format=JWT";
-        URI uri = new URI(baseUrl);
+        String baseUrl = "http://localhost:" + port + "/permissions?account-id=EGAW0000004000&format=JWT";
 
         String jwt1 = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJlbWlsaW8iLCJnYTRnaF92aXNhX3YxIjp7ImFzc2VydGVkIjoxNTY4ODE0MzgzLCJieSI6ImRhYyIsInNvdXJjZSI6Imh0dHBzOi8vZWdhLWFyY2hpdmUub3JnL2RhY3MvRUdBQzAwMDAxMDAwNTE0IiwidHlwZSI6IkNvbnRyb2xsZWRBY2Nlc3NHcmFudHMiLCJ2YWx1ZSI6Imh0dHBzOi8vZWdhLWFyY2hpdmUub3JnL2RhdGFzZXRzL0VHQUQwMDAwMTAwMjA4MCJ9LCJpc3MiOiJodHRwczovL2VnYS5lYmkuYWMudWs6ODA1My9lZ2Etb3BlbmlkLWNvbm5lY3Qtc2VydmVyLyIsImV4cCI6MTU5ODk1Mjg1MCwiaWF0IjoxNTkyODI0NTE0LCJqdGkiOiI0MmQ5NzIzZC00OTNmLTQ3NGEtOGU0Yi03ZmRkZGE1YzM5ZjEifQ.JkWP6emg3irl4-97ZfCvri-SOK4WRUqHncledf5yg14";
 
@@ -151,10 +165,13 @@ class PermissionsControllerJwtIT {
         object1.put("jwt", jwt1);
         object1.put("format", "JWT");
 
-        this.restTemplate.postForEntity(uri, Arrays.asList(object1), Object[].class);
+        this.restTemplate.postForEntity(new URI(baseUrl), Arrays.asList(object1), Object[].class);
+
+        baseUrl = "http://localhost:" + port + "/permissions?format=JWT";
 
         HttpHeaders headers = new HttpHeaders();
         headers.set("Accept", MediaType.APPLICATION_JSON_VALUE);
+        headers.set("x-account-id", "EGAW0000004000");
 
         UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(baseUrl)
                 .queryParam("value", "https://ega-archive.org/datasets/EGAD00001002080");
@@ -166,12 +183,13 @@ class PermissionsControllerJwtIT {
     }
 
     @Test
-    @DisplayName("NOT_FOUND Response when DELETE request sent to /{accountId}/permissions endpoint")
+    @DisplayName("NOT_FOUND Response when DELETE request sent to /permissions endpoint")
     public void shouldReturnNotFoundForDeleteOperation() throws Exception {
-        final String baseUrl = "http://localhost:" + port + "/EGAW0000005000/permissions";
+        final String baseUrl = "http://localhost:" + port + "/permissions";
 
         HttpHeaders headers = new HttpHeaders();
         headers.set("Accept", MediaType.APPLICATION_JSON_VALUE);
+        headers.set("x-account-id", "EGAW0000005000");
 
         UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(baseUrl)
                 .queryParam("value", "https://ega-archive.org/datasets/EGAD00002222222");
