@@ -18,7 +18,6 @@
 package uk.ac.ebi.ega.permissions.configuration;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
@@ -40,8 +39,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-@Disabled
-//TODO: Enable later, a way to distinguish between the mock and main configuration is needed
 public class CustomPermissionEvaluatorTest {
     private static final String EGA_ACCOUNT_ID = "EGAW001";
     private PermissionsService permissionsService = mock(PermissionsService.class);

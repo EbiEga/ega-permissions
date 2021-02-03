@@ -92,6 +92,7 @@ public class RequestHandler {
                             .map(e -> {
                                 JWTVisa jwtVisa = new JWTVisa();
                                 jwtVisa.setJwt(e);
+                                jwtVisa.setFormat(format);
                                 return jwtVisa;
                             })
                             .collect(Collectors.toList())
@@ -140,6 +141,7 @@ public class RequestHandler {
                         response.setGa4ghVisaV1(strVisa);
                         response.setStatus(preResponse.getStatus());
                         response.setMessage(preResponse.getMessage());
+                        response.setFormat(Format.JWT);
                         return response;
                     } catch (ParseException ex) {
                         JWTPermissionsResponse response = new JWTPermissionsResponse();
@@ -185,6 +187,7 @@ public class RequestHandler {
         final PermissionsResponse permissionsResponse = new PermissionsResponse();
         permissionsResponse.setStatus(httpStatus.value());
         permissionsResponse.setMessage(message);
+        permissionsResponse.setFormat(Format.PLAIN);
         return permissionsResponse;
     }
 

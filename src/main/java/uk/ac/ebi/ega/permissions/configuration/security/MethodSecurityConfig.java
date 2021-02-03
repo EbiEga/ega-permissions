@@ -15,9 +15,10 @@
  * limitations under the License.
  *
  */
-package uk.ac.ebi.ega.permissions.configuration;
+package uk.ac.ebi.ega.permissions.configuration.security;
 
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.access.PermissionEvaluator;
 import org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler;
 import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
@@ -27,17 +28,17 @@ import org.springframework.security.config.annotation.method.configuration.Globa
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class MethodSecurityConfig extends GlobalMethodSecurityConfiguration {
 
-    private final CustomPermissionEvaluator customPermissionEvaluator;
+    private final PermissionEvaluator permissionEvaluator;
 
-    public MethodSecurityConfig(final CustomPermissionEvaluator customPermissionEvaluator) {
-        this.customPermissionEvaluator = customPermissionEvaluator;
+    public MethodSecurityConfig(final PermissionEvaluator customPermissionEvaluator) {
+        this.permissionEvaluator = customPermissionEvaluator;
     }
 
     @Override
     protected MethodSecurityExpressionHandler createExpressionHandler() {
         DefaultMethodSecurityExpressionHandler expressionHandler =
                 new DefaultMethodSecurityExpressionHandler();
-        expressionHandler.setPermissionEvaluator(customPermissionEvaluator);
+        expressionHandler.setPermissionEvaluator(permissionEvaluator);
         return expressionHandler;
     }
 }

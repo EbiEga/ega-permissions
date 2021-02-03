@@ -21,9 +21,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.web.server.LocalServerPort;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -32,8 +35,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.util.UriComponentsBuilder;
-import uk.ac.ebi.ega.permissions.TestApplication;
-import uk.ac.ebi.ega.permissions.configuration.TestEntityManagerConfig;
 import uk.ac.ebi.ega.permissions.model.PassportVisaObject;
 import uk.ac.ebi.ega.permissions.model.PermissionsResponse;
 import uk.ac.ebi.ega.permissions.persistence.entities.Account;
@@ -50,18 +51,14 @@ import java.util.HashMap;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest(classes = {
-        TestApplication.class,
-        TestEntityManagerConfig.class},
-        webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ActiveProfiles("test")
+@ActiveProfiles(profiles = "unsecuretest")
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@EnableAutoConfiguration(exclude = {DataSourceAutoConfiguration.class})
+@ComponentScan(basePackages = "uk.ac.ebi.ega.permissions")
 class PermissionsControllerJwtIT {
 
     @Autowired
     private TestRestTemplate restTemplate;
-
-    @Autowired
-    private PassportClaimRepository passportClaimRepository;
 
     @Autowired
     private AccountRepository accountRepository;
@@ -69,8 +66,12 @@ class PermissionsControllerJwtIT {
     @Autowired
     private UserGroupRepository userGroupRepository;
 
+    @Autowired
+    private PassportClaimRepository passportClaimRepository;
+
     @LocalServerPort
     int port;
+
 
     @BeforeEach
     public void setup() {
@@ -79,11 +80,14 @@ class PermissionsControllerJwtIT {
 
         UserGroup userGroup = new UserGroup("EGAW0000001000", "", GroupType.EGAAdmin, Permission.write);
         userGroupRepository.save(userGroup);
+
+        passportClaimRepository.deleteAll();
     }
 
     @Test
     @DisplayName("NOT_FOUND Response when GET request sent to /{accountId}/permissions endpoint")
     public void shouldReturnNotFoundWithInvalidUserAccountId() throws Exception {
+
         final String baseUrl = "http://localhost:" + port + "/EGAW0000001000/permissions?format=JWT";
         URI uri = new URI(baseUrl);
         ResponseEntity result = this.restTemplate.getForEntity(uri, Object.class);

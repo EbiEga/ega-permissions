@@ -15,9 +15,13 @@
  */
 package uk.ac.ebi.ega.permissions.service;
 
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
+import org.slf4j.LoggerFactory;
 import uk.ac.ebi.ega.permissions.mapper.ApiKeyMapper;
 import uk.ac.ebi.ega.permissions.model.ApiKeyParams;
 import uk.ac.ebi.ega.permissions.persistence.entities.ApiKey;
@@ -26,7 +30,9 @@ import uk.ac.ebi.ega.permissions.utils.EncryptionUtils;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Base64;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -34,7 +40,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-class   ApiKeyServiceImplTest {
+
+class ApiKeyServiceImplTest {
 
     private final String keyAlgorithm = "RSA";
     private final String pbeAlgorithm = "AES";
@@ -63,11 +70,18 @@ class   ApiKeyServiceImplTest {
 
         when(apiKeyRepository.findApiKeyByUsernameAndKeyName(any(), any())).thenReturn(Optional.of(apiKey));
 
-        assertThat(apiKeyService.verifyToken(params.getToken())).isTrue();
+        assertThat(apiKeyService.getUserFromToken(params.getToken())).get().isEqualTo("user@ebi.ac.uk");
     }
 
     @Test
     void generateAndVerifyToken_Expired() throws Exception {
+        Logger LOGGER = (Logger) LoggerFactory.getLogger(ApiKeyServiceImpl.class);
+
+        ListAppender<ILoggingEvent> listAppender = new ListAppender<>();
+        listAppender.start();
+
+        LOGGER.addAppender(listAppender);
+
         Date pastDate = Date.from(Instant.now().minus(Duration.ofHours(1)));
 
         ApiKeyParams inputParams = new ApiKeyParams("user@ebi.ac.uk", "MyTestKeyID", pastDate, "Reason");
@@ -77,8 +91,29 @@ class   ApiKeyServiceImplTest {
 
         when(apiKeyRepository.findApiKeyByUsernameAndKeyName(any(), any())).thenReturn(Optional.of(apiKey));
 
-        assertThat(apiKeyService.verifyToken(encryptedParams.getToken())).isFalse();
+        assertThat(apiKeyService.getUserFromToken(encryptedParams.getToken())).isEmpty();
+
+        List<ILoggingEvent> logsList = listAppender.list;
+        assertThat(logsList.get(0).getMessage()).isEqualTo("Invalid API_KEY found in request. Username: {} - KeyId:{}");
     }
 
+    @Test
+    void verifyRealString() throws Exception {
+
+        String exampleToken = "RUGXEDws5wougP25CarC6vZa+ttY0oSb+/1ceC9TWcX+Fmi17+ZIplmaGDRYorH8dVP0ORVgTs71ayD8nOMY2CfdAs052dIWZyphU+mfsd0IKNwU8YSS2KLIlxuOk0aZiX4+rhVVF9FklLUuzqJ1FQUAC2zI3Yjk0MR845Mj1f8=";
+        byte[] decryptedToken = encryptionUtils.decryptWithPassword("Bar12345Bar12345".getBytes(), decodeString(exampleToken));
+
+        String[] tokenParts = new String(decryptedToken).split("\\.");
+
+        String username = tokenParts[0];
+        String keyId = tokenParts[1];
+
+        assertThat(new String(decodeString(username))).endsWith("@ebi.ac.uk");
+        assertThat(new String(decodeString(keyId))).isEqualTo("test1");
+    }
+
+    private byte[] decodeString(String input) {
+        return Base64.getDecoder().decode(input);
+    }
 
 }
