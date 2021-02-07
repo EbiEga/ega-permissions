@@ -18,6 +18,8 @@
 package uk.ac.ebi.ega.permissions.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.util.CollectionUtils;
 import uk.ac.ebi.ega.permissions.configuration.VisaInfoProperties;
@@ -47,10 +49,11 @@ import java.util.stream.Collectors;
 
 public class PermissionsServiceImpl implements PermissionsService {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(PermissionsServiceImpl.class);
+
     private static final String ELIXIR_ACCOUNT_SUFFIX = "@elixir-europe.org";
     private static final String EVENT_SAVED = "SAVED";
     private static final String EVENT_DELETED = "DELETED";
-
 
     private final PermissionsDataService permissionsDataService;
     private final EventDataService eventDataService;
@@ -136,15 +139,18 @@ public class PermissionsServiceImpl implements PermissionsService {
 
     @Override
     @Transactional
-    public void deletePassportVisaObject(String accountId, String value) {
+    public void deletePassportVisaObject(String accountId, List<String> toDeleteValues) {
         try {
-            PassportClaim deletedEntity = this.permissionsDataService.deletePassportClaim(accountId, value);
-            if (deletedEntity == null) {
+            List<PassportClaim> deletedClaims = toDeleteValues.parallelStream().map(val -> this.permissionsDataService.deletePassportClaim(accountId, val)).filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList());
+
+            if (toDeleteValues.size() > 0 && deletedClaims.size() == 0) {
                 throw new ValidationException("Values for accountId and value are incorrect or not valid");
+            } else if (toDeleteValues.size() != deletedClaims.size()) {
+                LOGGER.warn("Some values provided trying to delete permissions might be invalid");
             }
-            eventDataService.saveEvent(getEvent(accountId, new ObjectMapper().writeValueAsString(deletedEntity), EVENT_DELETED));
+            eventDataService.saveEvent(getEvent(accountId, new ObjectMapper().writeValueAsString(deletedClaims), EVENT_DELETED));
         } catch (Exception ex) {
-            throw new SystemException(String.format("Error processing the request for [accountId:%s, value:%s]", accountId, value), ex);
+            throw new SystemException(String.format("Error processing the request for [accountId:%s, values:%s]", accountId, String.join(",", toDeleteValues)), ex);
         }
     }
 

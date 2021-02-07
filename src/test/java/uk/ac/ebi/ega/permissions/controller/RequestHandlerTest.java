@@ -36,6 +36,7 @@ import uk.ac.ebi.ega.permissions.service.PermissionsService;
 import uk.ac.ebi.ega.permissions.service.SecurityService;
 
 import javax.validation.ValidationException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -120,7 +121,7 @@ public class RequestHandlerTest {
     void testDeletePermissions_WhenUserIsEGAAdmin_ReturnStatusOK() {
         when(userGroupDataService.isEGAAdmin(any())).thenReturn(true);
 
-        ResponseEntity<Void> responseEntity = requestHandler.deletePermissions(EMPTY, EMPTY);
+        ResponseEntity<Void> responseEntity = requestHandler.deletePermissions(EMPTY, new ArrayList<>());
         assertEquals(responseEntity.getStatusCode(), OK);
     }
 
@@ -129,7 +130,7 @@ public class RequestHandlerTest {
         when(userGroupDataService.isEGAAdmin(any())).thenReturn(false);
         when(userGroupDataService.datasetBelongsToDAC(any(), any())).thenReturn(true);
 
-        ResponseEntity<Void> responseEntity = requestHandler.deletePermissions(EMPTY, EMPTY);
+        ResponseEntity<Void> responseEntity = requestHandler.deletePermissions(EMPTY, new ArrayList<>());
         assertEquals(responseEntity.getStatusCode(), OK);
     }
 
@@ -139,7 +140,7 @@ public class RequestHandlerTest {
         when(userGroupDataService.datasetBelongsToDAC(any(), any())).thenReturn(false);
 
         assertThatThrownBy(() -> {
-            requestHandler.deletePermissions(EMPTY, EMPTY);
+            requestHandler.deletePermissions(EMPTY, Arrays.asList("CODE"));
         }).isInstanceOf(ValidationException.class);
     }
 

@@ -131,7 +131,7 @@ paths:
       tags:
         - permissions
       summary: Delete Permission
-      description: Delete Permission. Parameter accountId must be present either in the QueryString or Header request. Header takes priority.
+      description: Delete Permission(s). Comma separated values allowed. Set value to 'all' in order remove all permissions from the specified user. Parameter Account ID must be present either in the QueryString or Header request. Header takes priority.
       operationId: deletePermissions
       parameters:
         - name: account-id
@@ -146,12 +146,17 @@ paths:
           required: false
           schema:
             type: string
-        - name: value
+        - name: values
           in: query
-          description: Object to which permissions will apply
+          description: Object to which permissions will apply (i.e. Dataset to remove). Comma separated values and 'all' allowed.
           required: true
+          style: form
+          explode: false
           schema:
-            type: string
+            type: array
+            items:
+              type: string
+
       responses:
         200:
           description: OK

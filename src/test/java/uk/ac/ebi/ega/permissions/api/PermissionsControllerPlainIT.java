@@ -156,7 +156,7 @@ class PermissionsControllerPlainIT {
         headers.set("Accept", MediaType.APPLICATION_JSON_VALUE);
 
         UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(baseUrl)
-                .queryParam("value", "https://ega-archive.org/datasets/EGAD00002222222");
+                .queryParam("values", "https://ega-archive.org/datasets/EGAD00002222222");
 
         HttpEntity<?> entity = new HttpEntity<>(headers);
 
@@ -173,7 +173,7 @@ class PermissionsControllerPlainIT {
         headers.set("Accept", MediaType.APPLICATION_JSON_VALUE);
 
         UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(baseUrl)
-                .queryParam("value", "https://ega-archive.org/datasets/EGAD00002222222");
+                .queryParam("values", "https://ega-archive.org/datasets/EGAD00002222222");
 
         HttpEntity<?> entity = new HttpEntity<>(headers);
 

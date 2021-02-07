@@ -161,10 +161,10 @@ public class RequestHandler {
                 .collect(Collectors.toList());
     }
 
-    public ResponseEntity<Void> deletePermissions(String accountId, String value) {
+    public ResponseEntity<Void> deletePermissions(String accountId, List<String> values) {
         verifyAccountId(accountId);
-        validateDatasetBelongsToDAC(value);
-        this.permissionsService.deletePassportVisaObject(accountId, value);
+        values.forEach(this::validateDatasetBelongsToDAC);
+        this.permissionsService.deletePassportVisaObject(accountId, values);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
