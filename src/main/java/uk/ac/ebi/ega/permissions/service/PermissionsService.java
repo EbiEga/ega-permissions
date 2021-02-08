@@ -43,4 +43,6 @@ public interface PermissionsService {
     void deletePassportVisaObject(String accountId, List<String> values);
 
     List<AccountAccess> getGrantedAccountsForDataset(String datasetId);
+
+    List<String> getPermissionByAccountIdAndController(String accountId, String egaAccountStableId);
 }

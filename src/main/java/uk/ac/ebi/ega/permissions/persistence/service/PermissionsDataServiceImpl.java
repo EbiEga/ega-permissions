@@ -69,8 +69,8 @@ public class PermissionsDataServiceImpl implements PermissionsDataService {
     }
 
     @Override
-    public Optional<PassportClaim> getPassportClaimByAccountIdAndValue(String accountId, String value) {
-        return this.passportClaimRepository.findByAccountIdAndValue(accountId, value);
+    public List<PassportClaim> getPassportClaimsByUserAndController(String accountId, String egaAccountStableId) {
+        return this.passportClaimRepository.findAllByUserAndController(accountId, egaAccountStableId);
     }
 
 

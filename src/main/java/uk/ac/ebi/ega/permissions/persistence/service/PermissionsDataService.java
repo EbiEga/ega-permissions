@@ -23,5 +23,5 @@ public interface PermissionsDataService {
 
     List<PassportClaim> getPassportClaimsForDataset(String datasetId);
 
-    Optional<PassportClaim> getPassportClaimByAccountIdAndValue(String accountId, String value);
+    List<PassportClaim> getPassportClaimsByUserAndController(String accountId, String egaAccountStableId);
 }

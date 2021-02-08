@@ -163,7 +163,11 @@ public class RequestHandler {
 
     public ResponseEntity<Void> deletePermissions(String accountId, List<String> values) {
         verifyAccountId(accountId);
-        values.forEach(this::validateDatasetBelongsToDAC);
+        if (values.contains("all")) { //ignore all other values and remove all premissions
+            values = this.getAllPermissionsForUser(accountId);
+        } else {
+            values.forEach(this::validateDatasetBelongsToDAC);
+        }
         this.permissionsService.deletePassportVisaObject(accountId, values);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
@@ -252,6 +256,11 @@ public class RequestHandler {
             if (!userGroupDataService.datasetBelongsToDAC(bearerAccountId, datasetId))
                 throw new ValidationException("User doesn't own dataset.");
         }
+    }
+
+    private List<String> getAllPermissionsForUser(String accountId) {
+        String bearerAccountId = getBearerAccountId();
+        return permissionsService.getPermissionByAccountIdAndController(accountId, bearerAccountId);
     }
 
     private String getBearerAccountId() {

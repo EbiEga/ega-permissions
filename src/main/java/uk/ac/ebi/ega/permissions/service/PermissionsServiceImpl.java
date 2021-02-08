@@ -159,6 +159,11 @@ public class PermissionsServiceImpl implements PermissionsService {
         return this.tokenPayloadMapper.mapPassportClaimsToAccountAccesses(this.permissionsDataService.getPassportClaimsForDataset(datasetId));
     }
 
+    @Override
+    public List<String> getPermissionByAccountIdAndController(String accountId, String egaAccountStableId) {
+        return this.permissionsDataService.getPassportClaimsByUserAndController(accountId, egaAccountStableId).stream().map(PassportClaim::getValue).collect(Collectors.toList());
+    }
+
     //TODO: Verify/improve this logic to populate visa attributes
     // this can be generated but for now I'm using values from properties
     private Visa generatedVisaInfo(String accountId) {

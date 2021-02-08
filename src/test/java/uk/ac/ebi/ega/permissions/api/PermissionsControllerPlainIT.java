@@ -34,6 +34,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.jdbc.Sql;
+import org.springframework.test.context.jdbc.SqlConfig;
 import org.springframework.web.util.UriComponentsBuilder;
 import uk.ac.ebi.ega.permissions.model.AccountAccess;
 import uk.ac.ebi.ega.permissions.model.PassportVisaObject;
@@ -73,8 +75,10 @@ class PermissionsControllerPlainIT {
         Account account = new Account("EGAW0000001000", "Test", "Test", "test@ebi.ac.uk", "Active");
         accountRepository.save(account);
 
-        UserGroup userGroup = new UserGroup("EGAW0000001000", "", GroupType.EGAAdmin, Permission.write);
-        userGroupRepository.save(userGroup);
+        UserGroup userGroup1 = new UserGroup("EGAW0000001000", "", GroupType.EGAAdmin, Permission.write);
+        UserGroup userGroup2 = new UserGroup("EGAW0000001000", "EGAC0000001000", GroupType.DAC, Permission.write);
+        userGroupRepository.save(userGroup1);
+        userGroupRepository.save(userGroup2);
     }
 
 
@@ -162,6 +166,102 @@ class PermissionsControllerPlainIT {
 
         ResponseEntity result = restTemplate.exchange(builder.toUriString(), HttpMethod.DELETE, entity, Object.class);
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
+    }
+
+    @Test
+    @DisplayName("OK Response when DELETE ALL request sent to /permissions endpoint")
+    @Sql(scripts = {"classpath:scripts/add-datasets.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    public void shouldReturnOkWithNoResponseBodyForDeleteAll() throws Exception {
+        final String baseUrl = "http://localhost:" + port + "/permissions?account-id=EGAW0000004000&format=PLAIN";
+        URI uri = new URI(baseUrl);
+
+        // Create 2 permissions using rest service
+        PassportVisaObject passportVisaObject1 = new PassportVisaObject();
+        passportVisaObject1.setSource("https://ega-archive.org/dacs/EGAC00001111111");
+        passportVisaObject1.setType("ControlledAccessGrants");
+        passportVisaObject1.setValue("EGAD00002222222");
+        passportVisaObject1.setAsserted(1568814383L);
+        passportVisaObject1.setBy("dac");
+
+        PassportVisaObject passportVisaObject2 = new PassportVisaObject();
+        passportVisaObject2.setSource("https://ega-archive.org/dacs/EGAC00001111111");
+        passportVisaObject2.setType("ControlledAccessGrants");
+        passportVisaObject2.setValue("EGAD00003333333");
+        passportVisaObject2.setAsserted(1568814383L);
+        passportVisaObject2.setBy("dac");
+
+        this.restTemplate.postForEntity(uri, Arrays.asList(passportVisaObject1, passportVisaObject2), PermissionsResponse[].class);
+
+        ResponseEntity<Object[]> result = this.restTemplate.getForEntity(uri, Object[].class);
+        Object[] permissions = result.getBody();
+
+        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(permissions).hasSize(2);
+
+        // Delete 2 permissions using all parameter
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Accept", MediaType.APPLICATION_JSON_VALUE);
+
+        UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(baseUrl).queryParam("values", "all");
+
+        HttpEntity<?> entity = new HttpEntity<>(headers);
+
+        ResponseEntity result1 = restTemplate.exchange(builder.toUriString(), HttpMethod.DELETE, entity, Object.class);
+        assertThat(result1.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+        // Verify that the user no longer has active permissions (hence returning not found)
+
+        result1 = this.restTemplate.getForEntity(uri, Object.class);
+        assertThat(result1.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+    }
+
+    @Test
+    @DisplayName("OK Response when DELETE MULTIPLE request sent to /permissions endpoint")
+    @Sql(scripts = {"classpath:scripts/add-datasets.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    public void shouldReturnOkWithNoResponseBodyForDeleteMultiple() throws Exception {
+        final String baseUrl = "http://localhost:" + port + "/permissions?account-id=EGAW0000004000&format=PLAIN";
+        URI uri = new URI(baseUrl);
+
+        // Create 2 permissions using rest service
+        PassportVisaObject passportVisaObject1 = new PassportVisaObject();
+        passportVisaObject1.setSource("https://ega-archive.org/dacs/EGAC00001111111");
+        passportVisaObject1.setType("ControlledAccessGrants");
+        passportVisaObject1.setValue("EGAD00002222222");
+        passportVisaObject1.setAsserted(1568814383L);
+        passportVisaObject1.setBy("dac");
+
+        PassportVisaObject passportVisaObject2 = new PassportVisaObject();
+        passportVisaObject2.setSource("https://ega-archive.org/dacs/EGAC00001111111");
+        passportVisaObject2.setType("ControlledAccessGrants");
+        passportVisaObject2.setValue("EGAD00003333333");
+        passportVisaObject2.setAsserted(1568814383L);
+        passportVisaObject2.setBy("dac");
+
+        this.restTemplate.postForEntity(uri, Arrays.asList(passportVisaObject1, passportVisaObject2), PermissionsResponse[].class);
+
+        ResponseEntity<Object[]> result = this.restTemplate.getForEntity(uri, Object[].class);
+        Object[] permissions = result.getBody();
+
+        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(permissions).hasSize(2);
+
+        // Delete 2 permissions using all parameter
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Accept", MediaType.APPLICATION_JSON_VALUE);
+
+        UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(baseUrl).queryParam("values", "EGAD00002222222,EGAD00003333333");
+
+        HttpEntity<?> entity = new HttpEntity<>(headers);
+
+        ResponseEntity result1 = restTemplate.exchange(builder.toUriString(), HttpMethod.DELETE, entity, Object.class);
+        assertThat(result1.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+        // Verify that the user no longer has active permissions (hence returning not found)
+
+        result1 = this.restTemplate.getForEntity(uri, Object.class);
+        assertThat(result1.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
     }
 
     @Test
