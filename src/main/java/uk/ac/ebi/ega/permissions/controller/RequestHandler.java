@@ -259,8 +259,7 @@ public class RequestHandler {
     }
 
     private List<String> getAllPermissionsForUser(String accountId) {
-        String bearerAccountId = getBearerAccountId();
-        return permissionsService.getPermissionByAccountIdAndController(accountId, bearerAccountId);
+        return permissionsService.getPermissionByAccountIdAndController(accountId, getBearerAccountId());
     }
 
     private String getBearerAccountId() {

@@ -146,7 +146,7 @@ public class PermissionsServiceImpl implements PermissionsService {
             if (toDeleteValues.size() > 0 && deletedClaims.size() == 0) {
                 throw new ValidationException("Values for accountId and value are incorrect or not valid");
             } else if (toDeleteValues.size() != deletedClaims.size()) {
-                LOGGER.warn("Some values provided trying to delete permissions might be invalid");
+                LOGGER.warn("Some values provided trying to delete permissions might be invalid: {}", String.join(",", toDeleteValues));
             }
             eventDataService.saveEvent(getEvent(accountId, new ObjectMapper().writeValueAsString(deletedClaims), EVENT_DELETED));
         } catch (Exception ex) {

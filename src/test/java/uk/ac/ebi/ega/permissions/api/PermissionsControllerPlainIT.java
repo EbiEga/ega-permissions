@@ -35,7 +35,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
-import org.springframework.test.context.jdbc.SqlConfig;
 import org.springframework.web.util.UriComponentsBuilder;
 import uk.ac.ebi.ega.permissions.model.AccountAccess;
 import uk.ac.ebi.ega.permissions.model.PassportVisaObject;
@@ -48,7 +47,9 @@ import uk.ac.ebi.ega.permissions.persistence.repository.AccountRepository;
 import uk.ac.ebi.ega.permissions.persistence.repository.UserGroupRepository;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -97,14 +98,9 @@ class PermissionsControllerPlainIT {
         final String baseUrl = "http://localhost:" + port + "/permissions?account-id=EGAW0000002000&format=PLAIN";
         URI uri = new URI(baseUrl);
 
-        PassportVisaObject passportVisaObject = new PassportVisaObject();
-        passportVisaObject.setSource("https://ega-archive.org/dacs/EGAC00001111111");
-        passportVisaObject.setType("ControlledAccessGrants");
-        passportVisaObject.setValue("https://ega-archive.org/datasets/EGAD00002222222");
-        passportVisaObject.setAsserted(1568814383L);
-        passportVisaObject.setBy("dac");
+        List<PassportVisaObject> passportVisaObjects = createPassportVisaObjects(Arrays.asList("https://ega-archive.org/datasets/EGAD00002222222"));
 
-        this.restTemplate.postForEntity(uri, Arrays.asList(passportVisaObject), PermissionsResponse[].class);
+        this.restTemplate.postForEntity(uri, passportVisaObjects, PermissionsResponse[].class);
 
         ResponseEntity<Object[]> result = this.restTemplate.getForEntity(uri, Object[].class);
         Object[] permissions = result.getBody();
@@ -118,22 +114,10 @@ class PermissionsControllerPlainIT {
         final String baseUrl = "http://localhost:" + port + "/permissions?account-id=EGAW0000003000&format=PLAIN";
         URI uri = new URI(baseUrl);
 
-        PassportVisaObject passportVisaObject1 = new PassportVisaObject();
-        passportVisaObject1.setSource("https://ega-archive.org/dacs/EGAC00001111111");
-        passportVisaObject1.setType("ControlledAccessGrants");
-        passportVisaObject1.setValue("https://ega-archive.org/datasets/EGAD00002222222");
-        passportVisaObject1.setAsserted(1568814383L);
-        passportVisaObject1.setBy("dac");
+        List<PassportVisaObject> passportVisaObjects = createPassportVisaObjects(Arrays.asList("https://ega-archive.org/datasets/EGAD00002222222",
+                "https://ega-archive.org/datasets/EGAD00003333333"));
 
-        PassportVisaObject passportVisaObject2 = new PassportVisaObject();
-        passportVisaObject2.setSource("https://ega-archive.org/dacs/EGAC00001111111");
-        passportVisaObject2.setType("ControlledAccessGrants");
-        passportVisaObject2.setValue("https://ega-archive.org/datasets/EGAD00003333333");
-        passportVisaObject2.setAsserted(1568814383L);
-        passportVisaObject2.setBy("dac");
-
-        ResponseEntity<PermissionsResponse[]> result = this.restTemplate.postForEntity(uri, Arrays.asList(passportVisaObject1, passportVisaObject2),
-                PermissionsResponse[].class);
+        ResponseEntity<PermissionsResponse[]> result = this.restTemplate.postForEntity(uri, passportVisaObjects, PermissionsResponse[].class);
         PermissionsResponse[] responses = result.getBody();
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.MULTI_STATUS);
         assertThat(responses).hasSize(2);
@@ -147,14 +131,9 @@ class PermissionsControllerPlainIT {
         final String baseUrl = "http://localhost:" + port + "/permissions?account-id=EGAW0000004000&format=PLAIN";
         URI uri = new URI(baseUrl);
 
-        PassportVisaObject passportVisaObject = new PassportVisaObject();
-        passportVisaObject.setSource("https://ega-archive.org/dacs/EGAC00001111111");
-        passportVisaObject.setType("ControlledAccessGrants");
-        passportVisaObject.setValue("https://ega-archive.org/datasets/EGAD00002222222");
-        passportVisaObject.setAsserted(1568814383L);
-        passportVisaObject.setBy("dac");
+        List<PassportVisaObject> passportVisaObjects = createPassportVisaObjects(Arrays.asList("https://ega-archive.org/datasets/EGAD00002222222"));
 
-        this.restTemplate.postForEntity(uri, Arrays.asList(passportVisaObject), PermissionsResponse[].class);
+        this.restTemplate.postForEntity(uri, passportVisaObjects, PermissionsResponse[].class);
 
         HttpHeaders headers = new HttpHeaders();
         headers.set("Accept", MediaType.APPLICATION_JSON_VALUE);
@@ -176,21 +155,9 @@ class PermissionsControllerPlainIT {
         URI uri = new URI(baseUrl);
 
         // Create 2 permissions using rest service
-        PassportVisaObject passportVisaObject1 = new PassportVisaObject();
-        passportVisaObject1.setSource("https://ega-archive.org/dacs/EGAC00001111111");
-        passportVisaObject1.setType("ControlledAccessGrants");
-        passportVisaObject1.setValue("EGAD00002222222");
-        passportVisaObject1.setAsserted(1568814383L);
-        passportVisaObject1.setBy("dac");
+        List<PassportVisaObject> passportVisaObjects = createPassportVisaObjects(Arrays.asList("EGAD00002222222", "EGAD00003333333"));
 
-        PassportVisaObject passportVisaObject2 = new PassportVisaObject();
-        passportVisaObject2.setSource("https://ega-archive.org/dacs/EGAC00001111111");
-        passportVisaObject2.setType("ControlledAccessGrants");
-        passportVisaObject2.setValue("EGAD00003333333");
-        passportVisaObject2.setAsserted(1568814383L);
-        passportVisaObject2.setBy("dac");
-
-        this.restTemplate.postForEntity(uri, Arrays.asList(passportVisaObject1, passportVisaObject2), PermissionsResponse[].class);
+        this.restTemplate.postForEntity(uri, passportVisaObjects, PermissionsResponse[].class);
 
         ResponseEntity<Object[]> result = this.restTemplate.getForEntity(uri, Object[].class);
         Object[] permissions = result.getBody();
@@ -223,22 +190,9 @@ class PermissionsControllerPlainIT {
         final String baseUrl = "http://localhost:" + port + "/permissions?account-id=EGAW0000004000&format=PLAIN";
         URI uri = new URI(baseUrl);
 
-        // Create 2 permissions using rest service
-        PassportVisaObject passportVisaObject1 = new PassportVisaObject();
-        passportVisaObject1.setSource("https://ega-archive.org/dacs/EGAC00001111111");
-        passportVisaObject1.setType("ControlledAccessGrants");
-        passportVisaObject1.setValue("EGAD00002222222");
-        passportVisaObject1.setAsserted(1568814383L);
-        passportVisaObject1.setBy("dac");
+        List<PassportVisaObject> passportVisaObjects = createPassportVisaObjects(Arrays.asList("EGAD00002222222", "EGAD00003333333"));
 
-        PassportVisaObject passportVisaObject2 = new PassportVisaObject();
-        passportVisaObject2.setSource("https://ega-archive.org/dacs/EGAC00001111111");
-        passportVisaObject2.setType("ControlledAccessGrants");
-        passportVisaObject2.setValue("EGAD00003333333");
-        passportVisaObject2.setAsserted(1568814383L);
-        passportVisaObject2.setBy("dac");
-
-        this.restTemplate.postForEntity(uri, Arrays.asList(passportVisaObject1, passportVisaObject2), PermissionsResponse[].class);
+        this.restTemplate.postForEntity(uri, passportVisaObjects, PermissionsResponse[].class);
 
         ResponseEntity<Object[]> result = this.restTemplate.getForEntity(uri, Object[].class);
         Object[] permissions = result.getBody();
@@ -286,14 +240,9 @@ class PermissionsControllerPlainIT {
     public void shouldReturnOkWithAccountUsers() throws Exception {
         String baseUrl = "http://localhost:" + port + "/permissions?account-id=EGAW0000004000&format=PLAIN";
 
-        PassportVisaObject passportVisaObject = new PassportVisaObject();
-        passportVisaObject.setSource("https://ega-archive.org/dacs/EGAC00001111111");
-        passportVisaObject.setType("ControlledAccessGrants");
-        passportVisaObject.setValue("EGAD00002222222");
-        passportVisaObject.setAsserted(1568814383L);
-        passportVisaObject.setBy("dac");
+        List<PassportVisaObject> passportVisaObjects = createPassportVisaObjects(Arrays.asList("EGAD00002222222"));
 
-        this.restTemplate.postForEntity(new URI(baseUrl), Arrays.asList(passportVisaObject), PermissionsResponse[].class);
+        this.restTemplate.postForEntity(new URI(baseUrl), passportVisaObjects, PermissionsResponse[].class);
 
         baseUrl = "http://localhost:" + port + "/datasets/EGAD00002222222/users";
 
@@ -308,14 +257,9 @@ class PermissionsControllerPlainIT {
     public void shouldReturnOkWithCurrentUserPermissions() throws Exception {
         String baseUrl = "http://localhost:" + port + "/permissions?account-id=EGAW0000001000&format=PLAIN";
 
-        PassportVisaObject passportVisaObject = new PassportVisaObject();
-        passportVisaObject.setSource("https://ega-archive.org/dacs/EGAC00001111111");
-        passportVisaObject.setType("ControlledAccessGrants");
-        passportVisaObject.setValue("https://ega-archive.org/datasets/EGAD00002222222");
-        passportVisaObject.setAsserted(1568814383L);
-        passportVisaObject.setBy("dac");
+        List<PassportVisaObject> passportVisaObjects = createPassportVisaObjects(Arrays.asList("https://ega-archive.org/datasets/EGAD00002222222"));
 
-        this.restTemplate.postForEntity(new URI(baseUrl), Arrays.asList(passportVisaObject), PermissionsResponse[].class);
+        this.restTemplate.postForEntity(new URI(baseUrl), passportVisaObjects, PermissionsResponse[].class);
 
         baseUrl = "http://localhost:" + port + "/me/permissions?format=PLAIN";
 
@@ -325,4 +269,19 @@ class PermissionsControllerPlainIT {
         assertThat(permissions).hasSize(1);
     }
 
+
+    private List<PassportVisaObject> createPassportVisaObjects(List<String> values) {
+        List<PassportVisaObject> passportVisaObjects = new ArrayList<>(values.size());
+
+        values.forEach(value -> {
+            PassportVisaObject passportVisaObject = new PassportVisaObject();
+            passportVisaObject.setSource("https://ega-archive.org/dacs/EGAC00001111111");
+            passportVisaObject.setType("ControlledAccessGrants");
+            passportVisaObject.setValue(value);
+            passportVisaObject.setAsserted(1568814383L);
+            passportVisaObject.setBy("dac");
+            passportVisaObjects.add(passportVisaObject);
+        });
+        return passportVisaObjects;
+    }
 }
