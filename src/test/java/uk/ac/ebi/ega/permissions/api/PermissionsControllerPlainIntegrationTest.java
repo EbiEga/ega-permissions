@@ -57,7 +57,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @EnableAutoConfiguration(exclude = {DataSourceAutoConfiguration.class})
 @ComponentScan(basePackages = "uk.ac.ebi.ega.permissions")
-class PermissionsControllerPlainIT {
+class PermissionsControllerPlainIntegrationTest {
 
     @Autowired
     private TestRestTemplate restTemplate;
