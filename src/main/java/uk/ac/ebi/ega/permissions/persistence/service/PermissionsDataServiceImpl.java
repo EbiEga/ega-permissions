@@ -47,16 +47,15 @@ public class PermissionsDataServiceImpl implements PermissionsDataService {
 
     @Override
     @Transactional
-    public PassportClaim deletePassportClaim(String accountId, String value) {
+    public Optional<PassportClaim> deletePassportClaim(String accountId, String value) {
         PassportClaim deletedEntity = null;
         Optional<PassportClaim> optionalPassportClaim = this.passportClaimRepository.findByAccountIdAndValue(accountId, value);
         if (optionalPassportClaim.isPresent()) {
             PassportClaim passportClaim = optionalPassportClaim.get();
             passportClaim.setStatus("revoked");
             deletedEntity = this.passportClaimRepository.save(passportClaim);
-
         }
-        return deletedEntity;
+        return Optional.of(deletedEntity);
     }
 
     @Override
@@ -70,8 +69,8 @@ public class PermissionsDataServiceImpl implements PermissionsDataService {
     }
 
     @Override
-    public Optional<PassportClaim> getPassportClaimByAccountIdAndValue(String accountId, String value) {
-        return this.passportClaimRepository.findByAccountIdAndValue(accountId, value);
+    public List<PassportClaim> getPassportClaimsByUserAndController(String accountId, String egaAccountStableId) {
+        return this.passportClaimRepository.findAllByUserAndController(accountId, egaAccountStableId);
     }
 
 

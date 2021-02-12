@@ -55,7 +55,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @EnableAutoConfiguration(exclude = {DataSourceAutoConfiguration.class})
 @ComponentScan(basePackages = "uk.ac.ebi.ega.permissions")
-class PermissionsControllerJwtIT {
+class PermissionsControllerJwtIntegrationTest {
 
     @Autowired
     private TestRestTemplate restTemplate;
@@ -174,7 +174,7 @@ class PermissionsControllerJwtIT {
         headers.set("x-account-id", "EGAW0000004000");
 
         UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(baseUrl)
-                .queryParam("value", "https://ega-archive.org/datasets/EGAD00001002080");
+                .queryParam("values", "https://ega-archive.org/datasets/EGAD00001002080");
 
         HttpEntity<?> entity = new HttpEntity<>(headers);
 
@@ -192,7 +192,7 @@ class PermissionsControllerJwtIT {
         headers.set("x-account-id", "EGAW0000005000");
 
         UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(baseUrl)
-                .queryParam("value", "https://ega-archive.org/datasets/EGAD00002222222");
+                .queryParam("values", "https://ega-archive.org/datasets/EGAD00002222222");
 
         HttpEntity<?> entity = new HttpEntity<>(headers);
 

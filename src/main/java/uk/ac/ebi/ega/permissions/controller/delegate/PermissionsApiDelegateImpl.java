@@ -37,10 +37,10 @@ public class PermissionsApiDelegateImpl implements PermissionsApiDelegate {
     }
 
     @Override
-    public ResponseEntity<Void> deletePermissions(String value,
+    public ResponseEntity<Void> deletePermissions(List<String> values,
                                                   String accountId,
                                                   String xAccountId) {
-        return requestHandler.deletePermissions(requestHandler.getAccountIdForElixirId(verifyAccountId(accountId, xAccountId)), value);
+        return requestHandler.deletePermissions(requestHandler.getAccountIdForElixirId(verifyAccountId(accountId, xAccountId)), values);
     }
 
     //Check that the request contains either the account-id or x-account-id values

@@ -22,4 +22,9 @@ public interface PassportClaimRepository extends CrudRepository<PassportClaim, P
 
     @Query("select pc from PassportClaim pc where pc.value=:value and pc.status='approved'")
     List<PassportClaim> findAllByValue(@Param("value") String value);
+
+    @Query("select pc from PassportClaim pc inner join Dataset ds "
+            + "on ds.datasetId=pc.value inner join UserGroup ug "
+            + "on ug.groupStableId=ds.dacStableId where pc.accountId=:accountId and ug.egaAccountStableId=:egaAccountStableId")
+    List<PassportClaim> findAllByUserAndController(@Param("accountId") String accountId, @Param("egaAccountStableId") String egaAccountStableId);
 }
