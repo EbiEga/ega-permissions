@@ -27,10 +27,6 @@ import uk.ac.ebi.ega.permissions.configuration.apikey.ApiKeyAuthenticationFilter
 
 import javax.servlet.http.HttpServletRequest;
 
-import static org.springframework.http.HttpMethod.DELETE;
-import static org.springframework.http.HttpMethod.GET;
-import static org.springframework.http.HttpMethod.POST;
-
 @EnableWebSecurity
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
@@ -53,14 +49,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .addFilterBefore(apiKeyAuthenticationFilter, AnonymousAuthenticationFilter.class)
                 .authorizeRequests((authorizeRequests) ->
                         authorizeRequests
-                                .antMatchers(GET, "/datasets/{datasetId}/**")
-                                .access("hasPermission(#datasetId, 'DAC_read')")
-                                .antMatchers(GET, "/{accountId}/**")
-                                .access("hasPermission(#accountId, 'EGAAdmin_read')")
-                                .antMatchers(POST, "/{accountId}/**")
-                                .access("hasPermission(#accountId, 'DAC_write')")
-                                .antMatchers(DELETE, "/{accountId}/**")
-                                .access("hasPermission(#accountId, 'DAC_write')")
                                 .antMatchers(swaggerEndpointMatcher())
                                 .permitAll()
                                 .anyRequest().authenticated())

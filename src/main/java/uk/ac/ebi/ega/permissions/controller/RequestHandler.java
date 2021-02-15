@@ -24,6 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import uk.ac.ebi.ega.permissions.exception.ServiceException;
 import uk.ac.ebi.ega.permissions.exception.SystemException;
 import uk.ac.ebi.ega.permissions.mapper.TokenPayloadMapper;
@@ -77,6 +78,7 @@ public class RequestHandler {
         return getPermissionsForUser(accountId, format);
     }
 
+    @PreAuthorize("hasPermission(#userId, 'EGAAdmin_read')")
     public ResponseEntity<Visas> getPermissionsForUser(String userId, Format format) {
         Visas response = new Visas();
 
@@ -104,6 +106,7 @@ public class RequestHandler {
         return ResponseEntity.ok(response);
     }
 
+    @PreAuthorize("hasPermission(#accountId, 'DAC_write')")
     public ResponseEntity<PermissionsResponses> createPermissions(String accountId,
                                                                   List<Object> body,
                                                                   Format format) {
@@ -161,9 +164,10 @@ public class RequestHandler {
                 .collect(Collectors.toList());
     }
 
+    @PreAuthorize("hasPermission(#accountId, 'DAC_write')")
     public ResponseEntity<Void> deletePermissions(String accountId, List<String> values) {
         verifyAccountId(accountId);
-        if (values.contains("all")) { //ignore all other values and remove all premissions
+        if (values.contains("all")) { //ignore all other values and remove all permissions
             values = this.getAllPermissionsForUser(accountId);
         } else {
             values.forEach(this::validateDatasetBelongsToDAC);
@@ -232,7 +236,6 @@ public class RequestHandler {
                     });
         }
     }
-
 
     private void validatePermissionsDatasetBelongsToDAC(List<PassportVisaObject> passportVisaObjects) {
         String bearerAccountId = getBearerAccountId();
