@@ -54,7 +54,6 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Disabled //TODO: Need refactor, must be enabled later
 @ActiveProfiles(profiles = "unsecuretest")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @EnableAutoConfiguration(exclude = {DataSourceAutoConfiguration.class})
