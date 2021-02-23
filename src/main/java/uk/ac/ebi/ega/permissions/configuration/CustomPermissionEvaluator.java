@@ -52,7 +52,9 @@ public class CustomPermissionEvaluator implements PermissionEvaluator {
         return userGroups.stream().anyMatch(entry -> {
             String accessGroup = entry.getGroupType().name();
             String accessLevel = entry.getPermission().name();
-
+            //TODO: Looks like we're missing some validation here as the controller can only act upon datassets that they can control.
+            //HINT: variable targetType not being used. This means any controller with WRITE permission can modify any dataset
+            //Add tests
             if (EGAAdmin.name().equals(accessGroup) || permission.equals(accessGroup.concat("_").concat(accessLevel))) {
                 return true;
             }

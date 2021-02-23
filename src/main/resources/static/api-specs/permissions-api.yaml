@@ -1,8 +1,7 @@
 openapi: 3.0.3
 info:
   title: EGA Data Permissions
-  description: This API handles requests to read, add, update, and delete permissions
-    to EGA.
+  description: The EGA Permissions API is aimed to allow approved users (e.g. Data Access Committee) to control and audit access to EGA datasets. The API currently supports authentication using ELIXIR and EGA credentials for OpenID as well as generated API_KEYs.
   termsOfService: TBD
   contact:
     email: ega-dev@ebi.ac.uk
@@ -261,7 +260,7 @@ paths:
             type: string
         - name: expiration_date
           in: query
-          description: Expiration date
+          description: Expiration date in YYYY-MM-DD format
           required: true
           schema:
             type: string
@@ -527,6 +526,10 @@ components:
         reason:
           type: string
           description: Any relevant text provided by the user
+      example:
+        id: SampleID
+        expiration_date: 1592824514
+        reason: Sample Token
 
     CreatedAPIKey:
       type: object
@@ -541,6 +544,10 @@ components:
         token:
           type: string
           description: Token
+      example:
+        id: SampleID
+        expiration_date: 1592824514
+        token: generated.token=
 
   securitySchemes:
     BearerAuth:

@@ -17,6 +17,7 @@
  */
 package uk.ac.ebi.ega.permissions.configuration.security;
 
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.authentication.AuthenticationManagerResolver;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -27,6 +28,8 @@ import uk.ac.ebi.ega.permissions.configuration.apikey.ApiKeyAuthenticationFilter
 
 import javax.servlet.http.HttpServletRequest;
 
+//Overriding the security configuration so we can test request and responses with disabled security
+@Profile("unsecuretest")
 @EnableWebSecurity
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
@@ -46,15 +49,12 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(final HttpSecurity http) throws Exception {
         http
-                .addFilterBefore(apiKeyAuthenticationFilter, AnonymousAuthenticationFilter.class)
                 .authorizeRequests((authorizeRequests) ->
                         authorizeRequests
-                                .antMatchers(swaggerEndpointMatcher())
-                                .permitAll()
-                                .anyRequest().authenticated())
+                                .anyRequest()
+                                .permitAll())
                 .csrf()
                 .disable()
-                .oauth2ResourceServer(configurer -> configurer.authenticationManagerResolver(this.authenticationManagerResolver))
                 .exceptionHandling()
                 .accessDeniedHandler(accessDeniedHandler);
     }
