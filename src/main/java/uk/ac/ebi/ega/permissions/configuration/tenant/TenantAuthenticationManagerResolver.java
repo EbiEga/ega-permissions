@@ -56,7 +56,7 @@ public class TenantAuthenticationManagerResolver implements AuthenticationManage
 
     private AuthenticationManager fromTenant(String tenant) {
         AuthenticationManager manager;
-        LOGGER.debug("Validating token for Tenant: {}", tenant);
+        LOGGER.info("Validating token for Tenant: {}", tenant);
         if (egaJwtIssUri.equals(tenant)) {
             //NimbusJTWDecoder used because EGA OpenID server doesn't have the /.well-known/ configuration endpoint enabled
             JwtDecoder decoder = new NimbusJwtDecoderJwkSupport(egaJwtJwkSetUri);
