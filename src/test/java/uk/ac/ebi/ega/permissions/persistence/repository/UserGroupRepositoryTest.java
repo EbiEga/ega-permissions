@@ -56,7 +56,7 @@ public class UserGroupRepositoryTest {
 
         Optional<List<UserGroup>> userGroupsAfterInsert = userGroupRepository.findAllByUserIdAndDataSetId("user1", "d1");
 
-        assertTrue(userGroupsBeforeInsert.isEmpty());
+        assertTrue(userGroupsBeforeInsert.get().isEmpty());
         assertEquals(1, userGroupsAfterInsert.stream().count());
     }
 }
