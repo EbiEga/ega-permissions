@@ -78,7 +78,7 @@ public class RequestHandler {
         return getPermissionsForUser(accountId, format);
     }
 
-    @PreAuthorize("hasPermission(#userId, 'EGAAdmin_read')")
+    @PreAuthorize("hasPermission(#userId, 'EGAAdmin_read') || hasPermission(#userId, 'DAC_read')")
     public ResponseEntity<Visas> getPermissionsForUser(String userId, Format format) {
         Visas response = new Visas();
 

@@ -1,4 +1,4 @@
-Feature: permissions are granted to user
+Feature: Assign permissions to user
   Scenario: EGA Admin grants permissions to user
     Given user account EGAW0000001 with email amohan@ebi.ac.uk exist
     And user account EGAW0000002 with email test@ebi.ac.uk exist
@@ -8,7 +8,7 @@ Feature: permissions are granted to user
     When user account EGAW0000001 grants permissions to account EGAW0000002 on dataset EGAD00001
     Then the response status is 207 and the dataset status is 201
 
-  Scenario Outline: DAC with write permission to Dataset grants permissions to another user
+  Scenario Outline: DAC Admin with write permissions to Dataset grants permissions to another user
     Given user account <dac_user> with email amohan@ebi.ac.uk exist
     And user account <ega_user> with email test@ebi.ac.uk exist
     And dataset <dataset_id> belongs to DAC <dac_of_dataset>
