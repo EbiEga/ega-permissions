@@ -7,6 +7,7 @@ import uk.ac.ebi.ega.permissions.persistence.repository.AccountRepository;
 import uk.ac.ebi.ega.permissions.persistence.repository.PassportClaimRepository;
 import uk.ac.ebi.ega.permissions.persistence.entities.Account;
 import uk.ac.ebi.ega.permissions.persistence.entities.PassportClaim;
+import uk.ac.ebi.ega.permissions.persistence.repository.UserGroupRepository;
 
 import java.util.List;
 import java.util.Optional;
@@ -16,18 +17,30 @@ public class PermissionsDataServiceImpl implements PermissionsDataService {
     private PassportClaimRepository passportClaimRepository;
     private AccountRepository accountRepository;
     private AccountElixirIdRepository accountElixirIdRepository;
+    private UserGroupRepository userGroupRepository;
 
     public PermissionsDataServiceImpl(PassportClaimRepository passportClaimRepository,
                                       AccountRepository accountRepository,
-                                      AccountElixirIdRepository accountElixirIdRepository) {
+                                      AccountElixirIdRepository accountElixirIdRepository,
+                                      UserGroupRepository userGroupRepository) {
         this.passportClaimRepository = passportClaimRepository;
         this.accountRepository = accountRepository;
         this.accountElixirIdRepository = accountElixirIdRepository;
+        this.userGroupRepository = userGroupRepository;
     }
 
     @Override
     public List<PassportClaim> getPassPortClaimsForAccount(String accountId) {
         return passportClaimRepository.findAllByAccountId(accountId);
+    }
+
+    @Override
+    public List<PassportClaim> getPassPortClaimsForAccountAndController(String userAccountId, String controllerAccountId) {
+        if (userGroupRepository.isEGAAdmin(controllerAccountId)) {
+            return getPassPortClaimsForAccount(userAccountId);
+        } else {
+            return passportClaimRepository.findAllByAccountIdAndControllerId(userAccountId, controllerAccountId);
+        }
     }
 
     @Override

@@ -40,11 +40,7 @@ import uk.ac.ebi.ega.permissions.persistence.service.PermissionsDataService;
 import javax.persistence.PersistenceException;
 import javax.transaction.Transactional;
 import javax.validation.ValidationException;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class PermissionsServiceImpl implements PermissionsService {
@@ -90,15 +86,25 @@ public class PermissionsServiceImpl implements PermissionsService {
     }
 
     @Override
-    public List<Visa> getVisas(String accountId) {
+    public List<Visa> getVisas(String userAccountId) {
         List<PassportVisaObject> passportVisaObjects = this.tokenPayloadMapper
-                .mapPassportClaimsToPassportVisaObjects(this.permissionsDataService.getPassPortClaimsForAccount(accountId));
+                .mapPassportClaimsToPassportVisaObjects(this.permissionsDataService.getPassPortClaimsForAccount(userAccountId));
+        return formatVisas(userAccountId, passportVisaObjects);
+    }
 
+    @Override
+    public List<Visa> getControlledVisas(String userAccountId, String controllerAccountId) {
+        List<PassportVisaObject> passportVisaObjects = this.tokenPayloadMapper
+                .mapPassportClaimsToPassportVisaObjects(this.permissionsDataService.getPassPortClaimsForAccountAndController(userAccountId, controllerAccountId));
+        return formatVisas(userAccountId, passportVisaObjects);
+    }
+
+    private List<Visa> formatVisas(String userAccountId, List<PassportVisaObject> passportVisaObjects) {
         if (CollectionUtils.isEmpty(passportVisaObjects)) {
             return Collections.emptyList();
         }
 
-        Visa visa = generatedVisaInfo(accountId);
+        Visa visa = generatedVisaInfo(userAccountId);
 
         List<Visa> visas = passportVisaObjects.stream().map(e -> {
             Visa innerVisa = new Visa();

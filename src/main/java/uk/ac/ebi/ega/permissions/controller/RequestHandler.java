@@ -24,19 +24,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import uk.ac.ebi.ega.permissions.exception.ServiceException;
 import uk.ac.ebi.ega.permissions.exception.SystemException;
 import uk.ac.ebi.ega.permissions.mapper.TokenPayloadMapper;
-import uk.ac.ebi.ega.permissions.model.Format;
-import uk.ac.ebi.ega.permissions.model.JWTPassportVisaObject;
-import uk.ac.ebi.ega.permissions.model.JWTPermissionsResponse;
-import uk.ac.ebi.ega.permissions.model.JWTVisa;
-import uk.ac.ebi.ega.permissions.model.PassportVisaObject;
-import uk.ac.ebi.ega.permissions.model.PermissionsResponse;
-import uk.ac.ebi.ega.permissions.model.PermissionsResponses;
-import uk.ac.ebi.ega.permissions.model.Visa;
-import uk.ac.ebi.ega.permissions.model.Visas;
+import uk.ac.ebi.ega.permissions.model.*;
+import uk.ac.ebi.ega.permissions.persistence.entities.Account;
 import uk.ac.ebi.ega.permissions.persistence.entities.AccountElixirId;
 import uk.ac.ebi.ega.permissions.persistence.service.UserGroupDataService;
 import uk.ac.ebi.ega.permissions.service.JWTService;
@@ -82,9 +76,14 @@ public class RequestHandler {
     public ResponseEntity<Visas> getPermissionsForUser(String userId, Format format) {
         Visas response = new Visas();
 
-        String accountId = getAccountIdForElixirId(userId);
-        verifyAccountId(accountId);
-        List<Visa> visas = this.permissionsService.getVisas(accountId);
+        String userAccountId = getAccountIdForElixirId(userId);
+        verifyAccountId(userAccountId);
+
+        String controllerEmail = securityService.getCurrentUser().orElseThrow(() -> new AccessDeniedException("Invalid controller"));
+        Account controllerAccount = permissionsService.getAccountByEmail(controllerEmail).orElseThrow(() ->
+                new AccessDeniedException(("No linked EGA account for email ").concat(controllerEmail)));
+
+        List<Visa> visas = this.permissionsService.getControlledVisas(userAccountId, controllerAccount.getAccountId());
 
         if (format == null || format == Format.JWT) {
             response.addAll(

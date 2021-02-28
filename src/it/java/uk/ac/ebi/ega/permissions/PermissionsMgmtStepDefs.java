@@ -5,6 +5,7 @@ import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+import org.junit.Before;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -38,6 +39,14 @@ public class PermissionsMgmtStepDefs extends ITContextConfiguration {
     private String accessToken;
     private ResponseEntity<PermissionsResponse[]> postResponse;
     private ResponseEntity<Visa[]> getResponse;
+
+
+    @Before
+    void before(){
+
+        System.out.println("BEFOREEEEEEEE");
+
+    }
 
     @Given("^user account (.*?) with email (.*?) exist$")
     public void user_account_exist(String userAccountId, String email) {

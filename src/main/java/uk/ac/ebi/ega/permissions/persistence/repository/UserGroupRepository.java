@@ -32,4 +32,8 @@ public interface UserGroupRepository extends CrudRepository<UserGroup, UserGroup
             + "where ug.egaAccountStableId = :bearerAccountId and dc.datasetId = :datasetId and ug.status='" + APPROVED + "'")
     Optional<List<UserGroup>> findAllUserDatasetBelongsToDAC(@Param("bearerAccountId") String bearerAccountId,
                                                              @Param("datasetId") String datasetId);
+
+    @Query("select case when (count(ug) > 0)  then true else false end from UserGroup ug " +
+            " where ug.egaAccountStableId=:userAccountId and ug.groupType='EGAAdmin' and ug.status='" + APPROVED + "'")
+    boolean isEGAAdmin(@Param("userAccountId") String userAccountId);
 }

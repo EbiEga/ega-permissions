@@ -36,7 +36,9 @@ public interface PermissionsService {
 
     Optional<Account> getAccountByEmail(String email);
 
-    List<Visa> getVisas(String accountId);
+    List<Visa> getVisas(String userAccountId);
+
+    List<Visa> getControlledVisas(String userAccountId, String controllerAccountId);
 
     PassportVisaObject savePassportVisaObject(String accountId, PassportVisaObject passportVisaObject) throws ServiceException, SystemException;
 
