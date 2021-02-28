@@ -1,15 +1,13 @@
 package uk.ac.ebi.ega.permissions;
 
 import io.cucumber.datatable.DataTable;
+import io.cucumber.java.Before;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
-import org.junit.Before;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 import uk.ac.ebi.ega.permissions.helpers.AccessTokenHelper;
@@ -39,6 +37,13 @@ public class PermissionsMgmtStepDefs extends ITContextConfiguration {
     private String accessToken;
     private ResponseEntity<PermissionsResponse[]> postResponse;
     private ResponseEntity<Visa[]> getResponse;
+
+    @Before
+    public void cleanBeforeEachScenario() {
+        this.accountRepository.deleteAll();
+        this.userGroupRepository.deleteAll();
+        this.passportClaimRepository.deleteAll();
+    }
 
     @Given("^user account (.*?) with email (.*?) exist$")
     public void user_account_exist(String userAccountId, String email) {
@@ -81,13 +86,21 @@ public class PermissionsMgmtStepDefs extends ITContextConfiguration {
                 .toUri();
 
         final HttpEntity<List<PassportVisaObject>> request = new HttpEntity<>(passportVisaObjects, headers);
-        this.postResponse = restTemplate.postForEntity(requestURI, request, PermissionsResponse[].class);
+        try{
+            //restTemplate is throwing an exception so we catch it to validate later as this scenario includes multiple response types
+            this.postResponse = restTemplate.exchange(requestURI, HttpMethod.POST, request, PermissionsResponse[].class);
+        }catch (HttpClientErrorException ex){
+            this.postResponse = new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+
     }
 
     @Then("^the response status is (.*?) and the dataset status is (.*?)$")
     public void theResponseStatusIsResponse_statusAndTheDatasetStatusIsDataset_status(int responseStatus, int datasetStatus) {
         assertThat(this.postResponse.getStatusCodeValue()).isEqualTo(responseStatus);
-        assertThat(this.postResponse.getBody()[0].getStatus()).isEqualTo(datasetStatus);
+        if (responseStatus != 401) {
+            assertThat(this.postResponse.getBody()[0].getStatus()).isEqualTo(datasetStatus);
+        }
     }
 
     @And("^account (.*?) is an EGA Admin$")

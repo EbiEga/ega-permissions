@@ -11,8 +11,6 @@ public interface UserGroupDataService {
 
     boolean datasetBelongsToDAC(String bearerAccountId, String datasetId);
 
-    boolean canControlDataset(String accountId, String datasetId);
-
     Optional<List<UserGroup>> getPermissionGroups(String accountId);
 
     UserGroup save(UserGroup userGroup);

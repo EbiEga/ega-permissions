@@ -20,6 +20,7 @@ package uk.ac.ebi.ega.permissions.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.util.CollectionUtils;
 import uk.ac.ebi.ega.permissions.configuration.VisaInfoProperties;
@@ -124,21 +125,24 @@ public class PermissionsServiceImpl implements PermissionsService {
 
     @Override
     @Transactional
-    public PassportVisaObject savePassportVisaObject(String accountId, PassportVisaObject passportVisaObject) throws ServiceException, SystemException {
+    public PassportVisaObject savePassportVisaObject(String controllerAccountId, String userAccountId, PassportVisaObject passportVisaObject) throws ServiceException, SystemException {
         try {
             //TODO: This will be improved later with other validations such as valid accountIds and Datasets
-            if (passportVisaObject.getValue().isEmpty() || accountId.isEmpty()) {
+            if (passportVisaObject.getValue().isEmpty() || userAccountId.isEmpty()) {
                 throw new ValidationException("Values for accountId and value are incorrect or not valid");
             }
-            PassportClaim savedClaim = this.permissionsDataService.savePassportClaim(tokenPayloadMapper.mapPassportVisaObjectToPassportClaim(accountId, passportVisaObject));
+            if(!this.permissionsDataService.userCanControlDataset(controllerAccountId, passportVisaObject.getValue())){
+                throw new AccessDeniedException("User cannot control access to dataset");
+            }
+            PassportClaim savedClaim = this.permissionsDataService.savePassportClaim(tokenPayloadMapper.mapPassportVisaObjectToPassportClaim(userAccountId, passportVisaObject));
             passportVisaObject = this.tokenPayloadMapper.mapPassportClaimToPassportVisaObject(savedClaim);
-            eventDataService.saveEvent(getEvent(accountId, new ObjectMapper().writeValueAsString(passportVisaObject), EVENT_SAVED));
+            eventDataService.saveEvent(getEvent(userAccountId, new ObjectMapper().writeValueAsString(passportVisaObject), EVENT_SAVED));
         } catch (PersistenceException | CannotCreateTransactionException | IllegalArgumentException ex) { //These are spring-data possible errors
-            throw new ServiceException(String.format("Error saving permissions to the DB for [account:%s, object:%s]", accountId, passportVisaObject.getValue()), ex);
-        } catch (ValidationException exception) {
+            throw new ServiceException(String.format("Error saving permissions to the DB for [account:%s, object:%s]", userAccountId, passportVisaObject.getValue()), ex);
+        } catch (ValidationException | AccessDeniedException exception) {
             throw exception;
         } catch (Exception ex) { //Generic errors are wrapped with a default message
-            throw new SystemException(String.format("Error processing permissions for [account:%s, object:%s]", accountId, passportVisaObject.getValue()), ex);
+            throw new SystemException(String.format("Error processing permissions for [account:%s, object:%s]", userAccountId, passportVisaObject.getValue()), ex);
         }
         return passportVisaObject;
     }

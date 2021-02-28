@@ -40,7 +40,7 @@ public interface PermissionsService {
 
     List<Visa> getControlledVisas(String userAccountId, String controllerAccountId);
 
-    PassportVisaObject savePassportVisaObject(String accountId, PassportVisaObject passportVisaObject) throws ServiceException, SystemException;
+    PassportVisaObject savePassportVisaObject(String controllerAccountId, String userAccountId, PassportVisaObject passportVisaObject) throws ServiceException, SystemException;
 
     void deletePassportVisaObject(String accountId, List<String> values);
 

@@ -27,11 +27,6 @@ public class UserGroupDataServiceImpl implements UserGroupDataService {
     }
 
     @Override
-    public boolean canControlDataset(String accountId, String datasetId) {
-        return userGroupRepository.findAllByUserIdAndDataSetId(accountId, datasetId).isPresent();
-    }
-
-    @Override
     public Optional<List<UserGroup>> getPermissionGroups(String accountId) {
         return userGroupRepository.findAllByUserId(accountId);
     }

@@ -10,7 +10,6 @@ Feature: DAC Admin Assign permissions to user
 
     Examples:
       | dac_user    | ega_user    | dataset_id  | dac_of_dataset  | dac_of_dac_user | level | response_status | dataset_status  |
+      | EGAW0000001 | EGAW0000002 | EGAD00003   | EGAC0000003     | EGAC0000003     | read  | 401             | 0               |
       | EGAW0000001 | EGAW0000002 | EGAD00001   | EGAC0000001     | EGAC0000001     | write | 207             | 201             |
-#      | EGAW0000001 | EGAW0000002 | EGAD00001   | EGAC0000001     | EGAC0000001     | read  | 207             | 401             |
-#      | EGAW0000001 | EGAW0000002 | EGAD00001   | EGAC0000002     | EGAC0000001     | write | 207             | 401             |
-#      | EGAW0000001 | EGAW0000002 | EGAD00001   | EGAC0000001     | EGAC0000002     | write | 207             | 401             |
+      | EGAW0000001 | EGAW0000002 | EGAD00002   | EGAC0000002     | EGAC0000001     | write | 207             | 401             |

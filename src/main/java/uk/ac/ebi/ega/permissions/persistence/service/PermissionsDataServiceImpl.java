@@ -1,12 +1,13 @@
 package uk.ac.ebi.ega.permissions.persistence.service;
 
 import org.springframework.transaction.annotation.Transactional;
+import uk.ac.ebi.ega.permissions.persistence.entities.Account;
 import uk.ac.ebi.ega.permissions.persistence.entities.AccountElixirId;
+import uk.ac.ebi.ega.permissions.persistence.entities.GroupType;
+import uk.ac.ebi.ega.permissions.persistence.entities.PassportClaim;
 import uk.ac.ebi.ega.permissions.persistence.repository.AccountElixirIdRepository;
 import uk.ac.ebi.ega.permissions.persistence.repository.AccountRepository;
 import uk.ac.ebi.ega.permissions.persistence.repository.PassportClaimRepository;
-import uk.ac.ebi.ega.permissions.persistence.entities.Account;
-import uk.ac.ebi.ega.permissions.persistence.entities.PassportClaim;
 import uk.ac.ebi.ega.permissions.persistence.repository.UserGroupRepository;
 
 import java.util.List;
@@ -84,6 +85,11 @@ public class PermissionsDataServiceImpl implements PermissionsDataService {
     @Override
     public List<PassportClaim> getPassportClaimsByUserAndController(String accountId, String egaAccountStableId) {
         return this.passportClaimRepository.findAllByUserAndController(accountId, egaAccountStableId);
+    }
+
+    @Override
+    public boolean userCanControlDataset(String controllerAccountId, String value) {
+        return userGroupRepository.existsByUserIdAndAccessGroup(controllerAccountId, GroupType.EGAAdmin) || userGroupRepository.userCanControlDataset(controllerAccountId, value);
     }
 
 
