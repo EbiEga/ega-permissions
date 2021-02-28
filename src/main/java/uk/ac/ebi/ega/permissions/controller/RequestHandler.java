@@ -26,6 +26,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
+import uk.ac.ebi.ega.permissions.configuration.security.customauthorization.IsAdminReaderOrWriter;
+import uk.ac.ebi.ega.permissions.configuration.security.customauthorization.IsAdminWriter;
 import uk.ac.ebi.ega.permissions.exception.ServiceException;
 import uk.ac.ebi.ega.permissions.exception.SystemException;
 import uk.ac.ebi.ega.permissions.mapper.TokenPayloadMapper;
@@ -72,7 +74,7 @@ public class RequestHandler {
         return getPermissionsForUser(accountId, format);
     }
 
-    @PreAuthorize("hasPermission(#userId, 'EGAAdmin_read') || hasPermission(#userId, 'DAC_read')")
+    @IsAdminReaderOrWriter
     public ResponseEntity<Visas> getPermissionsForUser(String userId, Format format) {
         Visas response = new Visas();
 
@@ -105,8 +107,8 @@ public class RequestHandler {
         return ResponseEntity.ok(response);
     }
 
-    @PreAuthorize("hasPermission(#accountId, 'DAC_write')")
-    public ResponseEntity<PermissionsResponses> createPermissions(String accountId,
+    @IsAdminWriter
+    public ResponseEntity<PermissionsResponses> createPermissions(String userId,
                                                                   List<Object> body,
                                                                   Format format) {
 
@@ -119,12 +121,12 @@ public class RequestHandler {
         //TODO: Handle mapper exception and improve conversion
         if (format == null || format == Format.PLAIN) {
             passportVisaObjects = body.parallelStream().map(v -> mapper.convertValue(v, PassportVisaObject.class)).collect(Collectors.toList());
-            List<PermissionsResponse> permissionResponses = createPlainPermissions(getAccountIdForElixirId(accountId), passportVisaObjects);
+            List<PermissionsResponse> permissionResponses = createPlainPermissions(getAccountIdForElixirId(userId), passportVisaObjects);
             responses.addAll(permissionResponses);
 
         } else if (format == Format.JWT) {
             passportVisaStrings = body.parallelStream().map(v -> mapper.convertValue(v, JWTPassportVisaObject.class).getJwt()).collect(Collectors.toList());
-            List<JWTPermissionsResponse> jwtResponses = createJWTPermissions(getAccountIdForElixirId(accountId), passportVisaStrings);
+            List<JWTPermissionsResponse> jwtResponses = createJWTPermissions(getAccountIdForElixirId(userId), passportVisaStrings);
             responses.addAll(jwtResponses);
         }
 
@@ -163,7 +165,7 @@ public class RequestHandler {
                 .collect(Collectors.toList());
     }
 
-    @PreAuthorize("hasPermission(#accountId, 'DAC_write')")
+    @IsAdminWriter
     public ResponseEntity<Void> deletePermissions(String accountId, List<String> values) {
         verifyAccountId(accountId);
         if (values.contains("all")) { //ignore all other values and remove all permissions

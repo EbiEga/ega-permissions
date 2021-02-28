@@ -40,14 +40,6 @@ public class PermissionsMgmtStepDefs extends ITContextConfiguration {
     private ResponseEntity<PermissionsResponse[]> postResponse;
     private ResponseEntity<Visa[]> getResponse;
 
-
-    @Before
-    void before(){
-
-        System.out.println("BEFOREEEEEEEE");
-
-    }
-
     @Given("^user account (.*?) with email (.*?) exist$")
     public void user_account_exist(String userAccountId, String email) {
         Account account = new Account(userAccountId, "Test Account " + userAccountId, "Test", email, "Active");

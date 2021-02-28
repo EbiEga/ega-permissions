@@ -1,5 +1,5 @@
 Feature: DAC Admin Assign permissions to user
-  Scenario Outline: DAC Admin with write permissions to Dataset grants permissions to another user
+  Scenario Outline: DAC Admin with read/write permissions to Dataset grants permissions to another user
     Given user account <dac_user> with email amohan@ebi.ac.uk exist
     And user account <ega_user> with email test@ebi.ac.uk exist
     And dataset <dataset_id> belongs to DAC <dac_of_dataset>
