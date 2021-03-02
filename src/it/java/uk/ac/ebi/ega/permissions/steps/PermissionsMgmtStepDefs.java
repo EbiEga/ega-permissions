@@ -1,4 +1,19 @@
-package uk.ac.ebi.ega.permissions;
+/*
+ * Copyright 2021-2021 EMBL - European Bioinformatics Institute
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package uk.ac.ebi.ega.permissions.steps;
 
 import io.cucumber.datatable.DataTable;
 import io.cucumber.java.Before;
@@ -6,6 +21,7 @@ import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -14,7 +30,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
-import uk.ac.ebi.ega.permissions.helpers.AccessTokenHelper;
+import uk.ac.ebi.ega.permissions.ITContextConfiguration;
 import uk.ac.ebi.ega.permissions.helpers.DatasetHelper;
 import uk.ac.ebi.ega.permissions.model.PassportVisaObject;
 import uk.ac.ebi.ega.permissions.model.PermissionsResponse;
@@ -38,32 +54,25 @@ import java.util.stream.Collectors;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 
-public class PermissionsMgmtStepDefs extends ITContextConfiguration {
+public class PermissionsMgmtStepDefs {
+
+    @Autowired
+    World world;
 
     private RestTemplate restTemplate = new RestTemplate();
-    private AccessTokenHelper accessTokenHelper;
     private DatasetHelper datasetHelper;
 
-    private String accessToken;
     private ResponseEntity<PermissionsResponse[]> postResponse;
     private ResponseEntity<Visa[]> getResponse;
 
     @Before
     public void cleanBeforeEachScenario() {
-        this.accountRepository.deleteAll();
-        this.userGroupRepository.deleteAll();
-        this.passportClaimRepository.deleteAll();
-    }
-
-    @Given("^user account (.*?) with email (.*?) exist$")
-    public void user_account_exist(String userAccountId, String email) {
-        Account account = new Account(userAccountId, "Test Account " + userAccountId, "Test", email, "Active");
-        this.accountRepository.save(account);
+       this.world.cleanPermissions();
     }
 
     @Given("^dataset (.*?) belongs to DAC (.*?)$")
     public void dataset_belongs_to_dac(String datasetId, String dacStableId) {
-        this.datasetHelper = new DatasetHelper(this.entityManagerFactory.createEntityManager());
+        this.datasetHelper = new DatasetHelper(this.world.entityManagerFactory.createEntityManager());
         this.datasetHelper.insertDataset(datasetId, "Test Dataset", dacStableId);
     }
 
@@ -71,13 +80,7 @@ public class PermissionsMgmtStepDefs extends ITContextConfiguration {
     public void account_is_linked_to_dac_with_some_permissions(String dacUserAccountId, String dacStableId, String accessLevel) {
         Permission permission = accessLevel.equals("write") ? Permission.write : Permission.read;
         UserGroup userGroup = new UserGroup(dacUserAccountId, dacStableId, GroupType.DAC, permission);
-        this.userGroupRepository.save(userGroup);
-    }
-
-    @Given("^user account (.*?) has a valid token$")
-    public void user_account_has_a_valid_token(String dacUserAccountId) throws URISyntaxException {
-        this.accessTokenHelper = new AccessTokenHelper(this.restTemplate, this.tokenParams);
-        this.accessToken = this.accessTokenHelper.obtainAccessTokenFromEGA();
+        this.world.userGroupRepository.save(userGroup);
     }
 
     @When("^user account (.*?) grants permissions to account (.*?) on dataset (.*?)$")
@@ -86,7 +89,7 @@ public class PermissionsMgmtStepDefs extends ITContextConfiguration {
 
         final HttpHeaders headers = new HttpHeaders();
         headers.setContentType(APPLICATION_JSON);
-        headers.setBearerAuth(this.accessToken);
+        headers.setBearerAuth(this.world.bearerAccessToken);
 
         final URI requestURI = UriComponentsBuilder
                 .fromUri(new URI("http://localhost:8080"))
@@ -116,13 +119,13 @@ public class PermissionsMgmtStepDefs extends ITContextConfiguration {
     @And("^account (.*?) is an EGA Admin$")
     public void accountIsAnEGAAdmin(String egaAdminAccountId) {
         UserGroup userGroup = new UserGroup(egaAdminAccountId, "", GroupType.EGAAdmin, Permission.write);
-        this.userGroupRepository.save(userGroup);
+        this.world.userGroupRepository.save(userGroup);
     }
 
     @And("^datasets belongs to DAC (.*?)$")
     public void datasetsBelongsToDACEGAC(String dacStableId, DataTable datasetsTable) {
         List<String> datasets = datasetsTable.transpose().asList(String.class);
-        this.datasetHelper = new DatasetHelper(this.entityManagerFactory.createEntityManager());
+        this.datasetHelper = new DatasetHelper(this.world.entityManagerFactory.createEntityManager());
         datasets.forEach(dataset -> this.datasetHelper.insertDataset(dataset, "Test Dataset", dacStableId));
     }
 
@@ -130,14 +133,14 @@ public class PermissionsMgmtStepDefs extends ITContextConfiguration {
     public void userAccountEGAWHasPermissionsToDatasets(String egaUserAccountId, DataTable datasetsTable) {
         List<String> datasets = datasetsTable.transpose().asList(String.class);
         List<PassportClaim> passportClaims = datasets.stream().map(dataset -> createPassportClaim(egaUserAccountId, dataset)).collect(Collectors.toList());
-        this.passportClaimRepository.saveAll(passportClaims);
+        this.world.passportClaimRepository.saveAll(passportClaims);
     }
 
     @When("^user account (.*?) list permissions for account (.*?)$")
     public void userAccountEGAWListPermissionsForAccountEGAW(String dacUserAccountId, String egaUserAccountId) throws URISyntaxException {
         final HttpHeaders headers = new HttpHeaders();
         headers.setContentType(APPLICATION_JSON);
-        headers.setBearerAuth(this.accessToken);
+        headers.setBearerAuth(this.world.bearerAccessToken);
 
         final URI requestURI = UriComponentsBuilder
                 .fromUri(new URI("http://localhost:8080"))

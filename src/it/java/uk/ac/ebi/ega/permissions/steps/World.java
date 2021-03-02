@@ -13,12 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.ac.ebi.ega.permissions;
+package uk.ac.ebi.ega.permissions.steps;
 
-import io.cucumber.spring.CucumberContextConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
+import org.springframework.stereotype.Component;
 import uk.ac.ebi.ega.permissions.dto.TokenParams;
 import uk.ac.ebi.ega.permissions.persistence.repository.AccountRepository;
 import uk.ac.ebi.ega.permissions.persistence.repository.ApiKeyRepository;
@@ -28,9 +26,35 @@ import uk.ac.ebi.ega.permissions.persistence.repository.UserGroupRepository;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceUnit;
 
-@ActiveProfiles("integration")
-@CucumberContextConfiguration
-@SpringBootTest(classes = EgaPermissionsApplication.class, webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
-public class ITContextConfiguration {
+@Component
+public class World {
+    String bearerAccessToken;
 
+    @Autowired
+    ApiKeyRepository apiKeyRepository;
+
+    @Autowired
+    PassportClaimRepository passportClaimRepository;
+
+    @Autowired
+    UserGroupRepository userGroupRepository;
+
+    @Autowired
+    AccountRepository accountRepository;
+
+    @Autowired
+    TokenParams tokenParams;
+
+    @PersistenceUnit
+    EntityManagerFactory entityManagerFactory;
+
+    public void cleanApiKeys() {
+        this.apiKeyRepository.deleteAll();
+    }
+
+    public void cleanPermissions() {
+        this.accountRepository.deleteAll();
+        this.userGroupRepository.deleteAll();
+        this.passportClaimRepository.deleteAll();
+    }
 }

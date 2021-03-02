@@ -20,11 +20,11 @@ import io.cucumber.junit.CucumberOptions;
 import org.junit.runner.RunWith;
 import org.springframework.test.annotation.DirtiesContext;
 
-@CucumberOptions(features = "src/it/resources/features/permissions-mgmt",
+@CucumberOptions(features = "src/it/resources/features/api-key",
         plugin = {"json:target/cucumber.json", "pretty",
                 "html:target/cucumber-reports"})
 @RunWith(Cucumber.class)
 @DirtiesContext
-public class PermissionsMgmtIT {
+public class ApiKeyIT {
 
 }
