@@ -89,14 +89,14 @@ public class PermissionsServiceImpl implements PermissionsService {
     @Override
     public List<Visa> getVisas(String userAccountId) {
         List<PassportVisaObject> passportVisaObjects = this.tokenPayloadMapper
-                .mapPassportClaimsToPassportVisaObjects(this.permissionsDataService.getPassPortClaimsForAccount(userAccountId));
+                .mapPassportClaimsToPassportVisaObjects(this.permissionsDataService.getPassportClaimsForAccount(userAccountId));
         return formatVisas(userAccountId, passportVisaObjects);
     }
 
     @Override
     public List<Visa> getControlledVisas(String userAccountId, String controllerAccountId) {
         List<PassportVisaObject> passportVisaObjects = this.tokenPayloadMapper
-                .mapPassportClaimsToPassportVisaObjects(this.permissionsDataService.getPassPortClaimsForAccountAndController(userAccountId, controllerAccountId));
+                .mapPassportClaimsToPassportVisaObjects(this.permissionsDataService.getPassportClaimsForAccountAndController(userAccountId, controllerAccountId));
         return formatVisas(userAccountId, passportVisaObjects);
     }
 

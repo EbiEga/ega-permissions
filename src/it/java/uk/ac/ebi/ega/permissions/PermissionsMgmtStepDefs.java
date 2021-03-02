@@ -6,7 +6,11 @@ import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
-import org.springframework.http.*;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -15,7 +19,13 @@ import uk.ac.ebi.ega.permissions.helpers.DatasetHelper;
 import uk.ac.ebi.ega.permissions.model.PassportVisaObject;
 import uk.ac.ebi.ega.permissions.model.PermissionsResponse;
 import uk.ac.ebi.ega.permissions.model.Visa;
-import uk.ac.ebi.ega.permissions.persistence.entities.*;
+import uk.ac.ebi.ega.permissions.persistence.entities.Account;
+import uk.ac.ebi.ega.permissions.persistence.entities.Authority;
+import uk.ac.ebi.ega.permissions.persistence.entities.GroupType;
+import uk.ac.ebi.ega.permissions.persistence.entities.PassportClaim;
+import uk.ac.ebi.ega.permissions.persistence.entities.Permission;
+import uk.ac.ebi.ega.permissions.persistence.entities.UserGroup;
+import uk.ac.ebi.ega.permissions.persistence.entities.VisaType;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -86,10 +96,10 @@ public class PermissionsMgmtStepDefs extends ITContextConfiguration {
                 .toUri();
 
         final HttpEntity<List<PassportVisaObject>> request = new HttpEntity<>(passportVisaObjects, headers);
-        try{
+        try {
             //restTemplate is throwing an exception so we catch it to validate later as this scenario includes multiple response types
             this.postResponse = restTemplate.exchange(requestURI, HttpMethod.POST, request, PermissionsResponse[].class);
-        }catch (HttpClientErrorException ex){
+        } catch (HttpClientErrorException ex) {
             this.postResponse = new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
 

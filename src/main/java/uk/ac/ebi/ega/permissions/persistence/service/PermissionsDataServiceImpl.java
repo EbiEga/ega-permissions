@@ -31,14 +31,14 @@ public class PermissionsDataServiceImpl implements PermissionsDataService {
     }
 
     @Override
-    public List<PassportClaim> getPassPortClaimsForAccount(String accountId) {
+    public List<PassportClaim> getPassportClaimsForAccount(String accountId) {
         return passportClaimRepository.findAllByAccountId(accountId);
     }
 
     @Override
-    public List<PassportClaim> getPassPortClaimsForAccountAndController(String userAccountId, String controllerAccountId) {
+    public List<PassportClaim> getPassportClaimsForAccountAndController(String userAccountId, String controllerAccountId) {
         if (userGroupRepository.isEGAAdmin(controllerAccountId)) {
-            return getPassPortClaimsForAccount(userAccountId);
+            return getPassportClaimsForAccount(userAccountId);
         } else {
             return passportClaimRepository.findAllByAccountIdAndControllerId(userAccountId, controllerAccountId);
         }

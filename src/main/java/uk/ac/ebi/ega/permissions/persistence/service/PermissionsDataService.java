@@ -9,9 +9,9 @@ import java.util.Optional;
 
 public interface PermissionsDataService {
 
-    List<PassportClaim> getPassPortClaimsForAccount(String userAccountId);
+    List<PassportClaim> getPassportClaimsForAccount(String userAccountId);
 
-    List<PassportClaim> getPassPortClaimsForAccountAndController(String userAccountId, String controllerAccountId);
+    List<PassportClaim> getPassportClaimsForAccountAndController(String userAccountId, String controllerAccountId);
 
     Optional<Account> getAccountByEmail(String email);
 
