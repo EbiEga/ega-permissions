@@ -30,12 +30,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
-import uk.ac.ebi.ega.permissions.ITContextConfiguration;
 import uk.ac.ebi.ega.permissions.helpers.DatasetHelper;
 import uk.ac.ebi.ega.permissions.model.PassportVisaObject;
 import uk.ac.ebi.ega.permissions.model.PermissionsResponse;
 import uk.ac.ebi.ega.permissions.model.Visa;
-import uk.ac.ebi.ega.permissions.persistence.entities.Account;
 import uk.ac.ebi.ega.permissions.persistence.entities.Authority;
 import uk.ac.ebi.ega.permissions.persistence.entities.GroupType;
 import uk.ac.ebi.ega.permissions.persistence.entities.PassportClaim;
@@ -67,7 +65,7 @@ public class PermissionsMgmtStepDefs {
 
     @Before
     public void cleanBeforeEachScenario() {
-       this.world.cleanPermissions();
+        this.world.cleanPermissions();
     }
 
     @Given("^dataset (.*?) belongs to DAC (.*?)$")

@@ -36,7 +36,7 @@ public class DatasetHelper {
                 "values(?,?,?,'123');";
         this.entityManager.getTransaction().begin();
 
-        Query query  = this.entityManager.createNativeQuery(sql)
+        Query query = this.entityManager.createNativeQuery(sql)
                 .setParameter(1, datasetId)
                 .setParameter(2, description)
                 .setParameter(3, dacStableId);
