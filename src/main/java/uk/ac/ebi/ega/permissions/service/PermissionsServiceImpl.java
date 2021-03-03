@@ -41,7 +41,11 @@ import uk.ac.ebi.ega.permissions.persistence.service.PermissionsDataService;
 import javax.persistence.PersistenceException;
 import javax.transaction.Transactional;
 import javax.validation.ValidationException;
-import java.util.*;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class PermissionsServiceImpl implements PermissionsService {
@@ -131,7 +135,7 @@ public class PermissionsServiceImpl implements PermissionsService {
             if (passportVisaObject.getValue().isEmpty() || userAccountId.isEmpty()) {
                 throw new ValidationException("Values for accountId and value are incorrect or not valid");
             }
-            if(!this.permissionsDataService.userCanControlDataset(controllerAccountId, passportVisaObject.getValue())){
+            if (!this.permissionsDataService.userCanControlDataset(controllerAccountId, passportVisaObject.getValue())) {
                 throw new AccessDeniedException("User cannot control access to dataset");
             }
             PassportClaim savedClaim = this.permissionsDataService.savePassportClaim(tokenPayloadMapper.mapPassportVisaObjectToPassportClaim(userAccountId, passportVisaObject));
