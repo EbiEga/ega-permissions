@@ -11,5 +11,6 @@ Feature: EGA Admin Retrieve permissions
       | EGAD00001 | EGAD00002 | EGAD00003 | EGAD00004 | EGAD00005 | EGAD00006 | EGAD00007 | EGAD00008 | EGAD00009 | EGAD00010 |
     And user account EGAW0000001 has a valid token
     When user account EGAW0000001 list permissions for account EGAW0000002
-    Then response should have status code 200 and only contain
+    Then response should have status code 200
+    And response should only contain items
       | EGAD00001 | EGAD00002 | EGAD00003 | EGAD00004 | EGAD00005 | EGAD00006 | EGAD00007 | EGAD00008 | EGAD00009 | EGAD00010 |

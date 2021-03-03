@@ -23,6 +23,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 import uk.ac.ebi.ega.permissions.model.CreatedAPIKey;
@@ -39,7 +40,6 @@ public class ApiKeyITStepDefs {
     private World world;
 
     private RestTemplate restTemplate = new RestTemplate();
-    ResponseEntity<CreatedAPIKey> createdAPIKeyResponse;
 
     @Before
     public void cleanBeforeEachScenario() {
@@ -60,13 +60,20 @@ public class ApiKeyITStepDefs {
                 .toUri();
 
         HttpEntity request = new HttpEntity(headers);
-        this.createdAPIKeyResponse = restTemplate.exchange(requestURI, HttpMethod.GET, request, CreatedAPIKey.class);
+
+        try {
+            //restTemplate is throwing an exception so we catch it to validate later as this scenario includes multiple response types
+            world.response = restTemplate.exchange(requestURI, HttpMethod.GET, request, CreatedAPIKey.class);
+        } catch (HttpClientErrorException ex) {
+            world.response = new ResponseEntity<>(ex.getStatusCode());
+        }
     }
 
-    @Then("^a response containing the token key (.*?) is returned$")
+    @Then("^response contains the token key (.*?)$")
     public void a_response_containing_the_token_key_is_returned(String tokenKey) {
-        assertThat(this.createdAPIKeyResponse.getStatusCodeValue()).isEqualTo(200);
-        assertThat(this.createdAPIKeyResponse.getBody().getId()).isEqualTo(tokenKey);
-        assertThat(this.createdAPIKeyResponse.getBody().getToken()).isNotEmpty();
+        ResponseEntity<CreatedAPIKey> createdAPIKeyResponse = (ResponseEntity<CreatedAPIKey>) world.response;
+        assertThat(createdAPIKeyResponse.getStatusCodeValue()).isEqualTo(200);
+        assertThat(createdAPIKeyResponse.getBody().getId()).isEqualTo(tokenKey);
+        assertThat(createdAPIKeyResponse.getBody().getToken()).isNotEmpty();
     }
 }

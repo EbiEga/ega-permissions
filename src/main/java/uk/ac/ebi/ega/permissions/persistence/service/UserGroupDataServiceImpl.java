@@ -23,7 +23,7 @@ public class UserGroupDataServiceImpl implements UserGroupDataService {
 
     @Override
     public boolean datasetBelongsToDAC(String bearerAccountId, String datasetId) {
-        return userGroupRepository.findAllUserDatasetBelongsToDAC(bearerAccountId, datasetId).isPresent();
+        return !userGroupRepository.findAllUserDatasetBelongsToDAC(bearerAccountId, datasetId).isEmpty();
     }
 
     @Override

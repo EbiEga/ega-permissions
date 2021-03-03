@@ -16,12 +16,15 @@
 package uk.ac.ebi.ega.permissions.steps;
 
 import io.cucumber.java.en.Given;
+import io.cucumber.java.en.Then;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.client.RestTemplate;
 import uk.ac.ebi.ega.permissions.helpers.AccessTokenHelper;
 import uk.ac.ebi.ega.permissions.persistence.entities.Account;
 
 import java.net.URISyntaxException;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class CommonStepDefs {
 
@@ -41,6 +44,16 @@ public class CommonStepDefs {
     public void user_account_has_a_valid_token(String dacUserAccountId) throws URISyntaxException {
         this.accessTokenHelper = new AccessTokenHelper(this.restTemplate, this.world.tokenParams);
         this.world.bearerAccessToken = this.accessTokenHelper.obtainAccessTokenFromEGA();
+    }
+
+    @Given("^user account (.*?) has an invalid token$")
+    public void user_account_has_an_invalid_token(String dacUserAccountId) throws URISyntaxException {
+        this.world.bearerAccessToken = "invalid_token";
+    }
+
+    @Then("^response should have status code (.*?)$")
+    public void responseShouldHaveStatusCodeAndOnlyContain(int expectedStatusCode) {
+        assertThat(world.response.getStatusCodeValue()).isEqualTo(expectedStatusCode);
     }
 
 }

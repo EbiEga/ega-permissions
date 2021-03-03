@@ -77,18 +77,21 @@ public class RequestHandler {
 
     public ResponseEntity<Visas> getPermissionForCurrentUser(Format format) {
         String currentUser = securityService.getCurrentUser().orElseThrow(() -> new ServiceException("Operation not allowed for Anonymous users"));
-        String accountId = permissionsService.getAccountByEmail(currentUser).orElseThrow(() -> new ServiceException("Current user is not allowed to access this resource")).getAccountId();
-        return getPermissionsForUser(accountId, format);
+        String userAccountId = permissionsService.getAccountByEmail(currentUser).orElseThrow(() -> new ServiceException("Current user is not allowed to access this resource")).getAccountId();
+        List<Visa> visas = this.permissionsService.getVisas(userAccountId);
+        return this.getPermissions(visas, format);
     }
 
     @IsAdminReaderOrWriter
     public ResponseEntity<Visas> getPermissionsForUser(String userId, Format format) {
-        Visas response = new Visas();
-
         String userAccountId = getAccountIdForElixirId(userId);
         verifyAccountId(userAccountId);
-
         List<Visa> visas = this.permissionsService.getControlledVisas(userAccountId, getControllerAccountId());
+        return this.getPermissions(visas, format);
+    }
+
+    public ResponseEntity<Visas> getPermissions(List<Visa> visas, Format format) {
+        Visas response = new Visas();
 
         if (format == null || format == Format.JWT) {
             response.addAll(

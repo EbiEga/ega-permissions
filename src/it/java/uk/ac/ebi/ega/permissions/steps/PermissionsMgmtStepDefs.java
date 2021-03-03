@@ -25,7 +25,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
@@ -59,9 +58,6 @@ public class PermissionsMgmtStepDefs {
 
     private RestTemplate restTemplate = new RestTemplate();
     private DatasetHelper datasetHelper;
-
-    private ResponseEntity<PermissionsResponse[]> postResponse;
-    private ResponseEntity<Visa[]> getResponse;
 
     @Before
     public void cleanBeforeEachScenario() {
@@ -99,18 +95,19 @@ public class PermissionsMgmtStepDefs {
         final HttpEntity<List<PassportVisaObject>> request = new HttpEntity<>(passportVisaObjects, headers);
         try {
             //restTemplate is throwing an exception so we catch it to validate later as this scenario includes multiple response types
-            this.postResponse = restTemplate.exchange(requestURI, HttpMethod.POST, request, PermissionsResponse[].class);
+            world.response = restTemplate.exchange(requestURI, HttpMethod.POST, request, PermissionsResponse[].class);
         } catch (HttpClientErrorException ex) {
-            this.postResponse = new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+            world.response = new ResponseEntity<>(ex.getStatusCode());
         }
 
     }
 
     @Then("^the response status is (.*?) and the dataset status is (.*?)$")
     public void theResponseStatusIsResponse_statusAndTheDatasetStatusIsDataset_status(int responseStatus, int datasetStatus) {
-        assertThat(this.postResponse.getStatusCodeValue()).isEqualTo(responseStatus);
+        ResponseEntity<PermissionsResponse[]> postResponse = (ResponseEntity<PermissionsResponse[]>) world.response;
+        assertThat(postResponse.getStatusCodeValue()).isEqualTo(responseStatus);
         if (responseStatus != 401) {
-            assertThat(this.postResponse.getBody()[0].getStatus()).isEqualTo(datasetStatus);
+            assertThat(postResponse.getBody()[0].getStatus()).isEqualTo(datasetStatus);
         }
     }
 
@@ -148,17 +145,36 @@ public class PermissionsMgmtStepDefs {
                 .toUri();
 
         HttpEntity request = new HttpEntity(headers);
-        this.getResponse = restTemplate.exchange(requestURI, HttpMethod.GET, request, Visa[].class);
+        try {
+            //restTemplate is throwing an exception so we catch it to validate later as this scenario includes multiple response types
+            world.response = restTemplate.exchange(requestURI, HttpMethod.GET, request, Visa[].class);
+        } catch (HttpClientErrorException ex) {
+            world.response = new ResponseEntity<>(ex.getStatusCode());
+        }
     }
 
-    @Then("^response should have status code (.*?) and only contain$")
-    public void responseShouldHaveStatusCodeAndOnlyContain(int expectedStatusCode, DataTable datasetsTable) {
-        List<String> expectedDatasets = datasetsTable.transpose().asList(String.class);
-        List<String> returnedDatasets = Arrays.stream(this.getResponse.getBody()).map(Visa::getGa4ghVisaV1).map(PassportVisaObject::getValue).collect(Collectors.toList());
+    @When("^user account (.*?) list permissions for himself$")
+    public void userAccountListPermissionsForHimself(String userAccount) throws URISyntaxException {
+        final HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(APPLICATION_JSON);
+        headers.setBearerAuth(this.world.bearerAccessToken);
 
-        assertThat(this.getResponse.getStatusCodeValue()).isEqualTo(expectedStatusCode);
-        assertThat(returnedDatasets).hasSameElementsAs(expectedDatasets);
+        final URI requestURI = UriComponentsBuilder
+                .fromUri(new URI("http://localhost:8080"))
+                .path("/me/permissions")
+                .query("format=PLAIN")
+                .build()
+                .toUri();
+
+        HttpEntity request = new HttpEntity(headers);
+        try {
+            //restTemplate is throwing an exception so we catch it to validate later as this scenario includes multiple response types
+            world.response = restTemplate.exchange(requestURI, HttpMethod.GET, request, Visa[].class);
+        } catch (HttpClientErrorException ex) {
+            world.response = new ResponseEntity<>(ex.getStatusCode());
+        }
     }
+
 
     private List<PassportVisaObject> createPassportVisaObjects(List<String> values, String dacStableId) {
         List<PassportVisaObject> passportVisaObjects = new ArrayList<>(values.size());
@@ -179,4 +195,17 @@ public class PermissionsMgmtStepDefs {
         return new PassportClaim(accountId, VisaType.ControlledAccessGrants, new Date().getTime(), value, "SampleDAC", Authority.dac);
     }
 
+    @And("response should only contain items")
+    public void responseShouldOnlyContainItems(DataTable datasetsTable) {
+        ResponseEntity<Visa[]> getResponse = (ResponseEntity<Visa[]>) world.response;
+        List<String> expectedDatasets = datasetsTable.transpose().asList(String.class);
+        List<String> returnedDatasets = Arrays.stream(getResponse.getBody()).map(Visa::getGa4ghVisaV1).map(PassportVisaObject::getValue).collect(Collectors.toList());
+        assertThat(returnedDatasets).hasSameElementsAs(expectedDatasets);
+    }
+
+    @And("response should not contain any items")
+    public void responseShouldNotContainAnyItems() {
+        ResponseEntity<Visa[]> getResponse = (ResponseEntity<Visa[]>) world.response;
+        assertThat(getResponse.getBody()).isEmpty();
+    }
 }

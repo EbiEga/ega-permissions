@@ -16,6 +16,7 @@
 package uk.ac.ebi.ega.permissions.steps;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import uk.ac.ebi.ega.permissions.dto.TokenParams;
 import uk.ac.ebi.ega.permissions.persistence.repository.AccountRepository;
@@ -29,6 +30,7 @@ import javax.persistence.PersistenceUnit;
 @Component
 public class World {
     String bearerAccessToken;
+    ResponseEntity response;
 
     @Autowired
     ApiKeyRepository apiKeyRepository;
