@@ -18,10 +18,16 @@ public interface UserGroupRepository extends CrudRepository<UserGroup, UserGroup
     @Query("select case when count(ug)> 0 then true else false end from UserGroup ug where ug.egaAccountStableId=:userId and ug.groupType=:accessGroup")
     boolean existsByUserIdAndAccessGroup(@Param("userId") String userId, @Param("accessGroup") GroupType groupType);
 
+    @Query("select case when count(ug)>0 then true else false end from UserGroup ug" +
+            " inner join Dataset ds on ug.groupStableId = ds.dacStableId" +
+            " where ug.egaAccountStableId = :userId and ds.datasetId=:datasetId and ug.status='" + APPROVED + "'")
+    boolean userCanControlDataset(@Param("userId") String userId,
+                                  @Param("datasetId") String datasetId);
+
     @Query("select ug from UserGroup ug inner join PassportClaim pc "
             + "on ug.groupStableId = pc.source "
             + "where ug.egaAccountStableId = :userId and pc.value = :datasetId and ug.status='" + APPROVED + "' and pc.status ='approved'")
-    Optional<List<UserGroup>> findAllByUserIdAndDataSetId(@Param("userId") String userId,
+    List<UserGroup> findAllByUserIdAndDataSetId(@Param("userId") String userId,
                                                           @Param("datasetId") String datasetId);
 
     @Query("select ug from UserGroup ug where ug.egaAccountStableId=:userId and ug.status='" + APPROVED + "'")
@@ -30,6 +36,10 @@ public interface UserGroupRepository extends CrudRepository<UserGroup, UserGroup
     @Query("select ug from UserGroup ug inner join Dataset dc "
             + "on ug.groupStableId = dc.dacStableId "
             + "where ug.egaAccountStableId = :bearerAccountId and dc.datasetId = :datasetId and ug.status='" + APPROVED + "'")
-    Optional<List<UserGroup>> findAllUserDatasetBelongsToDAC(@Param("bearerAccountId") String bearerAccountId,
+    List<UserGroup> findAllUserDatasetBelongsToDAC(@Param("bearerAccountId") String bearerAccountId,
                                                              @Param("datasetId") String datasetId);
+
+    @Query("select case when (count(ug) > 0)  then true else false end from UserGroup ug " +
+            " where ug.egaAccountStableId=:userAccountId and ug.groupType='EGAAdmin' and ug.status='" + APPROVED + "'")
+    boolean isEGAAdmin(@Param("userAccountId") String userAccountId);
 }

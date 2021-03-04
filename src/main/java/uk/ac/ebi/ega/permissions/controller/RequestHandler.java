@@ -24,7 +24,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.access.AccessDeniedException;
+import uk.ac.ebi.ega.permissions.configuration.security.customauthorization.IsAdminReaderOrWriter;
+import uk.ac.ebi.ega.permissions.configuration.security.customauthorization.IsAdminWriter;
 import uk.ac.ebi.ega.permissions.exception.ServiceException;
 import uk.ac.ebi.ega.permissions.exception.SystemException;
 import uk.ac.ebi.ega.permissions.mapper.TokenPayloadMapper;
@@ -37,6 +39,7 @@ import uk.ac.ebi.ega.permissions.model.PermissionsResponse;
 import uk.ac.ebi.ega.permissions.model.PermissionsResponses;
 import uk.ac.ebi.ega.permissions.model.Visa;
 import uk.ac.ebi.ega.permissions.model.Visas;
+import uk.ac.ebi.ega.permissions.persistence.entities.Account;
 import uk.ac.ebi.ega.permissions.persistence.entities.AccountElixirId;
 import uk.ac.ebi.ega.permissions.persistence.service.UserGroupDataService;
 import uk.ac.ebi.ega.permissions.service.JWTService;
@@ -74,17 +77,21 @@ public class RequestHandler {
 
     public ResponseEntity<Visas> getPermissionForCurrentUser(Format format) {
         String currentUser = securityService.getCurrentUser().orElseThrow(() -> new ServiceException("Operation not allowed for Anonymous users"));
-        String accountId = permissionsService.getAccountByEmail(currentUser).orElseThrow(() -> new ServiceException("Current user is not allowed to access this resource")).getAccountId();
-        return getPermissionsForUser(accountId, format);
+        String userAccountId = permissionsService.getAccountByEmail(currentUser).orElseThrow(() -> new ServiceException("Current user is not allowed to access this resource")).getAccountId();
+        List<Visa> visas = this.permissionsService.getVisas(userAccountId);
+        return this.getPermissions(visas, format);
     }
 
-    @PreAuthorize("hasPermission(#userId, 'EGAAdmin_read')")
+    @IsAdminReaderOrWriter
     public ResponseEntity<Visas> getPermissionsForUser(String userId, Format format) {
-        Visas response = new Visas();
+        String userAccountId = getAccountIdForElixirId(userId);
+        verifyAccountId(userAccountId);
+        List<Visa> visas = this.permissionsService.getControlledVisas(userAccountId, getControllerAccountId());
+        return this.getPermissions(visas, format);
+    }
 
-        String accountId = getAccountIdForElixirId(userId);
-        verifyAccountId(accountId);
-        List<Visa> visas = this.permissionsService.getVisas(accountId);
+    public ResponseEntity<Visas> getPermissions(List<Visa> visas, Format format) {
+        Visas response = new Visas();
 
         if (format == null || format == Format.JWT) {
             response.addAll(
@@ -106,10 +113,8 @@ public class RequestHandler {
         return ResponseEntity.ok(response);
     }
 
-    @PreAuthorize("hasPermission(#accountId, 'DAC_write')")
-    public ResponseEntity<PermissionsResponses> createPermissions(String accountId,
-                                                                  List<Object> body,
-                                                                  Format format) {
+    @IsAdminWriter
+    public ResponseEntity<PermissionsResponses> createPermissions(String userId, List<Object> body, Format format) {
 
         PermissionsResponses responses = new PermissionsResponses();
         List<PassportVisaObject> passportVisaObjects;
@@ -120,12 +125,12 @@ public class RequestHandler {
         //TODO: Handle mapper exception and improve conversion
         if (format == null || format == Format.PLAIN) {
             passportVisaObjects = body.parallelStream().map(v -> mapper.convertValue(v, PassportVisaObject.class)).collect(Collectors.toList());
-            List<PermissionsResponse> permissionResponses = createPlainPermissions(getAccountIdForElixirId(accountId), passportVisaObjects);
+            List<PermissionsResponse> permissionResponses = createPlainPermissions(getAccountIdForElixirId(userId), passportVisaObjects);
             responses.addAll(permissionResponses);
 
         } else if (format == Format.JWT) {
             passportVisaStrings = body.parallelStream().map(v -> mapper.convertValue(v, JWTPassportVisaObject.class).getJwt()).collect(Collectors.toList());
-            List<JWTPermissionsResponse> jwtResponses = createJWTPermissions(getAccountIdForElixirId(accountId), passportVisaStrings);
+            List<JWTPermissionsResponse> jwtResponses = createJWTPermissions(getAccountIdForElixirId(userId), passportVisaStrings);
             responses.addAll(jwtResponses);
         }
 
@@ -133,7 +138,6 @@ public class RequestHandler {
     }
 
     public List<JWTPermissionsResponse> createJWTPermissions(String accountId, List<String> ga4ghVisaV1List) {
-        validateJWTPermissionsDatasetBelongsToDAC(ga4ghVisaV1List);
         return ga4ghVisaV1List
                 .stream()
                 .map((strVisa) -> {
@@ -157,14 +161,13 @@ public class RequestHandler {
     }
 
     public List<PermissionsResponse> createPlainPermissions(String accountId, List<PassportVisaObject> passportVisaObjects) {
-        validatePermissionsDatasetBelongsToDAC(passportVisaObjects);
         return passportVisaObjects
                 .stream()
                 .map((passportVisaObject) -> handlePassportVisaObjectProcessing(accountId, passportVisaObject))
                 .collect(Collectors.toList());
     }
 
-    @PreAuthorize("hasPermission(#accountId, 'DAC_write')")
+    @IsAdminWriter
     public ResponseEntity<Void> deletePermissions(String accountId, List<String> values) {
         verifyAccountId(accountId);
         if (values.contains("all")) { //ignore all other values and remove all permissions
@@ -176,12 +179,15 @@ public class RequestHandler {
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
-    private PermissionsResponse handlePassportVisaObjectProcessing(String accountId, PassportVisaObject passportVisaObject) {
+    private PermissionsResponse handlePassportVisaObjectProcessing(String userAccountId, PassportVisaObject passportVisaObject) {
         try {
-            this.permissionsService.savePassportVisaObject(accountId, passportVisaObject);
+            this.permissionsService.savePassportVisaObject(getControllerAccountId(), userAccountId, passportVisaObject);
             final PermissionsResponse permissionsResponse = getPermissionsResponse(HttpStatus.CREATED, "Created");
             permissionsResponse.setGa4ghVisaV1(passportVisaObject);
             return permissionsResponse;
+        } catch (AccessDeniedException ex) {
+            LOGGER.error(ex.getMessage(), ex);
+            return getPermissionsResponse(HttpStatus.UNAUTHORIZED, ex.getMessage());
         } catch (ServiceException ex) {
             LOGGER.error(ex.getMessage(), ex);
             return getPermissionsResponse(HttpStatus.SERVICE_UNAVAILABLE, ex.getMessage());
@@ -215,44 +221,6 @@ public class RequestHandler {
         return accountId;
     }
 
-
-    private void validateJWTPermissionsDatasetBelongsToDAC(List<String> ga4ghVisaV1List) {
-        String bearerAccountId = getBearerAccountId();
-        if (!userGroupDataService.isEGAAdmin(bearerAccountId)) {
-            ga4ghVisaV1List
-                    .stream()
-                    .filter((strVisa) -> {
-                        try {
-                            Visa visa = tokenPayloadMapper.mapJWTClaimSetToVisa(SignedJWT.parse(strVisa).getJWTClaimsSet());
-                            String datasetId = visa.getGa4ghVisaV1().getValue();
-                            return !userGroupDataService.datasetBelongsToDAC(bearerAccountId, datasetId);
-                        } catch (ParseException ex) {
-                            return true;
-                        }
-                    })
-                    .findAny()
-                    .ifPresent(a -> {
-                        throw new ValidationException("User doesn't own dataset.");
-                    });
-        }
-    }
-
-    private void validatePermissionsDatasetBelongsToDAC(List<PassportVisaObject> passportVisaObjects) {
-        String bearerAccountId = getBearerAccountId();
-        if (!userGroupDataService.isEGAAdmin(bearerAccountId)) {
-            passportVisaObjects
-                    .stream()
-                    .filter((passportVisaObject) -> {
-                        String datasetId = passportVisaObject.getValue();
-                        return !userGroupDataService.datasetBelongsToDAC(bearerAccountId, datasetId);
-                    })
-                    .findAny()
-                    .ifPresent(a -> {
-                        throw new ValidationException("User doesn't own dataset.");
-                    });
-        }
-    }
-
     public void validateDatasetBelongsToDAC(String datasetId) {
         String bearerAccountId = getBearerAccountId();
         if (!userGroupDataService.isEGAAdmin(bearerAccountId)) {
@@ -281,5 +249,12 @@ public class RequestHandler {
         //Sign JWT token by signer
         this.jwtService.signJWT(ga4ghSignedJWT);
         return ga4ghSignedJWT;
+    }
+
+    private String getControllerAccountId() {
+        String controllerEmail = securityService.getCurrentUser().orElseThrow(() -> new AccessDeniedException("Invalid controller"));
+        Account controllerAccount = permissionsService.getAccountByEmail(controllerEmail).orElseThrow(() ->
+                new AccessDeniedException(("No linked EGA account for email ").concat(controllerEmail)));
+        return controllerAccount.getAccountId();
     }
 }

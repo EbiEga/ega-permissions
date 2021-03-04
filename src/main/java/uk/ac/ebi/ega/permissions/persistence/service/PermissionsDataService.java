@@ -9,7 +9,9 @@ import java.util.Optional;
 
 public interface PermissionsDataService {
 
-    List<PassportClaim> getPassPortClaimsForAccount(String accountId);
+    List<PassportClaim> getPassportClaimsForAccount(String userAccountId);
+
+    List<PassportClaim> getPassportClaimsForAccountAndController(String userAccountId, String controllerAccountId);
 
     Optional<Account> getAccountByEmail(String email);
 
@@ -24,4 +26,6 @@ public interface PermissionsDataService {
     List<PassportClaim> getPassportClaimsForDataset(String datasetId);
 
     List<PassportClaim> getPassportClaimsByUserAndController(String accountId, String egaAccountStableId);
+
+    boolean userCanControlDataset(String controllerAccountId, String value);
 }

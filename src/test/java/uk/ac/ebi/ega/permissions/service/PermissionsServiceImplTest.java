@@ -52,6 +52,7 @@ class PermissionsServiceImplTest {
     @Test
     @DisplayName("SERVICE_EXCEPTION Cannot connect to the DB")
     void savePassportVisaObject_serviceException() {
+        when(permissionsDataService.userCanControlDataset(any(), any())).thenReturn(true);
         when(permissionsDataService.savePassportClaim(any())).thenThrow(new CannotCreateTransactionException("Error connecting to the DB"));
 
         assertThatThrownBy(() -> {
@@ -62,7 +63,7 @@ class PermissionsServiceImplTest {
             passportVisaObject.setType("ControlledAccessGrants");
             passportVisaObject.setSource("https://ega-archive.org/dacs/EGAC00001111111");
 
-            permissionsService.savePassportVisaObject("id", passportVisaObject);
+            permissionsService.savePassportVisaObject("id","id", passportVisaObject);
         }).isInstanceOf(ServiceException.class).hasMessageContaining("Error saving permissions to the DB");
     }
 
@@ -72,7 +73,7 @@ class PermissionsServiceImplTest {
         when(permissionsDataService.savePassportClaim(any())).thenThrow(new RuntimeException("Generic Error"));
 
         assertThatThrownBy(() -> {
-            permissionsService.savePassportVisaObject("id", new PassportVisaObject());
+            permissionsService.savePassportVisaObject("id","id", new PassportVisaObject());
         }).isInstanceOf(SystemException.class).hasMessageContaining("Error processing permissions");
     }
 }

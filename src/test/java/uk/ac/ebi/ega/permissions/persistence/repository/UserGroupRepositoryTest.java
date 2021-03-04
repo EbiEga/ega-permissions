@@ -29,6 +29,7 @@ import uk.ac.ebi.ega.permissions.persistence.entities.VisaType;
 import java.util.List;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static uk.ac.ebi.ega.permissions.persistence.entities.Authority.dac;
@@ -46,7 +47,7 @@ public class UserGroupRepositoryTest {
 
     @Test
     void findAllByUserIdAndDataSetId() {
-        Optional<List<UserGroup>> userGroupsBeforeInsert = userGroupRepository.findAllByUserIdAndDataSetId("user1", "d1");
+        List<UserGroup> userGroupsBeforeInsert = userGroupRepository.findAllByUserIdAndDataSetId("user1", "d1");
         userGroupRepository.save(new UserGroup("user1", "dac1", EGAAdmin, read));
         userGroupRepository.save(new UserGroup("user2", "dac1", EGAAdmin, read));
 
@@ -54,9 +55,9 @@ public class UserGroupRepositoryTest {
         passportClaimRepository.save(new PassportClaim("user1", VisaType.ControlledAccessGrants, 1L, "d2", "dac1", dac));
         passportClaimRepository.save(new PassportClaim("user2", VisaType.ControlledAccessGrants, 1L, "d1", "dac1", dac));
 
-        Optional<List<UserGroup>> userGroupsAfterInsert = userGroupRepository.findAllByUserIdAndDataSetId("user1", "d1");
+        List<UserGroup> userGroupsAfterInsert = userGroupRepository.findAllByUserIdAndDataSetId("user1", "d1");
 
-        assertTrue(userGroupsBeforeInsert.isEmpty());
-        assertEquals(1, userGroupsAfterInsert.stream().count());
+        assertThat(userGroupsBeforeInsert).isEmpty();
+        assertEquals(2, userGroupsAfterInsert.size());
     }
 }

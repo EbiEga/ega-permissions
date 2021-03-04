@@ -14,6 +14,13 @@ public interface PassportClaimRepository extends CrudRepository<PassportClaim, P
     @Query("select pc from PassportClaim pc where pc.accountId=:accountId and pc.status='approved'")
     List<PassportClaim> findAllByAccountId(@Param("accountId") String accountId);
 
+    @Query("select pc from PassportClaim pc" +
+            " inner join Dataset ds on pc.value = ds.datasetId" +
+            " inner join UserGroup ug on ds.dacStableId=ug.groupStableId" +
+            " where ug.egaAccountStableId=:controllerAccountId and pc.accountId=:userAccountId and pc.status='approved'")
+    List<PassportClaim> findAllByAccountIdAndControllerId(@Param("userAccountId") String userAccountId,
+                                                          @Param("controllerAccountId") String controllerAccountId);
+
     @Query("select case when count(pc)> 0 then true else false end from PassportClaim pc where pc.accountId=:accountId and pc.status='approved'")
     boolean existsPassportClaimByAccountId(@Param("accountId") String accountId);
 

@@ -79,16 +79,6 @@ public class RequestHandlerTest {
     }
 
     @Test
-    void testCreateJWTPermissions_WhenUserIsDACAndDatasetDoesntBelongToDac_ReturnValidationException() {
-        when(userGroupDataService.isEGAAdmin(any())).thenReturn(false);
-        when(userGroupDataService.datasetBelongsToDAC(any(), any())).thenReturn(false);
-
-        assertThatThrownBy(() -> {
-            requestHandler.createJWTPermissions(EMPTY, Arrays.asList(getTestToken()));
-        }).isInstanceOf(ValidationException.class);
-    }
-
-    @Test
     void testCreatePermissions_WhenUserIsEGAAdmin_ReturnCreatedObject() {
         when(userGroupDataService.isEGAAdmin(any())).thenReturn(true);
 
@@ -105,16 +95,6 @@ public class RequestHandlerTest {
         List<PermissionsResponse> permissionsCreated = requestHandler.createPlainPermissions(EMPTY,
                 Arrays.asList(createPassportVisaObject()));
         assertEquals(permissionsCreated.size(), 1);
-    }
-
-    @Test
-    void testCreatePermissions_WhenUserIsDACAndDatasetDoesntBelongToDac_ReturnValidationException() {
-        when(userGroupDataService.isEGAAdmin(any())).thenReturn(false);
-        when(userGroupDataService.datasetBelongsToDAC(any(), any())).thenReturn(false);
-
-        assertThatThrownBy(() -> {
-            requestHandler.createPlainPermissions(EMPTY, Arrays.asList(createPassportVisaObject()));
-        }).isInstanceOf(ValidationException.class);
     }
 
     @Test
