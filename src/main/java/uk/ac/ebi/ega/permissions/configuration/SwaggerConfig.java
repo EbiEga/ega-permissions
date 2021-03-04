@@ -51,6 +51,7 @@ public class SwaggerConfig {
         return () -> {
             List<SwaggerResource> resources = new ArrayList<>();
             resources.add(loadResource("permissions-api"));
+            resources.add(loadResource("admins-api"));
             return resources;
         };
     }

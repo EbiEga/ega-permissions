@@ -1,0 +1,271 @@
+openapi: 3.0.3
+info:
+  title: EGA Admin Permissions
+  description: The EGA Admin API is aimed to allow EGA Admins to control DAC Admins for the European Genome-Phenome Archive.
+  termsOfService: TBD
+  contact:
+    email: ega-dev@ebi.ac.uk
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+    description: Local
+  - url: https://ega.ebi.ac.uk:8053/ega-permissions
+    description: Test
+tags:
+  - name: DacAdmin
+    description: DAC Admin Endpoints
+
+paths:
+  /dacs/{dacStableId}:
+    get:
+      tags:
+        - DacAdmin
+      summary: Retrieve DAC Info
+      description: List all users that can controll a DAC
+      operationId: getDac
+      parameters:
+        - name: dacStableId
+          in: path
+          description: DAC Stable ID
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DacWithAdmins'
+        400:
+          description: Invalid ID supplied
+          content: { }
+        401:
+          description: Unauthorized
+          content: { }
+        500:
+          description: Internal server error
+          content: { }
+        503:
+          description: Service Unavailable
+          content: { }
+
+
+  /dacs/{dacStableId}/admins:
+    get:
+      tags:
+        - DacAdmin
+      summary: Retrieve admins for DAC
+      description: Returns a list of all the Admins assigned to DAC
+      operationId: getDacAdmins
+      parameters:
+        - name: dacStableId
+          in: path
+          description: DAC Stable ID
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Admin'
+        400:
+          description: Invalid ID supplied
+          content: { }
+        401:
+          description: Unauthorized
+          content: { }
+        500:
+          description: Internal server error
+          content: { }
+        503:
+          description: Service Unavailable
+          content: { }
+
+    post:
+      tags:
+        - DacAdmin
+      summary: Register user as a DAC Admin
+      description: Register user as a DAC Admin
+      operationId: postDacAdmin
+      parameters:
+        - name: dacStableId
+          in: path
+          description: DAC Stable ID
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: ID of the user account
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Admin'
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Admin'
+        400:
+          description: Invalid ID supplied
+          content: { }
+        401:
+          description: Unauthorized
+          content: { }
+        500:
+          description: Internal server error
+          content: { }
+        503:
+          description: Service Unavailable
+          content: { }
+
+
+  /dacAdmins/{egaAccountId}:
+    get:
+      tags:
+        - DacAdmin
+      summary: Assigned DACs
+      description: List all DACs assigned to a User
+      operationId: getDacsForUser
+      parameters:
+        - name: egaAccountId
+          in: path
+          description: User Account ID
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Dac'
+        400:
+          description: Invalid ID supplied
+          content: { }
+        401:
+          description: Unauthorized
+          content: { }
+        500:
+          description: Internal server error
+          content: { }
+        503:
+          description: Service Unavailable
+          content: { }
+
+    delete:
+      tags:
+        - DacAdmin
+      summary: Remove user from DAC Admins
+      description: Remove user from one or more DACs. Comma separated values for 'dacs' parameter allowed. Set value to 'all' in order remove user from all DACs.
+      operationId: delDacAdmin
+      parameters:
+        - name: egaAccountId
+          in: path
+          description: User from which the DAC Admin assignation(s) will be removed
+          required: true
+          schema:
+            type: string
+        - name: dacs
+          in: query
+          description: DAC from which the user should be removed. Comma separated values and 'all' allowed.
+          required: true
+          style: form
+          explode: false
+          schema:
+            type: array
+            items:
+              type: string
+      responses:
+        200:
+          description: OK
+          content: {}
+        204:
+          description: No content (no record has been deleted)
+          content: { }
+        400:
+          description: Invalid ID supplied
+          content: { }
+        401:
+          description: Unauthorized
+          content: { }
+        500:
+          description: Internal server error
+          content: { }
+        503:
+          description: Service Unavailable
+          content: { }
+
+components:
+  schemas:
+    Dac:
+      type: object
+      properties:
+        dacStableId:
+          type: string
+        description:
+          type: string
+
+    Admin:
+      type: object
+      properties:
+        egaAccountId:
+          type: string
+          description: EGA Account ID
+        permission:
+          type: string
+          enum: [read, write]
+
+    DacWithAdmins:
+      type: object
+      properties:
+        dacStableId:
+          type: string
+        description:
+          type: string
+        admins:
+          type: array
+          items:
+            $ref: '#/components/schemas/Admin'
+
+    ErrorBody:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          description: Server time
+        status:
+          type: string
+          description: Error code
+        message:
+          type: string
+          description: Error message
+
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: API_KEY
+
+security:
+  - BearerAuth: []
+  - ApiKeyAuth: []

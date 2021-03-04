@@ -243,6 +243,34 @@ paths:
         503:
           description: Service Unavailable
           content: { }
+  /me/controlled:
+    get:
+      tags:
+        - me
+      summary: Assigned DACs
+      description: List all DACs to which the current user is assigned as controller (DAC Admin)
+      operationId: getCurrentUserDacs
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Dac'
+        400:
+          description: Invalid ID supplied
+          content: { }
+        401:
+          description: Unauthorized
+          content: { }
+        500:
+          description: Internal server error
+          content: { }
+        503:
+          description: Service Unavailable
+          content: { }
 
   /api_key/generate:
     get:
@@ -548,6 +576,14 @@ components:
         id: SampleID
         expiration_date: 1592824514
         token: generated.token=
+
+    Dac:
+      type: object
+      properties:
+        dacStableId:
+          type: string
+        description:
+          type: string
 
   securitySchemes:
     BearerAuth:
