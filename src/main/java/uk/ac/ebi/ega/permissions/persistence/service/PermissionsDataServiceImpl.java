@@ -69,7 +69,7 @@ public class PermissionsDataServiceImpl implements PermissionsDataService {
             passportClaim.setStatus("revoked");
             deletedEntity = this.passportClaimRepository.save(passportClaim);
         }
-        return Optional.of(deletedEntity);
+        return Optional.ofNullable(deletedEntity);
     }
 
     @Override
@@ -84,7 +84,11 @@ public class PermissionsDataServiceImpl implements PermissionsDataService {
 
     @Override
     public List<PassportClaim> getPassportClaimsByUserAndController(String accountId, String egaAccountStableId) {
-        return this.passportClaimRepository.findAllByUserAndController(accountId, egaAccountStableId);
+        if (userGroupRepository.isEGAAdmin(egaAccountStableId)) {
+            return this.passportClaimRepository.findAllByAccountId(accountId);
+        } else {
+            return this.passportClaimRepository.findAllByUserAndController(accountId, egaAccountStableId);
+        }
     }
 
     @Override

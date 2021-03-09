@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import uk.ac.ebi.ega.permissions.dto.TokenParams;
+import uk.ac.ebi.ega.permissions.helpers.DatasetHelper;
 import uk.ac.ebi.ega.permissions.persistence.repository.AccountRepository;
 import uk.ac.ebi.ega.permissions.persistence.repository.ApiKeyRepository;
 import uk.ac.ebi.ega.permissions.persistence.repository.PassportClaimRepository;
@@ -50,6 +51,9 @@ public class World {
     @PersistenceUnit
     EntityManagerFactory entityManagerFactory;
 
+    @Autowired
+    DatasetHelper datasetHelper;
+
     public void cleanApiKeys() {
         this.apiKeyRepository.deleteAll();
     }
@@ -58,5 +62,6 @@ public class World {
         this.accountRepository.deleteAll();
         this.userGroupRepository.deleteAll();
         this.passportClaimRepository.deleteAll();
+        this.datasetHelper.removeAll();
     }
 }

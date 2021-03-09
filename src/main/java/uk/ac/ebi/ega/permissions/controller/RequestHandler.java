@@ -168,14 +168,14 @@ public class RequestHandler {
     }
 
     @IsAdminWriter
-    public ResponseEntity<Void> deletePermissions(String accountId, List<String> values) {
-        verifyAccountId(accountId);
+    public ResponseEntity<Void> deletePermissions(String userId, List<String> values) {
+        verifyAccountId(userId);
         if (values.contains("all")) { //ignore all other values and remove all permissions
-            values = this.getAllPermissionsForUser(accountId);
+            values = this.getAllPermissionsForUser(userId);
         } else {
             values.forEach(this::validateDatasetBelongsToDAC);
         }
-        this.permissionsService.deletePassportVisaObject(accountId, values);
+        this.permissionsService.deletePassportVisaObject(userId, values);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
