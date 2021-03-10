@@ -5,7 +5,7 @@ import org.springframework.security.access.PermissionEvaluator;
 import org.springframework.security.core.Authentication;
 import uk.ac.ebi.ega.permissions.persistence.entities.Account;
 import uk.ac.ebi.ega.permissions.persistence.entities.AccountElixirId;
-import uk.ac.ebi.ega.permissions.persistence.entities.UserGroup;
+import uk.ac.ebi.ega.permissions.persistence.entities.AccessGroup;
 import uk.ac.ebi.ega.permissions.persistence.service.UserGroupDataService;
 import uk.ac.ebi.ega.permissions.service.PermissionsService;
 
@@ -46,7 +46,7 @@ public class CustomPermissionEvaluator implements PermissionEvaluator {
         String email = auth.getName();
 
         String accountId = getAccountIdForElixirId(email);
-        List<UserGroup> userGroups = userGroupDataService.getPermissionGroups(accountId).orElseThrow(() ->
+        List<AccessGroup> userGroups = userGroupDataService.getPermissionGroups(accountId).orElseThrow(() ->
                 new AccessDeniedException(("No linked user group for ").concat(email)));
 
         return userGroups.stream().anyMatch(entry -> {

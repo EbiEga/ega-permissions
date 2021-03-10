@@ -47,7 +47,7 @@ public class CommonStepDefs {
     }
 
     @Given("^user has an invalid token$")
-    public void user_account_has_an_invalid_token() {
+    public void userHasAnInvalidToken() {
         this.world.bearerAccessToken = "invalid_token";
     }
 

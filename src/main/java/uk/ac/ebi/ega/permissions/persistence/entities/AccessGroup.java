@@ -9,11 +9,13 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import javax.persistence.IdClass;
+import javax.persistence.Table;
 
 @Entity
-@IdClass(UserGroupId.class)
+@IdClass(AccessGroupId.class)
+@Table(name = "USER_GROUP")
 @TypeDef(name = "pgsql_enum", typeClass = PostgreSQLEnumType.class)
-public class UserGroup {
+public class AccessGroup {
     @Id
     private String egaAccountStableId;
 
@@ -34,10 +36,10 @@ public class UserGroup {
 
     private int peaRecord;
 
-    public UserGroup() {
+    public AccessGroup() {
     }
 
-    public UserGroup(String egaAccountStableId, String groupStableId, GroupType groupType, Permission permission) {
+    public AccessGroup(String egaAccountStableId, String groupStableId, GroupType groupType, Permission permission) {
         this.egaAccountStableId = egaAccountStableId;
         this.groupStableId = groupStableId;
         this.groupType = groupType;

@@ -23,11 +23,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.ac.ebi.ega.permissions.persistence.entities.PassportClaim;
-import uk.ac.ebi.ega.permissions.persistence.entities.UserGroup;
+import uk.ac.ebi.ega.permissions.persistence.entities.AccessGroup;
 import uk.ac.ebi.ega.permissions.persistence.entities.VisaType;
 
 import java.util.List;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -47,15 +46,15 @@ public class UserGroupRepositoryTest {
 
     @Test
     void findAllByUserIdAndDataSetId() {
-        List<UserGroup> userGroupsBeforeInsert = userGroupRepository.findAllByUserIdAndDataSetId("user1", "d1");
-        userGroupRepository.save(new UserGroup("user1", "dac1", EGAAdmin, read));
-        userGroupRepository.save(new UserGroup("user2", "dac1", EGAAdmin, read));
+        List<AccessGroup> userGroupsBeforeInsert = userGroupRepository.findAllByUserIdAndDataSetId("user1", "d1");
+        userGroupRepository.save(new AccessGroup("user1", "dac1", EGAAdmin, read));
+        userGroupRepository.save(new AccessGroup("user2", "dac1", EGAAdmin, read));
 
         passportClaimRepository.save(new PassportClaim("user1", VisaType.ControlledAccessGrants, 1L, "d1", "dac1", dac));
         passportClaimRepository.save(new PassportClaim("user1", VisaType.ControlledAccessGrants, 1L, "d2", "dac1", dac));
         passportClaimRepository.save(new PassportClaim("user2", VisaType.ControlledAccessGrants, 1L, "d1", "dac1", dac));
 
-        List<UserGroup> userGroupsAfterInsert = userGroupRepository.findAllByUserIdAndDataSetId("user1", "d1");
+        List<AccessGroup> userGroupsAfterInsert = userGroupRepository.findAllByUserIdAndDataSetId("user1", "d1");
 
         assertThat(userGroupsBeforeInsert).isEmpty();
         assertEquals(2, userGroupsAfterInsert.size());

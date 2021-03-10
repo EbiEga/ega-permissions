@@ -25,8 +25,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
-import uk.ac.ebi.ega.permissions.configuration.security.customauthorization.IsAdminReaderOrWriter;
-import uk.ac.ebi.ega.permissions.configuration.security.customauthorization.IsAdminWriter;
+import uk.ac.ebi.ega.permissions.configuration.security.customauthorization.HasReadOrWritePermissions;
+import uk.ac.ebi.ega.permissions.configuration.security.customauthorization.HasWritePermissions;
 import uk.ac.ebi.ega.permissions.exception.ServiceException;
 import uk.ac.ebi.ega.permissions.exception.SystemException;
 import uk.ac.ebi.ega.permissions.mapper.TokenPayloadMapper;
@@ -82,7 +82,7 @@ public class RequestHandler {
         return this.getPermissions(visas, format);
     }
 
-    @IsAdminReaderOrWriter
+    @HasReadOrWritePermissions
     public ResponseEntity<Visas> getPermissionsForUser(String userId, Format format) {
         String userAccountId = getAccountIdForElixirId(userId);
         verifyAccountId(userAccountId);
@@ -113,7 +113,7 @@ public class RequestHandler {
         return ResponseEntity.ok(response);
     }
 
-    @IsAdminWriter
+    @HasWritePermissions
     public ResponseEntity<PermissionsResponses> createPermissions(String userId, List<Object> body, Format format) {
 
         PermissionsResponses responses = new PermissionsResponses();
@@ -167,7 +167,7 @@ public class RequestHandler {
                 .collect(Collectors.toList());
     }
 
-    @IsAdminWriter
+    @HasWritePermissions
     public ResponseEntity<Void> deletePermissions(String userId, List<String> values) {
         verifyAccountId(userId);
         if (values.contains("all")) { //ignore all other values and remove all permissions

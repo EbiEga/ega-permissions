@@ -7,5 +7,5 @@ import java.lang.annotation.RetentionPolicy;
 
 @Retention(RetentionPolicy.RUNTIME)
 @PreAuthorize("hasPermission(#userId, 'EGAAdmin_read') || hasPermission(#userId, 'DAC_read') ")
-public @interface IsAdminReader {
+public @interface HasReadPermissions {
 }

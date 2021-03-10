@@ -42,6 +42,7 @@ import uk.ac.ebi.ega.permissions.controller.delegate.GroupUsersApiDelegateImpl;
 import uk.ac.ebi.ega.permissions.controller.delegate.MeApiDelegateImpl;
 import uk.ac.ebi.ega.permissions.controller.delegate.PermissionsApiDelegateImpl;
 import uk.ac.ebi.ega.permissions.mapper.ApiKeyMapper;
+import uk.ac.ebi.ega.permissions.mapper.GroupUserMapper;
 import uk.ac.ebi.ega.permissions.mapper.TokenPayloadMapper;
 import uk.ac.ebi.ega.permissions.model.JWTAlgorithm;
 import uk.ac.ebi.ega.permissions.persistence.repository.AccountElixirIdRepository;
@@ -200,8 +201,9 @@ public class EgaPermissionsConfig {
     }
 
     @Bean
-    public AccessGroupsApiDelegate accessGroupsApiDelegate() {
-        return new AccessGroupsApiDelegateImpl();
+    public AccessGroupsApiDelegate accessGroupsApiDelegate(final UserGroupDataService userGroupDataService,
+                                                           final GroupUserMapper groupUserMapper) {
+        return new AccessGroupsApiDelegateImpl(userGroupDataService, groupUserMapper);
     }
 
     @Bean

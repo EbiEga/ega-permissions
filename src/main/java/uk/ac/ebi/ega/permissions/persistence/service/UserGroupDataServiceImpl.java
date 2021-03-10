@@ -1,12 +1,13 @@
 package uk.ac.ebi.ega.permissions.persistence.service;
 
-import static uk.ac.ebi.ega.permissions.persistence.entities.GroupType.EGAAdmin;
+import uk.ac.ebi.ega.permissions.model.GroupUserDTO;
+import uk.ac.ebi.ega.permissions.persistence.entities.AccessGroup;
+import uk.ac.ebi.ega.permissions.persistence.repository.UserGroupRepository;
 
 import java.util.List;
 import java.util.Optional;
 
-import uk.ac.ebi.ega.permissions.persistence.entities.UserGroup;
-import uk.ac.ebi.ega.permissions.persistence.repository.UserGroupRepository;
+import static uk.ac.ebi.ega.permissions.persistence.entities.GroupType.EGAAdmin;
 
 public class UserGroupDataServiceImpl implements UserGroupDataService {
 
@@ -27,12 +28,17 @@ public class UserGroupDataServiceImpl implements UserGroupDataService {
     }
 
     @Override
-    public Optional<List<UserGroup>> getPermissionGroups(String accountId) {
+    public Optional<List<AccessGroup>> getPermissionGroups(String accountId) {
         return userGroupRepository.findAllByUserId(accountId);
     }
 
     @Override
-    public UserGroup save(UserGroup userGroup) {
+    public List<GroupUserDTO> getGroupUsers(String groupStableId) {
+        return userGroupRepository.findAllUsersByGroup(groupStableId);
+    }
+
+    @Override
+    public AccessGroup save(AccessGroup userGroup) {
         //Make sure we mark each record we modify as non pea so the migration process handle it properly
         userGroup.setPeaRecord(0);
         return userGroupRepository.save(userGroup);

@@ -16,6 +16,7 @@
 package uk.ac.ebi.ega.permissions.steps;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import uk.ac.ebi.ega.permissions.dto.TokenParams;
@@ -27,6 +28,8 @@ import uk.ac.ebi.ega.permissions.persistence.repository.UserGroupRepository;
 
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceUnit;
+
+import static org.springframework.http.MediaType.APPLICATION_JSON;
 
 @Component
 public class World {
@@ -63,5 +66,12 @@ public class World {
         this.userGroupRepository.deleteAll();
         this.passportClaimRepository.deleteAll();
         this.datasetHelper.removeAll();
+    }
+
+    public HttpHeaders getHeaders() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(APPLICATION_JSON);
+        headers.setBearerAuth(this.bearerAccessToken);
+        return headers;
     }
 }

@@ -23,13 +23,11 @@ import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
-import uk.ac.ebi.ega.permissions.helpers.DatasetHelper;
 import uk.ac.ebi.ega.permissions.model.PassportVisaObject;
 import uk.ac.ebi.ega.permissions.model.PermissionsResponse;
 import uk.ac.ebi.ega.permissions.model.Visa;
@@ -38,7 +36,7 @@ import uk.ac.ebi.ega.permissions.persistence.entities.Authority;
 import uk.ac.ebi.ega.permissions.persistence.entities.GroupType;
 import uk.ac.ebi.ega.permissions.persistence.entities.PassportClaim;
 import uk.ac.ebi.ega.permissions.persistence.entities.Permission;
-import uk.ac.ebi.ega.permissions.persistence.entities.UserGroup;
+import uk.ac.ebi.ega.permissions.persistence.entities.AccessGroup;
 import uk.ac.ebi.ega.permissions.persistence.entities.VisaType;
 
 import java.net.URI;
@@ -50,7 +48,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.http.MediaType.APPLICATION_JSON;
 
 public class PermissionsMgmtStepDefs {
 
@@ -75,7 +72,7 @@ public class PermissionsMgmtStepDefs {
         this.world.accountRepository.save(account);
 
         Permission permission = accessLevel.equals("write") ? Permission.write : Permission.read;
-        UserGroup userGroup = new UserGroup(dacUserAccountId, dacStableId, GroupType.DAC, permission);
+        AccessGroup userGroup = new AccessGroup(dacUserAccountId, dacStableId, GroupType.DAC, permission);
         this.world.userGroupRepository.save(userGroup);
     }
 
@@ -90,7 +87,7 @@ public class PermissionsMgmtStepDefs {
                 .build()
                 .toUri();
 
-        final HttpEntity<List<PassportVisaObject>> request = new HttpEntity<>(passportVisaObjects, getHeaders());
+        final HttpEntity<List<PassportVisaObject>> request = new HttpEntity<>(passportVisaObjects, this.world.getHeaders());
         try {
             //restTemplate is throwing an exception so we catch it to validate later as this scenario includes multiple response types
             world.response = restTemplate.exchange(requestURI, HttpMethod.POST, request, PermissionsResponse[].class);
@@ -108,9 +105,11 @@ public class PermissionsMgmtStepDefs {
         }
     }
 
-    @And("^account (.*?) is an EGA Admin$")
-    public void accountIsAnEGAAdmin(String egaAdminAccountId) {
-        UserGroup userGroup = new UserGroup(egaAdminAccountId, "", GroupType.EGAAdmin, Permission.write);
+    @And("^EGA Admin (.*?) with email (.*?) exists$")
+    public void accountIsAnEGAAdmin(String egaAdminAccountId, String email) {
+        Account account = new Account(egaAdminAccountId, "Test Account " + egaAdminAccountId, "Test", email, "Active");
+        this.world.accountRepository.save(account);
+        AccessGroup userGroup = new AccessGroup(egaAdminAccountId, "", GroupType.EGAAdmin, Permission.write);
         this.world.userGroupRepository.save(userGroup);
     }
 
@@ -136,7 +135,7 @@ public class PermissionsMgmtStepDefs {
                 .build()
                 .toUri();
 
-        HttpEntity request = new HttpEntity(getHeaders());
+        HttpEntity request = new HttpEntity(this.world.getHeaders());
         try {
             //restTemplate is throwing an exception so we catch it to validate later as this scenario includes multiple response types
             world.response = restTemplate.exchange(requestURI, HttpMethod.GET, request, Visa[].class);
@@ -154,7 +153,7 @@ public class PermissionsMgmtStepDefs {
                 .build()
                 .toUri();
 
-        HttpEntity request = new HttpEntity(getHeaders());
+        HttpEntity request = new HttpEntity(this.world.getHeaders());
         try {
             //restTemplate is throwing an exception so we catch it to validate later as this scenario includes multiple response types
             world.response = restTemplate.exchange(requestURI, HttpMethod.GET, request, Visa[].class);
@@ -213,7 +212,7 @@ public class PermissionsMgmtStepDefs {
                 .build()
                 .toUri();
 
-        HttpEntity request = new HttpEntity(getHeaders());
+        HttpEntity request = new HttpEntity(this.world.getHeaders());
 
         try {
             //restTemplate is throwing an exception so we catch it to validate later as this scenario includes multiple response types
@@ -223,10 +222,4 @@ public class PermissionsMgmtStepDefs {
         }
     }
 
-    private HttpHeaders getHeaders() {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(APPLICATION_JSON);
-        headers.setBearerAuth(this.world.bearerAccessToken);
-        return headers;
-    }
 }
