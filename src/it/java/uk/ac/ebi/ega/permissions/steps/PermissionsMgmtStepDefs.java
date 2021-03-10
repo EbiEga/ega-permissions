@@ -57,7 +57,6 @@ public class PermissionsMgmtStepDefs {
     World world;
 
     private RestTemplate restTemplate = new RestTemplate();
-    private DatasetHelper datasetHelper;
 
     @Before
     public void cleanBeforeEachScenario() {
@@ -66,8 +65,7 @@ public class PermissionsMgmtStepDefs {
 
     @Given("^dataset (.*?) belongs to DAC (.*?)$")
     public void dataset_belongs_to_dac(String datasetId, String dacStableId) {
-        this.datasetHelper = new DatasetHelper(this.world.entityManagerFactory.createEntityManager());
-        this.datasetHelper.insertDataset(datasetId, "Test Dataset", dacStableId);
+        this.world.datasetHelper.insert(datasetId, "Test Dataset", dacStableId);
     }
 
     @Given("^account (.*?) is linked to DAC (.*?) with (.*?) permissions$")
@@ -81,10 +79,6 @@ public class PermissionsMgmtStepDefs {
     public void user_account_grants_permissions_to_account_on_dataset(String dacUserAccountId, String egaUserAccountId, String datasetId) throws URISyntaxException {
         List<PassportVisaObject> passportVisaObjects = createPassportVisaObjects(Arrays.asList(datasetId), dacUserAccountId);
 
-        final HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(APPLICATION_JSON);
-        headers.setBearerAuth(this.world.bearerAccessToken);
-
         final URI requestURI = UriComponentsBuilder
                 .fromUri(new URI("http://localhost:8080"))
                 .path("/permissions")
@@ -92,7 +86,7 @@ public class PermissionsMgmtStepDefs {
                 .build()
                 .toUri();
 
-        final HttpEntity<List<PassportVisaObject>> request = new HttpEntity<>(passportVisaObjects, headers);
+        final HttpEntity<List<PassportVisaObject>> request = new HttpEntity<>(passportVisaObjects, getHeaders());
         try {
             //restTemplate is throwing an exception so we catch it to validate later as this scenario includes multiple response types
             world.response = restTemplate.exchange(requestURI, HttpMethod.POST, request, PermissionsResponse[].class);
@@ -120,8 +114,7 @@ public class PermissionsMgmtStepDefs {
     @And("^datasets belongs to DAC (.*?)$")
     public void datasetsBelongsToDACEGAC(String dacStableId, DataTable datasetsTable) {
         List<String> datasets = datasetsTable.transpose().asList(String.class);
-        this.datasetHelper = new DatasetHelper(this.world.entityManagerFactory.createEntityManager());
-        datasets.forEach(dataset -> this.datasetHelper.insertDataset(dataset, "Test Dataset", dacStableId));
+        datasets.forEach(dataset -> this.world.datasetHelper.insert(dataset, "Test Dataset", dacStableId));
     }
 
     @And("^user account (.*?) has permissions to datasets$")
@@ -133,10 +126,6 @@ public class PermissionsMgmtStepDefs {
 
     @When("^user account (.*?) list permissions for account (.*?)$")
     public void userAccountEGAWListPermissionsForAccountEGAW(String dacUserAccountId, String egaUserAccountId) throws URISyntaxException {
-        final HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(APPLICATION_JSON);
-        headers.setBearerAuth(this.world.bearerAccessToken);
-
         final URI requestURI = UriComponentsBuilder
                 .fromUri(new URI("http://localhost:8080"))
                 .path("/permissions")
@@ -144,7 +133,7 @@ public class PermissionsMgmtStepDefs {
                 .build()
                 .toUri();
 
-        HttpEntity request = new HttpEntity(headers);
+        HttpEntity request = new HttpEntity(getHeaders());
         try {
             //restTemplate is throwing an exception so we catch it to validate later as this scenario includes multiple response types
             world.response = restTemplate.exchange(requestURI, HttpMethod.GET, request, Visa[].class);
@@ -155,10 +144,6 @@ public class PermissionsMgmtStepDefs {
 
     @When("^user account (.*?) list permissions for himself$")
     public void userAccountListPermissionsForHimself(String userAccount) throws URISyntaxException {
-        final HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(APPLICATION_JSON);
-        headers.setBearerAuth(this.world.bearerAccessToken);
-
         final URI requestURI = UriComponentsBuilder
                 .fromUri(new URI("http://localhost:8080"))
                 .path("/me/permissions")
@@ -166,7 +151,7 @@ public class PermissionsMgmtStepDefs {
                 .build()
                 .toUri();
 
-        HttpEntity request = new HttpEntity(headers);
+        HttpEntity request = new HttpEntity(getHeaders());
         try {
             //restTemplate is throwing an exception so we catch it to validate later as this scenario includes multiple response types
             world.response = restTemplate.exchange(requestURI, HttpMethod.GET, request, Visa[].class);
@@ -207,5 +192,38 @@ public class PermissionsMgmtStepDefs {
     public void responseShouldNotContainAnyItems() {
         ResponseEntity<Visa[]> getResponse = (ResponseEntity<Visa[]>) world.response;
         assertThat(getResponse.getBody()).isEmpty();
+    }
+
+    @And("^database should still contain permissions for account (.*?)$")
+    public void databaseShouldContainPermissionsForAccount(String accountId, DataTable datasetsTable) {
+        List<String> datasets = datasetsTable.transpose().asList(String.class);
+        List<String> grantedDatasets = this.world.passportClaimRepository.findAllByAccountId(accountId).stream().map(PassportClaim::getValue).collect(Collectors.toList());
+        assertThat(grantedDatasets).hasSameElementsAs(datasets);
+    }
+
+    @When("^admin account (.*?) revokes (.*?) from user account (.*?)$")
+    public void adminAccountRevokesPermissionFromUserAccount(String dacUserAccountId, String permission, String userAccountId) throws URISyntaxException {
+        final URI requestURI = UriComponentsBuilder
+                .fromUri(new URI("http://localhost:8080"))
+                .path("/permissions")
+                .query("account-id=" + userAccountId + "&values=" + permission)
+                .build()
+                .toUri();
+
+        HttpEntity request = new HttpEntity(getHeaders());
+
+        try {
+            //restTemplate is throwing an exception so we catch it to validate later as this scenario includes multiple response types
+            world.response = restTemplate.exchange(requestURI, HttpMethod.DELETE, request, Object.class);
+        } catch (HttpClientErrorException ex) {
+            world.response = new ResponseEntity<>(ex.getStatusCode());
+        }
+    }
+
+    private HttpHeaders getHeaders() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(APPLICATION_JSON);
+        headers.setBearerAuth(this.world.bearerAccessToken);
+        return headers;
     }
 }

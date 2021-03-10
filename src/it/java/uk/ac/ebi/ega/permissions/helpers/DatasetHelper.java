@@ -15,23 +15,27 @@
  */
 package uk.ac.ebi.ega.permissions.helpers;
 
+import org.springframework.stereotype.Component;
+
 import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
 import javax.persistence.Query;
 import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 
+@Component
 public class DatasetHelper {
 
     private EntityManager entityManager;
 
     //We don't have repositories for Dataset (view) so we use the entity manager for our tests
-    public DatasetHelper(EntityManager entityManager) {
-        this.entityManager = entityManager;
+    public DatasetHelper(EntityManagerFactory entityManagerFactory) {
+        this.entityManager = entityManagerFactory.createEntityManager();
     }
 
     @Transactional
-    public void insertDataset(String datasetId, String description, String dacStableId) {
+    public void insert(String datasetId, String description, String dacStableId) {
         String sql = "insert into pea.dataset(dataset_id, description, dac_stable_id, double_signature) " +
                 "values(?,?,?,'123');";
         this.entityManager.getTransaction().begin();
@@ -46,11 +50,19 @@ public class DatasetHelper {
         this.entityManager.getTransaction().commit();
     }
 
+    @Transactional
+    public void removeAll(){
+        this.entityManager.getTransaction().begin();
+        Query query = this.entityManager.createNativeQuery("truncate table pea.dataset");
+        query.executeUpdate();
+        this.entityManager.getTransaction().commit();
+    }
+
     public List<String> generateDatasets(String dacStableId, int cant) {
         List<String> datasets = new ArrayList<>(cant);
         for (int i = 1; i <= cant; i++) {
             String datasetId = "EGAD0000" + 1;
-            insertDataset(datasetId, "Test Dataset " + datasetId, dacStableId);
+            insert(datasetId, "Test Dataset " + datasetId, dacStableId);
             datasets.add(datasetId);
         }
         return datasets;
