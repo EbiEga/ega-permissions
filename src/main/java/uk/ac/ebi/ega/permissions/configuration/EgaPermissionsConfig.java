@@ -25,20 +25,20 @@ import org.springframework.security.access.PermissionEvaluator;
 import org.springframework.security.authentication.AuthenticationManagerResolver;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.util.ResourceUtils;
+import uk.ac.ebi.ega.permissions.api.AccessGroupsApiDelegate;
 import uk.ac.ebi.ega.permissions.api.ApiKeyApiDelegate;
-import uk.ac.ebi.ega.permissions.api.DacAdminsApiDelegate;
-import uk.ac.ebi.ega.permissions.api.DacsApiDelegate;
 import uk.ac.ebi.ega.permissions.api.DatasetsApiDelegate;
+import uk.ac.ebi.ega.permissions.api.GroupUsersApiDelegate;
 import uk.ac.ebi.ega.permissions.api.MeApiDelegate;
 import uk.ac.ebi.ega.permissions.api.PermissionsApiDelegate;
 import uk.ac.ebi.ega.permissions.configuration.apikey.ApiKeyAuthenticationFilter;
 import uk.ac.ebi.ega.permissions.configuration.tenant.TenantAuthenticationManagerResolver;
 import uk.ac.ebi.ega.permissions.controller.CustomAccessDeniedHandler;
 import uk.ac.ebi.ega.permissions.controller.RequestHandler;
+import uk.ac.ebi.ega.permissions.controller.delegate.AccessGroupsApiDelegateImpl;
 import uk.ac.ebi.ega.permissions.controller.delegate.ApiKeyApiDelegateImpl;
-import uk.ac.ebi.ega.permissions.controller.delegate.DacAdminApiDelegateImpl;
-import uk.ac.ebi.ega.permissions.controller.delegate.DacApiDelegateImpl;
 import uk.ac.ebi.ega.permissions.controller.delegate.DatasetsApiDelegateImpl;
+import uk.ac.ebi.ega.permissions.controller.delegate.GroupUsersApiDelegateImpl;
 import uk.ac.ebi.ega.permissions.controller.delegate.MeApiDelegateImpl;
 import uk.ac.ebi.ega.permissions.controller.delegate.PermissionsApiDelegateImpl;
 import uk.ac.ebi.ega.permissions.mapper.ApiKeyMapper;
@@ -200,13 +200,13 @@ public class EgaPermissionsConfig {
     }
 
     @Bean
-    public DacAdminsApiDelegate dacAdminsApiDelegate() {
-        return new DacAdminApiDelegateImpl();
+    public AccessGroupsApiDelegate accessGroupsApiDelegate() {
+        return new AccessGroupsApiDelegateImpl();
     }
 
     @Bean
-    public DacsApiDelegate dacsApiDelegate(){
-        return new DacApiDelegateImpl();
+    public GroupUsersApiDelegate groupUsersApiDelegate() {
+        return new GroupUsersApiDelegateImpl();
     }
 
     private void assertFileExistsAndReadable(final File file, final String message) throws FileSystemException {

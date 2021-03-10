@@ -1,6 +1,6 @@
 openapi: 3.0.3
 info:
-  title: EGA Admin Permissions
+  title: EGA Admins (Internal)
   description: The EGA Admin API is aimed to allow EGA Admins to control DAC Admins for the European Genome-Phenome Archive.
   termsOfService: TBD
   contact:
@@ -15,21 +15,21 @@ servers:
   - url: https://ega.ebi.ac.uk:8053/ega-permissions
     description: Test
 tags:
-  - name: DacAdmin
-    description: DAC Admin Endpoints
+  - name: Access Groups
+    description: Access Groups Endpoints (former DAC Admin)
 
 paths:
-  /dacs/{dacStableId}:
+  /access-groups/{groupId}/group-users:
     get:
       tags:
-        - DacAdmin
-      summary: Retrieve DAC Info
-      description: List all users that can controll a DAC
-      operationId: getDac
+        - Access Groups
+      summary: Retrieve Users assigned to Group
+      description: Return users assigned to a specific Access Group (i.e. DAC)
+      operationId: getGroupUsers
       parameters:
-        - name: dacStableId
+        - name: groupId
           in: path
-          description: DAC Stable ID
+          description: ID of the Access Group (i.e. dacStableId)
           required: true
           schema:
             type: string
@@ -41,44 +41,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/DacWithAdmins'
-        400:
-          description: Invalid ID supplied
-          content: { }
-        401:
-          description: Unauthorized
-          content: { }
-        500:
-          description: Internal server error
-          content: { }
-        503:
-          description: Service Unavailable
-          content: { }
-
-
-  /dacs/{dacStableId}/admins:
-    get:
-      tags:
-        - DacAdmin
-      summary: Retrieve admins for DAC
-      description: Returns a list of all the Admins assigned to DAC
-      operationId: getDacAdmins
-      parameters:
-        - name: dacStableId
-          in: path
-          description: DAC Stable ID
-          required: true
-          schema:
-            type: string
-      responses:
-        200:
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Admin'
+                  $ref: '#/components/schemas/GroupUser'
         400:
           description: Invalid ID supplied
           content: { }
@@ -94,30 +57,30 @@ paths:
 
     post:
       tags:
-        - DacAdmin
-      summary: Register user as a DAC Admin
-      description: Register user as a DAC Admin
-      operationId: postDacAdmin
+        - Access Groups
+      summary: Add User to Group
+      description: Register User in Access Group (i.e. DAC)
+      operationId: postAccessGroup
       parameters:
-        - name: dacStableId
+        - name: groupId
           in: path
-          description: DAC Stable ID
+          description: ID of the Access Group (i.e. dacStableId)
           required: true
           schema:
             type: string
       requestBody:
-        description: ID of the user account
+        description: ID of the Access Group (i.e. dacStableId)
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Admin'
+              $ref: '#/components/schemas/GroupUser'
       responses:
         200:
           description: successful operation
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Admin'
+                $ref: '#/components/schemas/GroupUser'
         400:
           description: Invalid ID supplied
           content: { }
@@ -132,15 +95,15 @@ paths:
           content: { }
 
 
-  /dacAdmins/{egaAccountId}:
+  /group-users/{accountId}:
     get:
       tags:
-        - DacAdmin
-      summary: Assigned DACs
-      description: List all DACs assigned to a User
-      operationId: getDacsForUser
+        - Access Groups
+      summary: Assigned Groups for User
+      description: List all Access Groups assigned to a User
+      operationId: getGroupsForUser
       parameters:
-        - name: egaAccountId
+        - name: accountId
           in: path
           description: User Account ID
           required: true
@@ -154,7 +117,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Dac'
+                  $ref: '#/components/schemas/AccessGroup'
         400:
           description: Invalid ID supplied
           content: { }
@@ -170,20 +133,20 @@ paths:
 
     delete:
       tags:
-        - DacAdmin
-      summary: Remove user from DAC Admins
-      description: Remove user from one or more DACs. Comma separated values for 'dacs' parameter allowed. Set value to 'all' in order remove user from all DACs.
+        - Access Groups
+      summary: Remove user from Access Group
+      description: Remove user from one or more Access Group. Comma separated values for 'groupIds' parameter allowed. Set value to 'all' in order remove user from all Access Groups.
       operationId: delDacAdmin
       parameters:
-        - name: egaAccountId
+        - name: accountId
           in: path
-          description: User from which the DAC Admin assignation(s) will be removed
+          description: Account ID for the User from which the Access Group assignation(s) will be removed
           required: true
           schema:
             type: string
-        - name: dacs
+        - name: groupIds
           in: query
-          description: DAC from which the user should be removed. Comma separated values and 'all' allowed.
+          description: IDs of the Access Groups from which the user will be removed (i.e. dacStableId). Comma separated values and 'all' allowed.
           required: true
           style: form
           explode: false
@@ -194,7 +157,7 @@ paths:
       responses:
         200:
           description: OK
-          content: {}
+          content: { }
         204:
           description: No content (no record has been deleted)
           content: { }
@@ -213,35 +176,36 @@ paths:
 
 components:
   schemas:
-    Dac:
+    AccessGroup:
       type: object
       properties:
-        dacStableId:
+        groupId:
           type: string
-        description:
-          type: string
-
-    Admin:
-      type: object
-      properties:
-        egaAccountId:
-          type: string
-          description: EGA Account ID
+          description: ID of the Access Group (i.e. dacStableId)
         permission:
-          type: string
-          enum: [read, write]
-
-    DacWithAdmins:
-      type: object
-      properties:
-        dacStableId:
-          type: string
+          $ref: '#/components/schemas/PermissionLevel'
         description:
           type: string
-        admins:
-          type: array
-          items:
-            $ref: '#/components/schemas/Admin'
+
+    GroupUser:
+      type: object
+      properties:
+        userAccountId:
+          type: string
+          description: User account ID
+        userEmail:
+          type: string
+          description: User e-mail
+        permission:
+          $ref: '#/components/schemas/PermissionLevel'
+      required:
+        - userAccountId
+        - permission
+
+    PermissionLevel:
+      type: string
+      enum: [ READ, WRITE ]
+      default: READ
 
     ErrorBody:
       type: object
@@ -267,5 +231,5 @@ components:
       name: API_KEY
 
 security:
-  - BearerAuth: []
-  - ApiKeyAuth: []
+  - BearerAuth: [ ]
+  - ApiKeyAuth: [ ]

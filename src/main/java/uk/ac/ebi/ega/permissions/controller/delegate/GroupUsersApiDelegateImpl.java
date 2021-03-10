@@ -15,7 +15,8 @@
  */
 package uk.ac.ebi.ega.permissions.controller.delegate;
 
-import uk.ac.ebi.ega.permissions.api.DacAdminsApiDelegate;
 
-public class DacAdminApiDelegateImpl implements DacAdminsApiDelegate {
+import uk.ac.ebi.ega.permissions.api.GroupUsersApiDelegate;
+
+public class GroupUsersApiDelegateImpl implements GroupUsersApiDelegate {
 }
