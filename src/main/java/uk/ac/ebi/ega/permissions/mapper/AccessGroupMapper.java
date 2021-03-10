@@ -17,6 +17,7 @@ package uk.ac.ebi.ega.permissions.mapper;/*
 import org.mapstruct.InjectionStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import uk.ac.ebi.ega.permissions.model.AccessGroup;
 import uk.ac.ebi.ega.permissions.model.GroupUser;
 import uk.ac.ebi.ega.permissions.model.GroupUserDTO;
 import uk.ac.ebi.ega.permissions.model.PermissionLevel;
@@ -26,12 +27,18 @@ import java.util.List;
 
 @Mapper(componentModel = "spring",
         injectionStrategy = InjectionStrategy.CONSTRUCTOR)
-public interface GroupUserMapper {
+public interface AccessGroupMapper {
 
     @Mapping(target = "userEmail", source = "email")
-    GroupUser fromDTO(GroupUserDTO dto);
+    GroupUser groupUserFromDTO(GroupUserDTO dto);
 
-    List<GroupUser> fromDTOList(List<GroupUserDTO> dtoList);
+    @Mapping(target = "groupId", source = "groupStableId")
+    @Mapping(target = "description", ignore = true)
+    AccessGroup accessGroupFromAccessGroupEntity(uk.ac.ebi.ega.permissions.persistence.entities.AccessGroup accessGroup);
+
+    List<GroupUser> groupUsersFromDTOs(List<GroupUserDTO> dtoList);
+
+    List<AccessGroup> accessGroupsFromAccessGroupEntities(List<uk.ac.ebi.ega.permissions.persistence.entities.AccessGroup> accessGroups);
 
     default PermissionLevel mapPermissionLevel(Permission permission) {
         switch (permission) {

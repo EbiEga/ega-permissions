@@ -24,7 +24,7 @@ import uk.ac.ebi.ega.permissions.helpers.DatasetHelper;
 import uk.ac.ebi.ega.permissions.persistence.repository.AccountRepository;
 import uk.ac.ebi.ega.permissions.persistence.repository.ApiKeyRepository;
 import uk.ac.ebi.ega.permissions.persistence.repository.PassportClaimRepository;
-import uk.ac.ebi.ega.permissions.persistence.repository.UserGroupRepository;
+import uk.ac.ebi.ega.permissions.persistence.repository.AccessGroupRepository;
 
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceUnit;
@@ -43,7 +43,7 @@ public class World {
     PassportClaimRepository passportClaimRepository;
 
     @Autowired
-    UserGroupRepository userGroupRepository;
+    AccessGroupRepository userGroupRepository;
 
     @Autowired
     AccountRepository accountRepository;

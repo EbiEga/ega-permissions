@@ -46,8 +46,8 @@ public class ApiKeyITStepDefs {
         this.world.cleanApiKeys();
     }
 
-    @When("^user request a new Token with key (.*?)$")
-    public void user_account_request_a_new_token_with_key(String tokenKey) throws URISyntaxException {
+    @When("^user request API_KEY Token (.*?)$")
+    public void userRequestTokenWithKey(String tokenKey) throws URISyntaxException {
         final HttpHeaders headers = new HttpHeaders();
         headers.setContentType(APPLICATION_JSON);
         headers.setBearerAuth(this.world.bearerAccessToken);
@@ -69,8 +69,8 @@ public class ApiKeyITStepDefs {
         }
     }
 
-    @Then("^response contains the token key (.*?)$")
-    public void a_response_containing_the_token_key_is_returned(String tokenKey) {
+    @Then("^response contains token (.*?)$")
+    public void responseContainsToken(String tokenKey) {
         ResponseEntity<CreatedAPIKey> createdAPIKeyResponse = (ResponseEntity<CreatedAPIKey>) world.response;
         assertThat(createdAPIKeyResponse.getStatusCodeValue()).isEqualTo(200);
         assertThat(createdAPIKeyResponse.getBody().getId()).isEqualTo(tokenKey);

@@ -11,7 +11,7 @@ import uk.ac.ebi.ega.permissions.persistence.entities.AccessGroupId;
 import java.util.List;
 import java.util.Optional;
 
-public interface UserGroupRepository extends CrudRepository<AccessGroup, AccessGroupId> {
+public interface AccessGroupRepository extends CrudRepository<AccessGroup, AccessGroupId> {
 
     String APPROVED = "approved";
     String REVOKED = "revoked";
@@ -32,7 +32,7 @@ public interface UserGroupRepository extends CrudRepository<AccessGroup, AccessG
                                                   @Param("datasetId") String datasetId);
 
     @Query("select ug from AccessGroup ug where ug.egaAccountStableId=:userId and ug.status='" + APPROVED + "'")
-    Optional<List<AccessGroup>> findAllByUserId(@Param("userId") String userId);
+    List<AccessGroup> findAllByUserId(@Param("userId") String userId);
 
     @Query("select ug from AccessGroup ug inner join Dataset dc "
             + "on ug.groupStableId = dc.dacStableId "
@@ -48,4 +48,6 @@ public interface UserGroupRepository extends CrudRepository<AccessGroup, AccessG
             " inner join Account ac on ug.egaAccountStableId=ac.accountId" +
             " where ug.groupStableId=:groupId")
     List<GroupUserDTO> findAllUsersByGroup(@Param("groupId") String groupId);
+
+
 }

@@ -2,18 +2,19 @@ package uk.ac.ebi.ega.permissions.persistence.service;
 
 import uk.ac.ebi.ega.permissions.model.GroupUserDTO;
 import uk.ac.ebi.ega.permissions.persistence.entities.AccessGroup;
-import uk.ac.ebi.ega.permissions.persistence.repository.UserGroupRepository;
+import uk.ac.ebi.ega.permissions.persistence.entities.AccessGroupId;
+import uk.ac.ebi.ega.permissions.persistence.repository.AccessGroupRepository;
 
 import java.util.List;
 import java.util.Optional;
 
 import static uk.ac.ebi.ega.permissions.persistence.entities.GroupType.EGAAdmin;
 
-public class UserGroupDataServiceImpl implements UserGroupDataService {
+public class AccessGroupDataServiceImpl implements AccessGroupDataService {
 
-    private UserGroupRepository userGroupRepository;
+    private AccessGroupRepository userGroupRepository;
 
-    public UserGroupDataServiceImpl(UserGroupRepository userGroupRepository) {
+    public AccessGroupDataServiceImpl(AccessGroupRepository userGroupRepository) {
         this.userGroupRepository = userGroupRepository;
     }
 
@@ -28,7 +29,7 @@ public class UserGroupDataServiceImpl implements UserGroupDataService {
     }
 
     @Override
-    public Optional<List<AccessGroup>> getPermissionGroups(String accountId) {
+    public List<AccessGroup> getPermissionGroups(String accountId) {
         return userGroupRepository.findAllByUserId(accountId);
     }
 
@@ -42,5 +43,17 @@ public class UserGroupDataServiceImpl implements UserGroupDataService {
         //Make sure we mark each record we modify as non pea so the migration process handle it properly
         userGroup.setPeaRecord(0);
         return userGroupRepository.save(userGroup);
+    }
+
+    @Override
+    public Optional<AccessGroup> removeAccessGroup(String accountId, String groupStableId) {
+        AccessGroup deletedEntity = null;
+        Optional<AccessGroup> optionalAccessGroup = this.userGroupRepository.findById(new AccessGroupId(accountId, groupStableId));
+        if (optionalAccessGroup.isPresent()) {
+            AccessGroup accessGroup = optionalAccessGroup.get();
+            accessGroup.setStatus("revoked");
+            deletedEntity = this.userGroupRepository.save(accessGroup);
+        }
+        return Optional.ofNullable(deletedEntity);
     }
 }

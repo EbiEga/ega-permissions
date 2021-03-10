@@ -19,7 +19,7 @@ tags:
     description: Access Groups Endpoints (former DAC Admin)
 
 paths:
-  /access-groups/{groupId}/group-users:
+  /access-groups/{groupId}:
     get:
       tags:
         - Access Groups
@@ -136,7 +136,7 @@ paths:
         - Access Groups
       summary: Remove user from Access Group
       description: Remove user from one or more Access Group. Comma separated values for 'groupIds' parameter allowed. Set value to 'all' in order remove user from all Access Groups.
-      operationId: delDacAdmin
+      operationId: delUserFromGroup
       parameters:
         - name: accountId
           in: path
@@ -204,8 +204,8 @@ components:
 
     PermissionLevel:
       type: string
-      enum: [ READ, WRITE ]
-      default: READ
+      enum: [ read, write ]
+      default: read
 
     ErrorBody:
       type: object

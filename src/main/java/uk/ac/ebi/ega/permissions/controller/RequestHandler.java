@@ -29,7 +29,9 @@ import uk.ac.ebi.ega.permissions.configuration.security.customauthorization.HasR
 import uk.ac.ebi.ega.permissions.configuration.security.customauthorization.HasWritePermissions;
 import uk.ac.ebi.ega.permissions.exception.ServiceException;
 import uk.ac.ebi.ega.permissions.exception.SystemException;
+import uk.ac.ebi.ega.permissions.mapper.AccessGroupMapper;
 import uk.ac.ebi.ega.permissions.mapper.TokenPayloadMapper;
+import uk.ac.ebi.ega.permissions.model.AccessGroup;
 import uk.ac.ebi.ega.permissions.model.Format;
 import uk.ac.ebi.ega.permissions.model.JWTPassportVisaObject;
 import uk.ac.ebi.ega.permissions.model.JWTPermissionsResponse;
@@ -41,7 +43,7 @@ import uk.ac.ebi.ega.permissions.model.Visa;
 import uk.ac.ebi.ega.permissions.model.Visas;
 import uk.ac.ebi.ega.permissions.persistence.entities.Account;
 import uk.ac.ebi.ega.permissions.persistence.entities.AccountElixirId;
-import uk.ac.ebi.ega.permissions.persistence.service.UserGroupDataService;
+import uk.ac.ebi.ega.permissions.persistence.service.AccessGroupDataService;
 import uk.ac.ebi.ega.permissions.service.JWTService;
 import uk.ac.ebi.ega.permissions.service.PermissionsService;
 import uk.ac.ebi.ega.permissions.service.SecurityService;
@@ -59,13 +61,15 @@ public class RequestHandler {
 
     private final PermissionsService permissionsService;
     private final TokenPayloadMapper tokenPayloadMapper;
-    private final UserGroupDataService userGroupDataService;
+    private final AccessGroupDataService userGroupDataService;
     private final JWTService jwtService;
     private final SecurityService securityService;
+    private final AccessGroupMapper accessGroupMapper;
 
     public RequestHandler(final PermissionsService permissionsService,
                           final TokenPayloadMapper tokenPayloadMapper,
-                          final UserGroupDataService userGroupDataService,
+                          final AccessGroupMapper accessGroupMapper,
+                          final AccessGroupDataService userGroupDataService,
                           final JWTService jwtService,
                           final SecurityService securityService) {
         this.permissionsService = permissionsService;
@@ -73,6 +77,7 @@ public class RequestHandler {
         this.userGroupDataService = userGroupDataService;
         this.jwtService = jwtService;
         this.securityService = securityService;
+        this.accessGroupMapper = accessGroupMapper;
     }
 
     public ResponseEntity<Visas> getPermissionForCurrentUser(Format format) {
@@ -80,6 +85,12 @@ public class RequestHandler {
         String userAccountId = permissionsService.getAccountByEmail(currentUser).orElseThrow(() -> new ServiceException("Current user is not allowed to access this resource")).getAccountId();
         List<Visa> visas = this.permissionsService.getVisas(userAccountId);
         return this.getPermissions(visas, format);
+    }
+
+    public ResponseEntity<List<AccessGroup>> getGroupsForCurrentUser() {
+        String currentUser = securityService.getCurrentUser().orElseThrow(() -> new ServiceException("Operation not allowed for Anonymous users"));
+        String userAccountId = permissionsService.getAccountByEmail(currentUser).orElseThrow(() -> new ServiceException("Current user is not allowed to access this resource")).getAccountId();
+        return ResponseEntity.ok(this.accessGroupMapper.accessGroupsFromAccessGroupEntities(this.userGroupDataService.getPermissionGroups(userAccountId)));
     }
 
     @HasReadOrWritePermissions

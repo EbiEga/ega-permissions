@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import uk.ac.ebi.ega.permissions.persistence.entities.AccessGroup;
-import uk.ac.ebi.ega.permissions.persistence.repository.UserGroupRepository;
+import uk.ac.ebi.ega.permissions.persistence.repository.AccessGroupRepository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static uk.ac.ebi.ega.permissions.persistence.entities.GroupType.EGAAdmin;
@@ -33,13 +33,13 @@ import static uk.ac.ebi.ega.permissions.persistence.entities.Permission.read;
 class UserGroupDataServiceImplTest {
 
     @Autowired
-    private UserGroupRepository userGroupRepository;
+    private AccessGroupRepository userGroupRepository;
 
-    private UserGroupDataService userGroupDataService;
+    private AccessGroupDataService userGroupDataService;
 
     @BeforeEach
     void setup() {
-        userGroupDataService = new UserGroupDataServiceImpl(userGroupRepository);
+        userGroupDataService = new AccessGroupDataServiceImpl(userGroupRepository);
     }
 
     @Test

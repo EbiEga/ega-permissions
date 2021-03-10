@@ -16,7 +16,40 @@
 package uk.ac.ebi.ega.permissions.controller.delegate;
 
 
+import org.springframework.http.ResponseEntity;
 import uk.ac.ebi.ega.permissions.api.GroupUsersApiDelegate;
+import uk.ac.ebi.ega.permissions.configuration.security.customauthorization.HasAdminPermissions;
+import uk.ac.ebi.ega.permissions.mapper.AccessGroupMapper;
+import uk.ac.ebi.ega.permissions.persistence.entities.AccessGroup;
+import uk.ac.ebi.ega.permissions.persistence.service.AccessGroupDataService;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class GroupUsersApiDelegateImpl implements GroupUsersApiDelegate {
+
+    private AccessGroupDataService userGroupDataService;
+    private AccessGroupMapper accessGroupMapper;
+
+    public GroupUsersApiDelegateImpl(AccessGroupDataService userGroupDataService,
+                                     AccessGroupMapper accessGroupMapper) {
+        this.userGroupDataService = userGroupDataService;
+        this.accessGroupMapper = accessGroupMapper;
+    }
+
+    @HasAdminPermissions
+    @Override
+    public ResponseEntity<Void> delUserFromGroup(String accountId, List<String> groupIds) {
+        if (groupIds.contains("all")) {
+            groupIds = this.userGroupDataService.getPermissionGroups(accountId).stream().map(AccessGroup::getGroupStableId).collect(Collectors.toList());
+        }
+        groupIds.forEach(groupId -> this.userGroupDataService.removeAccessGroup(accountId, groupId));
+        return ResponseEntity.ok().build();
+    }
+
+    @Override
+    @HasAdminPermissions
+    public ResponseEntity<List<uk.ac.ebi.ega.permissions.model.AccessGroup>> getGroupsForUser(String accountId) {
+        return ResponseEntity.ok(this.accessGroupMapper.accessGroupsFromAccessGroupEntities(this.userGroupDataService.getPermissionGroups(accountId)));
+    }
 }

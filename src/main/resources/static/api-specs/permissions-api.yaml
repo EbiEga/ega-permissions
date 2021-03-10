@@ -250,7 +250,7 @@ paths:
         - Me
       summary: Assigned Access Groups
       description: List all Access Groups to which the current user is assigned (i.e. DAC)
-      operationId: getCurrentUserAccessGroups
+      operationId: myAccessGroups
       responses:
         200:
           description: successful operation

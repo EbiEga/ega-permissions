@@ -23,14 +23,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import uk.ac.ebi.ega.permissions.mapper.AccessGroupMapper;
 import uk.ac.ebi.ega.permissions.mapper.TokenPayloadMapper;
 import uk.ac.ebi.ega.permissions.model.JWTPermissionsResponse;
 import uk.ac.ebi.ega.permissions.model.PassportVisaObject;
 import uk.ac.ebi.ega.permissions.model.PermissionsResponse;
 import uk.ac.ebi.ega.permissions.model.Visa;
 import uk.ac.ebi.ega.permissions.persistence.entities.Account;
+import uk.ac.ebi.ega.permissions.persistence.service.AccessGroupDataService;
 import uk.ac.ebi.ega.permissions.persistence.service.EventDataService;
-import uk.ac.ebi.ega.permissions.persistence.service.UserGroupDataService;
 import uk.ac.ebi.ega.permissions.service.JWTService;
 import uk.ac.ebi.ega.permissions.service.PermissionsService;
 import uk.ac.ebi.ega.permissions.service.SecurityService;
@@ -52,7 +53,8 @@ import static org.springframework.http.HttpStatus.OK;
 public class RequestHandlerTest {
     private PermissionsService permissionsService = mock(PermissionsService.class);
     private TokenPayloadMapper tokenPayloadMapper = mock(TokenPayloadMapper.class);
-    private UserGroupDataService userGroupDataService = mock(UserGroupDataService.class);
+    private AccessGroupMapper accessGroupMapper = mock(AccessGroupMapper.class);
+    private AccessGroupDataService userGroupDataService = mock(AccessGroupDataService.class);
     private EventDataService eventDataService = mock(EventDataService.class);
     private JWTService jwtService = mock(JWTService.class);
     private SecurityService securityService = mock(SecurityService.class);
@@ -129,7 +131,7 @@ public class RequestHandlerTest {
         final Authentication authentication = mock(Authentication.class);
         final SecurityContext securityContext = mock(SecurityContext.class);
         SecurityContextHolder.setContext(securityContext);
-        requestHandler = new RequestHandler(permissionsService, tokenPayloadMapper, userGroupDataService, jwtService, securityService);
+        requestHandler = new RequestHandler(permissionsService, tokenPayloadMapper, accessGroupMapper, userGroupDataService, jwtService, securityService);
 
         Visa visa = new Visa();
         visa.setGa4ghVisaV1(new PassportVisaObject());

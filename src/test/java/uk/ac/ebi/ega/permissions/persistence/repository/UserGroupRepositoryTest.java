@@ -39,7 +39,7 @@ import static uk.ac.ebi.ega.permissions.persistence.entities.Permission.read;
 @DataJpaTest
 public class UserGroupRepositoryTest {
     @Autowired
-    private UserGroupRepository userGroupRepository;
+    private AccessGroupRepository userGroupRepository;
 
     @Autowired
     private PassportClaimRepository passportClaimRepository;

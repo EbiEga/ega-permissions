@@ -3,10 +3,10 @@ package uk.ac.ebi.ega.permissions.configuration;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.PermissionEvaluator;
 import org.springframework.security.core.Authentication;
+import uk.ac.ebi.ega.permissions.persistence.entities.AccessGroup;
 import uk.ac.ebi.ega.permissions.persistence.entities.Account;
 import uk.ac.ebi.ega.permissions.persistence.entities.AccountElixirId;
-import uk.ac.ebi.ega.permissions.persistence.entities.AccessGroup;
-import uk.ac.ebi.ega.permissions.persistence.service.UserGroupDataService;
+import uk.ac.ebi.ega.permissions.persistence.service.AccessGroupDataService;
 import uk.ac.ebi.ega.permissions.service.PermissionsService;
 
 import java.io.Serializable;
@@ -19,9 +19,9 @@ public class CustomPermissionEvaluator implements PermissionEvaluator {
     public static final String ELIXIR_ACCOUNT_SUFFIX = "@elixir-europe.org";
 
     private PermissionsService permissionsService;
-    private UserGroupDataService userGroupDataService;
+    private AccessGroupDataService userGroupDataService;
 
-    public CustomPermissionEvaluator(PermissionsService permissionsService, UserGroupDataService userGroupDataService) {
+    public CustomPermissionEvaluator(PermissionsService permissionsService, AccessGroupDataService userGroupDataService) {
         this.permissionsService = permissionsService;
         this.userGroupDataService = userGroupDataService;
     }
@@ -46,15 +46,15 @@ public class CustomPermissionEvaluator implements PermissionEvaluator {
         String email = auth.getName();
 
         String accountId = getAccountIdForElixirId(email);
-        List<AccessGroup> userGroups = userGroupDataService.getPermissionGroups(accountId).orElseThrow(() ->
-                new AccessDeniedException(("No linked user group for ").concat(email)));
+        List<AccessGroup> userGroups = userGroupDataService.getPermissionGroups(accountId);
+
+        if (userGroups.isEmpty()) {
+            throw new AccessDeniedException(("No linked user group for ").concat(email));
+        }
 
         return userGroups.stream().anyMatch(entry -> {
             String accessGroup = entry.getGroupType().name();
             String accessLevel = entry.getPermission().name();
-            //TODO: Looks like we're missing some validation here as the controller can only act upon datassets that they can control.
-            //HINT: variable targetType not being used. This means any controller with WRITE permission can modify any dataset
-            //Add tests
             if (EGAAdmin.name().equals(accessGroup) || permission.equals(accessGroup.concat("_").concat(accessLevel))) {
                 return true;
             }

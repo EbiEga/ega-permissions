@@ -18,21 +18,21 @@ package uk.ac.ebi.ega.permissions.controller.delegate;
 import org.springframework.http.ResponseEntity;
 import uk.ac.ebi.ega.permissions.api.AccessGroupsApiDelegate;
 import uk.ac.ebi.ega.permissions.configuration.security.customauthorization.HasAdminPermissions;
-import uk.ac.ebi.ega.permissions.mapper.GroupUserMapper;
+import uk.ac.ebi.ega.permissions.mapper.AccessGroupMapper;
 import uk.ac.ebi.ega.permissions.model.GroupUser;
 import uk.ac.ebi.ega.permissions.persistence.entities.GroupType;
 import uk.ac.ebi.ega.permissions.persistence.entities.AccessGroup;
-import uk.ac.ebi.ega.permissions.persistence.service.UserGroupDataService;
+import uk.ac.ebi.ega.permissions.persistence.service.AccessGroupDataService;
 
 import java.util.List;
 
 public class AccessGroupsApiDelegateImpl implements AccessGroupsApiDelegate {
 
-    private UserGroupDataService userGroupDataService;
-    private GroupUserMapper groupUserMapper;
+    private AccessGroupDataService userGroupDataService;
+    private AccessGroupMapper groupUserMapper;
 
-    public AccessGroupsApiDelegateImpl(UserGroupDataService userGroupDataService,
-                                       GroupUserMapper groupUserMapper) {
+    public AccessGroupsApiDelegateImpl(AccessGroupDataService userGroupDataService,
+                                       AccessGroupMapper groupUserMapper) {
         this.userGroupDataService = userGroupDataService;
         this.groupUserMapper = groupUserMapper;
     }
@@ -40,7 +40,7 @@ public class AccessGroupsApiDelegateImpl implements AccessGroupsApiDelegate {
     @Override
     @HasAdminPermissions
     public ResponseEntity<List<GroupUser>> getGroupUsers(String groupId) {
-        return ResponseEntity.ok(this.groupUserMapper.fromDTOList(this.userGroupDataService.getGroupUsers(groupId)));
+        return ResponseEntity.ok(this.groupUserMapper.groupUsersFromDTOs(this.userGroupDataService.getGroupUsers(groupId)));
     }
 
     @Override

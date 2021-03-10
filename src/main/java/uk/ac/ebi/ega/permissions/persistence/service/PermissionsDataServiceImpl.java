@@ -8,7 +8,7 @@ import uk.ac.ebi.ega.permissions.persistence.entities.PassportClaim;
 import uk.ac.ebi.ega.permissions.persistence.repository.AccountElixirIdRepository;
 import uk.ac.ebi.ega.permissions.persistence.repository.AccountRepository;
 import uk.ac.ebi.ega.permissions.persistence.repository.PassportClaimRepository;
-import uk.ac.ebi.ega.permissions.persistence.repository.UserGroupRepository;
+import uk.ac.ebi.ega.permissions.persistence.repository.AccessGroupRepository;
 
 import java.util.List;
 import java.util.Optional;
@@ -18,12 +18,12 @@ public class PermissionsDataServiceImpl implements PermissionsDataService {
     private PassportClaimRepository passportClaimRepository;
     private AccountRepository accountRepository;
     private AccountElixirIdRepository accountElixirIdRepository;
-    private UserGroupRepository userGroupRepository;
+    private AccessGroupRepository userGroupRepository;
 
     public PermissionsDataServiceImpl(PassportClaimRepository passportClaimRepository,
                                       AccountRepository accountRepository,
                                       AccountElixirIdRepository accountElixirIdRepository,
-                                      UserGroupRepository userGroupRepository) {
+                                      AccessGroupRepository userGroupRepository) {
         this.passportClaimRepository = passportClaimRepository;
         this.accountRepository = accountRepository;
         this.accountElixirIdRepository = accountElixirIdRepository;
