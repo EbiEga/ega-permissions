@@ -33,6 +33,7 @@ import uk.ac.ebi.ega.permissions.helpers.DatasetHelper;
 import uk.ac.ebi.ega.permissions.model.PassportVisaObject;
 import uk.ac.ebi.ega.permissions.model.PermissionsResponse;
 import uk.ac.ebi.ega.permissions.model.Visa;
+import uk.ac.ebi.ega.permissions.persistence.entities.Account;
 import uk.ac.ebi.ega.permissions.persistence.entities.Authority;
 import uk.ac.ebi.ega.permissions.persistence.entities.GroupType;
 import uk.ac.ebi.ega.permissions.persistence.entities.PassportClaim;
@@ -64,19 +65,22 @@ public class PermissionsMgmtStepDefs {
     }
 
     @Given("^dataset (.*?) belongs to DAC (.*?)$")
-    public void dataset_belongs_to_dac(String datasetId, String dacStableId) {
+    public void datasetBelongsToDAC(String datasetId, String dacStableId) {
         this.world.datasetHelper.insert(datasetId, "Test Dataset", dacStableId);
     }
 
-    @Given("^account (.*?) is linked to DAC (.*?) with (.*?) permissions$")
-    public void account_is_linked_to_dac_with_some_permissions(String dacUserAccountId, String dacStableId, String accessLevel) {
+    @Given("^DAC Admin user (.*?) with email (.*?) and (.*?) access to (.*?) exist$")
+    public void dacAdminUserWithEmailAndAccessExists(String dacUserAccountId, String email, String accessLevel, String dacStableId) {
+        Account account = new Account(dacUserAccountId, "Test DACAdmin " + dacUserAccountId, "Test", email, "Active");
+        this.world.accountRepository.save(account);
+
         Permission permission = accessLevel.equals("write") ? Permission.write : Permission.read;
         UserGroup userGroup = new UserGroup(dacUserAccountId, dacStableId, GroupType.DAC, permission);
         this.world.userGroupRepository.save(userGroup);
     }
 
     @When("^user account (.*?) grants permissions to account (.*?) on dataset (.*?)$")
-    public void user_account_grants_permissions_to_account_on_dataset(String dacUserAccountId, String egaUserAccountId, String datasetId) throws URISyntaxException {
+    public void userGrantsPermissionsToAccountOnDataset(String dacUserAccountId, String egaUserAccountId, String datasetId) throws URISyntaxException {
         List<PassportVisaObject> passportVisaObjects = createPassportVisaObjects(Arrays.asList(datasetId), dacUserAccountId);
 
         final URI requestURI = UriComponentsBuilder
@@ -96,11 +100,10 @@ public class PermissionsMgmtStepDefs {
 
     }
 
-    @Then("^the response status is (.*?) and the dataset status is (.*?)$")
-    public void theResponseStatusIsResponse_statusAndTheDatasetStatusIsDataset_status(int responseStatus, int datasetStatus) {
-        ResponseEntity<PermissionsResponse[]> postResponse = (ResponseEntity<PermissionsResponse[]>) world.response;
-        assertThat(postResponse.getStatusCodeValue()).isEqualTo(responseStatus);
-        if (responseStatus != 401) {
+    @Then("^dataset has status code (.*?)$")
+    public void theResponseStatusIsResponse_statusAndTheDatasetStatusIsDataset_status(int datasetStatus) {
+        if (datasetStatus != 0) {
+            ResponseEntity<PermissionsResponse[]> postResponse = (ResponseEntity<PermissionsResponse[]>) world.response;
             assertThat(postResponse.getBody()[0].getStatus()).isEqualTo(datasetStatus);
         }
     }
@@ -111,21 +114,21 @@ public class PermissionsMgmtStepDefs {
         this.world.userGroupRepository.save(userGroup);
     }
 
-    @And("^datasets belongs to DAC (.*?)$")
-    public void datasetsBelongsToDACEGAC(String dacStableId, DataTable datasetsTable) {
+    @And("^datasets belong to DAC (.*?)$")
+    public void datasetsBelongToDAC(String dacStableId, DataTable datasetsTable) {
         List<String> datasets = datasetsTable.transpose().asList(String.class);
         datasets.forEach(dataset -> this.world.datasetHelper.insert(dataset, "Test Dataset", dacStableId));
     }
 
-    @And("^user account (.*?) has permissions to datasets$")
-    public void userAccountEGAWHasPermissionsToDatasets(String egaUserAccountId, DataTable datasetsTable) {
+    @And("^user (.*?) has access to datasets$")
+    public void userHasAccessToDatasets(String egaUserAccountId, DataTable datasetsTable) {
         List<String> datasets = datasetsTable.transpose().asList(String.class);
         List<PassportClaim> passportClaims = datasets.stream().map(dataset -> createPassportClaim(egaUserAccountId, dataset)).collect(Collectors.toList());
         this.world.passportClaimRepository.saveAll(passportClaims);
     }
 
-    @When("^user account (.*?) list permissions for account (.*?)$")
-    public void userAccountEGAWListPermissionsForAccountEGAW(String dacUserAccountId, String egaUserAccountId) throws URISyntaxException {
+    @When("^list permissions for account (.*?)$")
+    public void userAccountEGAWListPermissionsForAccountEGAW(String egaUserAccountId) throws URISyntaxException {
         final URI requestURI = UriComponentsBuilder
                 .fromUri(new URI("http://localhost:8080"))
                 .path("/permissions")
@@ -142,8 +145,8 @@ public class PermissionsMgmtStepDefs {
         }
     }
 
-    @When("^user account (.*?) list permissions for himself$")
-    public void userAccountListPermissionsForHimself(String userAccount) throws URISyntaxException {
+    @When("^user lists permissions for himself$")
+    public void userListPermissionsForHimself() throws URISyntaxException {
         final URI requestURI = UriComponentsBuilder
                 .fromUri(new URI("http://localhost:8080"))
                 .path("/me/permissions")
@@ -180,29 +183,29 @@ public class PermissionsMgmtStepDefs {
         return new PassportClaim(accountId, VisaType.ControlledAccessGrants, new Date().getTime(), value, "SampleDAC", Authority.dac);
     }
 
-    @And("response should only contain items")
-    public void responseShouldOnlyContainItems(DataTable datasetsTable) {
+    @And("response only contains items")
+    public void responseOnlyContainsItems(DataTable datasetsTable) {
         ResponseEntity<Visa[]> getResponse = (ResponseEntity<Visa[]>) world.response;
         List<String> expectedDatasets = datasetsTable.transpose().asList(String.class);
         List<String> returnedDatasets = Arrays.stream(getResponse.getBody()).map(Visa::getGa4ghVisaV1).map(PassportVisaObject::getValue).collect(Collectors.toList());
         assertThat(returnedDatasets).hasSameElementsAs(expectedDatasets);
     }
 
-    @And("response should not contain any items")
+    @And("response does not contain any items")
     public void responseShouldNotContainAnyItems() {
         ResponseEntity<Visa[]> getResponse = (ResponseEntity<Visa[]>) world.response;
         assertThat(getResponse.getBody()).isEmpty();
     }
 
-    @And("^database should still contain permissions for account (.*?)$")
+    @And("^database still contains permissions for account (.*?)$")
     public void databaseShouldContainPermissionsForAccount(String accountId, DataTable datasetsTable) {
         List<String> datasets = datasetsTable.transpose().asList(String.class);
         List<String> grantedDatasets = this.world.passportClaimRepository.findAllByAccountId(accountId).stream().map(PassportClaim::getValue).collect(Collectors.toList());
         assertThat(grantedDatasets).hasSameElementsAs(datasets);
     }
 
-    @When("^admin account (.*?) revokes (.*?) from user account (.*?)$")
-    public void adminAccountRevokesPermissionFromUserAccount(String dacUserAccountId, String permission, String userAccountId) throws URISyntaxException {
+    @When("^admin revokes (.*?) from user account (.*?)$")
+    public void adminAccountRevokesPermissionFromUserAccount(String permission, String userAccountId) throws URISyntaxException {
         final URI requestURI = UriComponentsBuilder
                 .fromUri(new URI("http://localhost:8080"))
                 .path("/permissions")

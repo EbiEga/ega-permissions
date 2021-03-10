@@ -34,25 +34,25 @@ public class CommonStepDefs {
     private RestTemplate restTemplate = new RestTemplate();
     private AccessTokenHelper accessTokenHelper;
 
-    @Given("^user account (.*?) with email (.*?) exist$")
-    public void user_account_exist(String userAccountId, String email) {
+    @Given("^user (.*?) with email (.*?) exist$")
+    public void userExistsWithEmail(String userAccountId, String email) {
         Account account = new Account(userAccountId, "Test Account " + userAccountId, "Test", email, "Active");
         this.world.accountRepository.save(account);
     }
 
-    @Given("^user account (.*?) has a valid token$")
-    public void user_account_has_a_valid_token(String dacUserAccountId) throws URISyntaxException {
+    @Given("^user acquires a valid token$")
+    public void userAcquiresValidToken() throws URISyntaxException {
         this.accessTokenHelper = new AccessTokenHelper(this.restTemplate, this.world.tokenParams);
         this.world.bearerAccessToken = this.accessTokenHelper.obtainAccessTokenFromEGA();
     }
 
-    @Given("^user account (.*?) has an invalid token$")
-    public void user_account_has_an_invalid_token(String dacUserAccountId) throws URISyntaxException {
+    @Given("^user has an invalid token$")
+    public void user_account_has_an_invalid_token() {
         this.world.bearerAccessToken = "invalid_token";
     }
 
-    @Then("^response should have status code (.*?)$")
-    public void responseShouldHaveStatusCodeAndOnlyContain(int expectedStatusCode) {
+    @Then("^response has status code (.*?)$")
+    public void responseHasStatusCode(int expectedStatusCode) {
         assertThat(world.response.getStatusCodeValue()).isEqualTo(expectedStatusCode);
     }
 

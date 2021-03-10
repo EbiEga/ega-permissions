@@ -46,8 +46,8 @@ public class ApiKeyITStepDefs {
         this.world.cleanApiKeys();
     }
 
-    @When("^user account (.*?) request a new Token with key (.*?)$")
-    public void user_account_request_a_new_token_with_key(String userAccountId, String tokenKey) throws URISyntaxException {
+    @When("^user request a new Token with key (.*?)$")
+    public void user_account_request_a_new_token_with_key(String tokenKey) throws URISyntaxException {
         final HttpHeaders headers = new HttpHeaders();
         headers.setContentType(APPLICATION_JSON);
         headers.setBearerAuth(this.world.bearerAccessToken);
