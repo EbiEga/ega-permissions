@@ -21,17 +21,20 @@ public interface PassportClaimRepository extends CrudRepository<PassportClaim, P
     List<PassportClaim> findAllByAccountIdAndControllerId(@Param("userAccountId") String userAccountId,
                                                           @Param("controllerAccountId") String controllerAccountId);
 
-    @Query("select case when count(pc)> 0 then true else false end from PassportClaim pc where pc.accountId=:accountId and pc.status='approved'")
+    @Query("select case when count(pc)> 0 then true else false end from PassportClaim pc " +
+            "where pc.accountId=:accountId and pc.status='approved'")
     boolean existsPassportClaimByAccountId(@Param("accountId") String accountId);
 
-    @Query("select pc from PassportClaim pc where pc.accountId=:accountId and pc.value=:value and pc.status='approved'")
+    @Query("select pc from PassportClaim pc " +
+            "where pc.accountId=:accountId and pc.value=:value and pc.status='approved'")
     Optional<PassportClaim> findByAccountIdAndValue(@Param("accountId") String accountId, @Param("value") String value);
 
     @Query("select pc from PassportClaim pc where pc.value=:value and pc.status='approved'")
     List<PassportClaim> findAllByValue(@Param("value") String value);
 
-    @Query("select pc from PassportClaim pc inner join Dataset ds "
-            + "on ds.datasetId=pc.value inner join UserGroup ug "
-            + "on ug.groupStableId=ds.dacStableId where pc.accountId=:accountId and ug.egaAccountStableId=:egaAccountStableId")
+    @Query("select pc from PassportClaim pc" +
+            " inner join Dataset ds on ds.datasetId=pc.value" +
+            " inner join UserGroup ug on ug.groupStableId=ds.dacStableId" +
+            " where pc.accountId=:accountId and ug.egaAccountStableId=:egaAccountStableId")
     List<PassportClaim> findAllByUserAndController(@Param("accountId") String accountId, @Param("egaAccountStableId") String egaAccountStableId);
 }

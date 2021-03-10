@@ -155,7 +155,7 @@ public class PermissionsServiceImpl implements PermissionsService {
     @Transactional
     public void deletePassportVisaObject(String accountId, List<String> toDeleteValues) {
         try {
-            List<PassportClaim> deletedClaims = toDeleteValues.parallelStream().map(val -> this.permissionsDataService.deletePassportClaim(accountId, val)).filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList());
+            List<PassportClaim> deletedClaims = toDeleteValues.stream().map(val -> this.permissionsDataService.deletePassportClaim(accountId, val)).filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList());
 
             if (toDeleteValues.size() > 0 && deletedClaims.size() == 0) {
                 throw new ValidationException("Values for accountId and value are incorrect or not valid");
