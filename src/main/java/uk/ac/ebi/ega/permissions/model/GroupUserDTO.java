@@ -23,6 +23,10 @@ public class GroupUserDTO {
     private String email;
     private Permission permission;
 
+    private GroupUserDTO() {
+
+    }
+
     public GroupUserDTO(String userAccountId, String email, Permission permission) {
         this.userAccountId = userAccountId;
         this.email = email;
@@ -33,23 +37,12 @@ public class GroupUserDTO {
         return userAccountId;
     }
 
-    public void setUserAccountId(String userAccountId) {
-        this.userAccountId = userAccountId;
-    }
-
     public String getEmail() {
         return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
     }
 
     public Permission getPermission() {
         return permission;
     }
-
-    public void setPermission(Permission permission) {
-        this.permission = permission;
-    }
+    
 }
