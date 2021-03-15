@@ -25,11 +25,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
-import uk.ac.ebi.ega.permissions.configuration.security.customauthorization.IsAdminReaderOrWriter;
-import uk.ac.ebi.ega.permissions.configuration.security.customauthorization.IsAdminWriter;
+import uk.ac.ebi.ega.permissions.configuration.security.customauthorization.HasReadOrWritePermissions;
+import uk.ac.ebi.ega.permissions.configuration.security.customauthorization.HasWritePermissions;
 import uk.ac.ebi.ega.permissions.exception.ServiceException;
 import uk.ac.ebi.ega.permissions.exception.SystemException;
+import uk.ac.ebi.ega.permissions.mapper.AccessGroupMapper;
 import uk.ac.ebi.ega.permissions.mapper.TokenPayloadMapper;
+import uk.ac.ebi.ega.permissions.model.AccessGroup;
 import uk.ac.ebi.ega.permissions.model.Format;
 import uk.ac.ebi.ega.permissions.model.JWTPassportVisaObject;
 import uk.ac.ebi.ega.permissions.model.JWTPermissionsResponse;
@@ -41,7 +43,7 @@ import uk.ac.ebi.ega.permissions.model.Visa;
 import uk.ac.ebi.ega.permissions.model.Visas;
 import uk.ac.ebi.ega.permissions.persistence.entities.Account;
 import uk.ac.ebi.ega.permissions.persistence.entities.AccountElixirId;
-import uk.ac.ebi.ega.permissions.persistence.service.UserGroupDataService;
+import uk.ac.ebi.ega.permissions.persistence.service.AccessGroupDataService;
 import uk.ac.ebi.ega.permissions.service.JWTService;
 import uk.ac.ebi.ega.permissions.service.PermissionsService;
 import uk.ac.ebi.ega.permissions.service.SecurityService;
@@ -59,13 +61,15 @@ public class RequestHandler {
 
     private final PermissionsService permissionsService;
     private final TokenPayloadMapper tokenPayloadMapper;
-    private final UserGroupDataService userGroupDataService;
+    private final AccessGroupDataService userGroupDataService;
     private final JWTService jwtService;
     private final SecurityService securityService;
+    private final AccessGroupMapper accessGroupMapper;
 
     public RequestHandler(final PermissionsService permissionsService,
                           final TokenPayloadMapper tokenPayloadMapper,
-                          final UserGroupDataService userGroupDataService,
+                          final AccessGroupMapper accessGroupMapper,
+                          final AccessGroupDataService userGroupDataService,
                           final JWTService jwtService,
                           final SecurityService securityService) {
         this.permissionsService = permissionsService;
@@ -73,6 +77,7 @@ public class RequestHandler {
         this.userGroupDataService = userGroupDataService;
         this.jwtService = jwtService;
         this.securityService = securityService;
+        this.accessGroupMapper = accessGroupMapper;
     }
 
     public ResponseEntity<Visas> getPermissionForCurrentUser(Format format) {
@@ -82,7 +87,13 @@ public class RequestHandler {
         return this.getPermissions(visas, format);
     }
 
-    @IsAdminReaderOrWriter
+    public ResponseEntity<List<AccessGroup>> getGroupsForCurrentUser() {
+        String currentUser = securityService.getCurrentUser().orElseThrow(() -> new ServiceException("Operation not allowed for Anonymous users"));
+        String userAccountId = permissionsService.getAccountByEmail(currentUser).orElseThrow(() -> new ServiceException("Current user is not allowed to access this resource")).getAccountId();
+        return ResponseEntity.ok(this.accessGroupMapper.accessGroupsFromAccessGroupEntities(this.userGroupDataService.getPermissionGroups(userAccountId)));
+    }
+
+    @HasReadOrWritePermissions
     public ResponseEntity<Visas> getPermissionsForUser(String userId, Format format) {
         String userAccountId = getAccountIdForElixirId(userId);
         verifyAccountId(userAccountId);
@@ -113,7 +124,7 @@ public class RequestHandler {
         return ResponseEntity.ok(response);
     }
 
-    @IsAdminWriter
+    @HasWritePermissions
     public ResponseEntity<PermissionsResponses> createPermissions(String userId, List<Object> body, Format format) {
 
         PermissionsResponses responses = new PermissionsResponses();
@@ -167,7 +178,7 @@ public class RequestHandler {
                 .collect(Collectors.toList());
     }
 
-    @IsAdminWriter
+    @HasWritePermissions
     public ResponseEntity<Void> deletePermissions(String userId, List<String> values) {
         verifyAccountId(userId);
         if (values.contains("all")) { //ignore all other values and remove all permissions

@@ -158,12 +158,33 @@
                 <version>3.0.24</version>
                 <executions>
                     <execution>
+                        <id>ega-permissions</id>
                         <goals>
                             <goal>generate</goal>
                         </goals>
                         <configuration>
                             <language>spring</language>
                             <inputSpec>${project.basedir}/src/main/resources/static/api-specs/permissions-api.yaml
+                            </inputSpec>
+                            <output>${project.build.directory}/generated-sources</output>
+                            <apiPackage>uk.ac.ebi.ega.permissions.api</apiPackage>
+                            <modelPackage>uk.ac.ebi.ega.permissions.model</modelPackage>
+                            <generateSupportingFiles>false</generateSupportingFiles>
+                            <configOptions>
+                                <generateAliasAsModel>true</generateAliasAsModel>
+                                <delegatePattern>true</delegatePattern>
+                                <dateLibrary>java8</dateLibrary>
+                            </configOptions>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>ega-admins</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <language>spring</language>
+                            <inputSpec>${project.basedir}/src/main/resources/static/api-specs/admins-api.yaml
                             </inputSpec>
                             <output>${project.build.directory}/generated-sources</output>
                             <apiPackage>uk.ac.ebi.ega.permissions.api</apiPackage>

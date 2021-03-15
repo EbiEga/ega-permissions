@@ -25,34 +25,38 @@ import org.springframework.security.access.PermissionEvaluator;
 import org.springframework.security.authentication.AuthenticationManagerResolver;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.util.ResourceUtils;
+import uk.ac.ebi.ega.permissions.api.AccessGroupsApiDelegate;
 import uk.ac.ebi.ega.permissions.api.ApiKeyApiDelegate;
 import uk.ac.ebi.ega.permissions.api.DatasetsApiDelegate;
+import uk.ac.ebi.ega.permissions.api.GroupUsersApiDelegate;
 import uk.ac.ebi.ega.permissions.api.MeApiDelegate;
 import uk.ac.ebi.ega.permissions.api.PermissionsApiDelegate;
 import uk.ac.ebi.ega.permissions.configuration.apikey.ApiKeyAuthenticationFilter;
 import uk.ac.ebi.ega.permissions.configuration.tenant.TenantAuthenticationManagerResolver;
 import uk.ac.ebi.ega.permissions.controller.CustomAccessDeniedHandler;
 import uk.ac.ebi.ega.permissions.controller.RequestHandler;
+import uk.ac.ebi.ega.permissions.controller.delegate.AccessGroupsApiDelegateImpl;
 import uk.ac.ebi.ega.permissions.controller.delegate.ApiKeyApiDelegateImpl;
 import uk.ac.ebi.ega.permissions.controller.delegate.DatasetsApiDelegateImpl;
+import uk.ac.ebi.ega.permissions.controller.delegate.GroupUsersApiDelegateImpl;
 import uk.ac.ebi.ega.permissions.controller.delegate.MeApiDelegateImpl;
 import uk.ac.ebi.ega.permissions.controller.delegate.PermissionsApiDelegateImpl;
+import uk.ac.ebi.ega.permissions.mapper.AccessGroupMapper;
 import uk.ac.ebi.ega.permissions.mapper.ApiKeyMapper;
 import uk.ac.ebi.ega.permissions.mapper.TokenPayloadMapper;
 import uk.ac.ebi.ega.permissions.model.JWTAlgorithm;
-import uk.ac.ebi.ega.permissions.persistence.entities.UserGroup;
 import uk.ac.ebi.ega.permissions.persistence.repository.AccountElixirIdRepository;
 import uk.ac.ebi.ega.permissions.persistence.repository.AccountRepository;
 import uk.ac.ebi.ega.permissions.persistence.repository.ApiKeyRepository;
 import uk.ac.ebi.ega.permissions.persistence.repository.EventRepository;
 import uk.ac.ebi.ega.permissions.persistence.repository.PassportClaimRepository;
-import uk.ac.ebi.ega.permissions.persistence.repository.UserGroupRepository;
+import uk.ac.ebi.ega.permissions.persistence.repository.AccessGroupRepository;
 import uk.ac.ebi.ega.permissions.persistence.service.EventDataService;
 import uk.ac.ebi.ega.permissions.persistence.service.EventDataServiceImpl;
 import uk.ac.ebi.ega.permissions.persistence.service.PermissionsDataService;
 import uk.ac.ebi.ega.permissions.persistence.service.PermissionsDataServiceImpl;
-import uk.ac.ebi.ega.permissions.persistence.service.UserGroupDataService;
-import uk.ac.ebi.ega.permissions.persistence.service.UserGroupDataServiceImpl;
+import uk.ac.ebi.ega.permissions.persistence.service.AccessGroupDataService;
+import uk.ac.ebi.ega.permissions.persistence.service.AccessGroupDataServiceImpl;
 import uk.ac.ebi.ega.permissions.service.ApiKeyService;
 import uk.ac.ebi.ega.permissions.service.ApiKeyServiceImpl;
 import uk.ac.ebi.ega.permissions.service.JWTService;
@@ -104,13 +108,13 @@ public class EgaPermissionsConfig {
     public PermissionsDataService permissionsDataService(final PassportClaimRepository passportClaimRepository,
                                                          final AccountElixirIdRepository accountElixirIdRepository,
                                                          final AccountRepository accountRepository,
-                                                         final UserGroupRepository userGroupRepository) {
+                                                         final AccessGroupRepository userGroupRepository) {
         return new PermissionsDataServiceImpl(passportClaimRepository, accountRepository, accountElixirIdRepository, userGroupRepository);
     }
 
     @Bean
-    public UserGroupDataService userGroupDataService(final UserGroupRepository userGroupRepository) {
-        return new UserGroupDataServiceImpl(userGroupRepository);
+    public AccessGroupDataService userGroupDataService(final AccessGroupRepository userGroupRepository) {
+        return new AccessGroupDataServiceImpl(userGroupRepository);
     }
 
     @Bean
@@ -121,10 +125,11 @@ public class EgaPermissionsConfig {
     @Bean
     public RequestHandler requestHandler(final PermissionsService permissionsService,
                                          final TokenPayloadMapper tokenPayloadMapper,
-                                         final UserGroupDataService userGroupDataService,
+                                         final AccessGroupMapper accessGroupMapper,
+                                         final AccessGroupDataService userGroupDataService,
                                          final JWTService jwtService,
                                          final SecurityService securityService) {
-        return new RequestHandler(permissionsService, tokenPayloadMapper, userGroupDataService, jwtService, securityService);
+        return new RequestHandler(permissionsService, tokenPayloadMapper, accessGroupMapper, userGroupDataService, jwtService, securityService);
     }
 
     @Bean
@@ -169,7 +174,7 @@ public class EgaPermissionsConfig {
 
     @Bean
     public PermissionEvaluator permissionEvaluator(final PermissionsService permissionsService,
-                                            final UserGroupDataService userGroupDataService) {
+                                                   final AccessGroupDataService userGroupDataService) {
         return new CustomPermissionEvaluator(permissionsService, userGroupDataService);
     }
 
@@ -194,6 +199,18 @@ public class EgaPermissionsConfig {
     @Bean
     public ApiKeyAuthenticationFilter apiKeyAuthenticationFilter(final ApiKeyService apiKeyService) {
         return new ApiKeyAuthenticationFilter(apiKeyService);
+    }
+
+    @Bean
+    public AccessGroupsApiDelegate accessGroupsApiDelegate(final AccessGroupDataService userGroupDataService,
+                                                           final AccessGroupMapper accessGroupMapper) {
+        return new AccessGroupsApiDelegateImpl(userGroupDataService, accessGroupMapper);
+    }
+
+    @Bean
+    public GroupUsersApiDelegate groupUsersApiDelegate(final AccessGroupDataService userGroupDataService,
+                                                       final AccessGroupMapper accessGroupMapper) {
+        return new GroupUsersApiDelegateImpl(userGroupDataService, accessGroupMapper);
     }
 
     private void assertFileExistsAndReadable(final File file, final String message) throws FileSystemException {

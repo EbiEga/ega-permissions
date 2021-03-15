@@ -1,0 +1,235 @@
+openapi: 3.0.3
+info:
+  title: EGA Admins (Internal)
+  description: The EGA Admin API is aimed to allow EGA Admins to control DAC Admins for the European Genome-Phenome Archive.
+  termsOfService: TBD
+  contact:
+    email: ega-dev@ebi.ac.uk
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+    description: Local
+  - url: https://ega.ebi.ac.uk:8053/ega-permissions
+    description: Test
+tags:
+  - name: Access Groups
+    description: Access Groups Endpoints (former DAC Admin)
+
+paths:
+  /access-groups/{groupId}:
+    get:
+      tags:
+        - Access Groups
+      summary: Retrieve Users assigned to Group
+      description: Return users assigned to a specific Access Group (i.e. DAC)
+      operationId: getGroupUsers
+      parameters:
+        - name: groupId
+          in: path
+          description: ID of the Access Group (i.e. dacStableId)
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GroupUser'
+        400:
+          description: Invalid ID supplied
+          content: { }
+        401:
+          description: Unauthorized
+          content: { }
+        500:
+          description: Internal server error
+          content: { }
+        503:
+          description: Service Unavailable
+          content: { }
+
+    post:
+      tags:
+        - Access Groups
+      summary: Add User to Group
+      description: Register User in Access Group (i.e. DAC)
+      operationId: postAccessGroup
+      parameters:
+        - name: groupId
+          in: path
+          description: ID of the Access Group (i.e. dacStableId)
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: ID of the Access Group (i.e. dacStableId)
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GroupUser'
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GroupUser'
+        400:
+          description: Invalid ID supplied
+          content: { }
+        401:
+          description: Unauthorized
+          content: { }
+        500:
+          description: Internal server error
+          content: { }
+        503:
+          description: Service Unavailable
+          content: { }
+
+
+  /group-users/{accountId}:
+    get:
+      tags:
+        - Access Groups
+      summary: Assigned Groups for User
+      description: List all Access Groups assigned to a User
+      operationId: getGroupsForUser
+      parameters:
+        - name: accountId
+          in: path
+          description: User Account ID
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AccessGroup'
+        400:
+          description: Invalid ID supplied
+          content: { }
+        401:
+          description: Unauthorized
+          content: { }
+        500:
+          description: Internal server error
+          content: { }
+        503:
+          description: Service Unavailable
+          content: { }
+
+    delete:
+      tags:
+        - Access Groups
+      summary: Remove user from Access Group
+      description: Remove user from one or more Access Group. Comma separated values for 'groupIds' parameter allowed. Set value to 'all' in order remove user from all Access Groups.
+      operationId: delUserFromGroup
+      parameters:
+        - name: accountId
+          in: path
+          description: Account ID for the User from which the Access Group assignation(s) will be removed
+          required: true
+          schema:
+            type: string
+        - name: groupIds
+          in: query
+          description: IDs of the Access Groups from which the user will be removed (i.e. dacStableId). Comma separated values and 'all' allowed.
+          required: true
+          style: form
+          explode: false
+          schema:
+            type: array
+            items:
+              type: string
+      responses:
+        200:
+          description: OK
+          content: { }
+        204:
+          description: No content (no record has been deleted)
+          content: { }
+        400:
+          description: Invalid ID supplied
+          content: { }
+        401:
+          description: Unauthorized
+          content: { }
+        500:
+          description: Internal server error
+          content: { }
+        503:
+          description: Service Unavailable
+          content: { }
+
+components:
+  schemas:
+    AccessGroup:
+      type: object
+      properties:
+        groupId:
+          type: string
+          description: ID of the Access Group (i.e. dacStableId)
+        permission:
+          $ref: '#/components/schemas/PermissionLevel'
+        description:
+          type: string
+
+    GroupUser:
+      type: object
+      properties:
+        userAccountId:
+          type: string
+          description: User account ID
+        userEmail:
+          type: string
+          description: User e-mail
+        permission:
+          $ref: '#/components/schemas/PermissionLevel'
+      required:
+        - userAccountId
+        - permission
+
+    PermissionLevel:
+      type: string
+      enum: [ read, write ]
+      default: read
+
+    ErrorBody:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          description: Server time
+        status:
+          type: string
+          description: Error code
+        message:
+          type: string
+          description: Error message
+
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: API_KEY
+
+security:
+  - BearerAuth: [ ]
+  - ApiKeyAuth: [ ]

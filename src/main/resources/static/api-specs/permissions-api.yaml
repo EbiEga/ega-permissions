@@ -1,6 +1,6 @@
 openapi: 3.0.3
 info:
-  title: EGA Data Permissions
+  title: EGA Permissions API (Public)
   description: The EGA Permissions API is aimed to allow approved users (e.g. Data Access Committee) to control and audit access to EGA datasets. The API currently supports authentication using ELIXIR and EGA credentials for OpenID as well as generated API_KEYs.
   termsOfService: TBD
   contact:
@@ -15,18 +15,18 @@ servers:
   - url: https://ega.ebi.ac.uk:8053/ega-permissions
     description: Test
 tags:
-  - name: permissions
+  - name: Permissions
     description: EGA Data Permissions
-  - name: me
+  - name: Me
     description: Current user endpoints
-  - name: apikey
+  - name: API Key
     description: API Key Endpoints
 
 paths:
   /permissions:
     get:
       tags:
-        - permissions
+        - Permissions
       summary: Read Permissions.
       description: Read permissions. Parameter accountId must be present either in the QueryString or Header request. Header takes priority.
       operationId: readPermissions
@@ -57,10 +57,10 @@ paths:
 
         400:
           description: Bad request
-          content: {}
+          content: { }
         404:
           description: User account invalid or not found
-          content: {}
+          content: { }
         401:
           description: Unauthorized
           content: { }
@@ -73,7 +73,7 @@ paths:
 
     post:
       tags:
-        - permissions
+        - Permissions
       summary: Create Permissions
       description: Create permissions. The account_id can be a namespace qualified
         ID, for example EGA or ELIXIR ID. Parameter accountId must be present either in the QueryString or Header request. Header takes priority.
@@ -112,10 +112,10 @@ paths:
                 $ref: '#/components/schemas/PermissionsResponses'
         400:
           description: Invalid ID supplied
-          content: {}
+          content: { }
         404:
           description: User account not found
-          content: {}
+          content: { }
         401:
           description: Unauthorized
           content: { }
@@ -128,7 +128,7 @@ paths:
 
     delete:
       tags:
-        - permissions
+        - Permissions
       summary: Delete Permission
       description: Delete Permission(s). Comma separated values allowed. Set value to 'all' in order remove all permissions from the specified user. Parameter Account ID must be present either in the QueryString or Header request. Header takes priority.
       operationId: deletePermissions
@@ -159,7 +159,7 @@ paths:
       responses:
         200:
           description: OK
-          content: {}
+          content: { }
         204:
           description: No content (no record has been deleted)
           content: { }
@@ -179,7 +179,7 @@ paths:
   /datasets/{datasetId}/users:
     get:
       tags:
-        - permissions
+        - Permissions
       summary: List users that have access to dataset
       description: List users that have access to dataset
       operationId: usersWithAccessToDataset
@@ -212,7 +212,7 @@ paths:
   /me/permissions:
     get:
       tags:
-        - me
+        - Me
       summary: Get current user permissions
       description: List current user permissions
       operationId: myPermissions
@@ -230,10 +230,39 @@ paths:
                 $ref: '#/components/schemas/Visas'
         400:
           description: Bad request
-          content: {}
+          content: { }
         404:
           description: User account invalid or not found
-          content: {}
+          content: { }
+        401:
+          description: Unauthorized
+          content: { }
+        500:
+          description: Internal server error
+          content: { }
+        503:
+          description: Service Unavailable
+          content: { }
+
+  /me/access-groups:
+    get:
+      tags:
+        - Me
+      summary: Assigned Access Groups
+      description: List all Access Groups to which the current user is assigned (i.e. DAC)
+      operationId: myAccessGroups
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AccessGroup'
+        400:
+          description: Invalid ID supplied
+          content: { }
         401:
           description: Unauthorized
           content: { }
@@ -247,7 +276,7 @@ paths:
   /api_key/generate:
     get:
       tags:
-        - apikey
+        - API Key
       summary: Generate a new token
       description: Return a message with the id, the expiration date and the api token
       operationId: generateApiKey
@@ -281,7 +310,7 @@ paths:
   /api_key:
     get:
       tags:
-        - apikey
+        - API Key
       summary: List all tokens
       description: Return the ids of the keys, reasons and their expiration_date
       operationId: getApiKeys
@@ -298,7 +327,7 @@ paths:
   /api_key/{key}:
     delete:
       tags:
-        - apikey
+        - API Key
       summary: Delete API Key
       description: Remove an API_TOKEN whenever it is no longer needed
       operationId: deleteApiKey
@@ -312,7 +341,7 @@ paths:
       responses:
         200:
           description: OK
-          content: {}
+          content: { }
 
 
 components:
@@ -497,7 +526,7 @@ components:
 
     format:
       type: string
-      enum: [JWT, PLAIN]
+      enum: [ JWT, PLAIN ]
       default: JWT
 
     ErrorBody:
@@ -549,6 +578,22 @@ components:
         expiration_date: 1592824514
         token: generated.token=
 
+    AccessGroup:
+      type: object
+      properties:
+        groupId:
+          type: string
+          description: ID of the Access Group (i.e. dacStableId)
+        permission:
+          $ref: '#/components/schemas/PermissionLevel'
+        description:
+          type: string
+
+    PermissionLevel:
+      type: string
+      enum: [ READ, WRITE ]
+      default: READ
+
   securitySchemes:
     BearerAuth:
       type: http
@@ -560,5 +605,5 @@ components:
       name: API_KEY
 
 security:
-  - BearerAuth: []
-  - ApiKeyAuth: []
+  - BearerAuth: [ ]
+  - ApiKeyAuth: [ ]

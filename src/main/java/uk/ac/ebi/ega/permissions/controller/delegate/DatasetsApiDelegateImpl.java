@@ -13,7 +13,7 @@ public class DatasetsApiDelegateImpl implements DatasetsApiDelegate {
     private final RequestHandler requestHandler;
     private final PermissionsService permissionsService;
 
-    public DatasetsApiDelegateImpl(final PermissionsService permissionsService, final RequestHandler requestHandler){
+    public DatasetsApiDelegateImpl(final PermissionsService permissionsService, final RequestHandler requestHandler) {
         this.permissionsService = permissionsService;
         this.requestHandler = requestHandler;
     }
