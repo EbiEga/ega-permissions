@@ -1,4 +1,4 @@
-ALTER TABLE pea.account_elixir_id ADD COLUMN IF NOT EXISTS created_at timestamp DEFAULT now();
+ALTER TABLE pea.account_elixir_id ADD COLUMN created_at timestamp DEFAULT now();
 
 CREATE OR REPLACE VIEW account_elixir_id
 AS SELECT ae.account_id,
