@@ -25,4 +25,4 @@ In the ```.m2/settings.xml``` file it's necessary to add these tags:
 The values are securely stored in the vault.
 
 I'm just testing the GitLab pipeline for the EE-1942 ticket. Sorry!
-Part 1.
+Part 2.
