@@ -1,0 +1,1 @@
+A 2javaXhrksrc/main/java/uk/ac/ebi/ega/permissions/configuration/security/customauthorization/HasAdminPermissions.java

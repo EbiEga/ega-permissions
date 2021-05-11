@@ -4,12 +4,11 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 import uk.ac.ebi.ega.permissions.model.GroupUserDTO;
-import uk.ac.ebi.ega.permissions.persistence.entities.GroupType;
 import uk.ac.ebi.ega.permissions.persistence.entities.AccessGroup;
 import uk.ac.ebi.ega.permissions.persistence.entities.AccessGroupId;
+import uk.ac.ebi.ega.permissions.persistence.entities.GroupType;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface AccessGroupRepository extends CrudRepository<AccessGroup, AccessGroupId> {
 

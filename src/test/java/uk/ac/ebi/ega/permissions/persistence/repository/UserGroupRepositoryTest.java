@@ -37,7 +37,7 @@ import static uk.ac.ebi.ega.permissions.persistence.entities.Permission.read;
 
 @ExtendWith(SpringExtension.class)
 @DataJpaTest
-public class UserGroupRepositoryTest {
+class UserGroupRepositoryTest {
     @Autowired
     private AccessGroupRepository userGroupRepository;
 

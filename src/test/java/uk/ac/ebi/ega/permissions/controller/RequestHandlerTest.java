@@ -50,12 +50,11 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpStatus.OK;
 
-public class RequestHandlerTest {
+class RequestHandlerTest {
     private PermissionsService permissionsService = mock(PermissionsService.class);
     private TokenPayloadMapper tokenPayloadMapper = mock(TokenPayloadMapper.class);
     private AccessGroupMapper accessGroupMapper = mock(AccessGroupMapper.class);
     private AccessGroupDataService userGroupDataService = mock(AccessGroupDataService.class);
-    private EventDataService eventDataService = mock(EventDataService.class);
     private JWTService jwtService = mock(JWTService.class);
     private SecurityService securityService = mock(SecurityService.class);
 
@@ -67,7 +66,7 @@ public class RequestHandlerTest {
 
         List<JWTPermissionsResponse> permissionsCreated = requestHandler.createJWTPermissions(EMPTY,
                 Arrays.asList(getTestToken()));
-        assertEquals(permissionsCreated.size(), 1);
+        assertEquals(1, permissionsCreated.size());
     }
 
     @Test
@@ -77,7 +76,7 @@ public class RequestHandlerTest {
 
         List<JWTPermissionsResponse> permissionsCreated = requestHandler.createJWTPermissions(EMPTY,
                 Arrays.asList(getTestToken()));
-        assertEquals(permissionsCreated.size(), 1);
+        assertEquals(1, permissionsCreated.size());
     }
 
     @Test
@@ -86,7 +85,7 @@ public class RequestHandlerTest {
 
         List<PermissionsResponse> permissionsCreated = requestHandler.createPlainPermissions(EMPTY,
                 Arrays.asList(createPassportVisaObject()));
-        assertEquals(permissionsCreated.size(), 1);
+        assertEquals(1, permissionsCreated.size());
     }
 
     @Test
@@ -96,7 +95,7 @@ public class RequestHandlerTest {
 
         List<PermissionsResponse> permissionsCreated = requestHandler.createPlainPermissions(EMPTY,
                 Arrays.asList(createPassportVisaObject()));
-        assertEquals(permissionsCreated.size(), 1);
+        assertEquals(1, permissionsCreated.size());
     }
 
     @Test
@@ -104,7 +103,7 @@ public class RequestHandlerTest {
         when(userGroupDataService.isEGAAdmin(any())).thenReturn(true);
 
         ResponseEntity<Void> responseEntity = requestHandler.deletePermissions(EMPTY, new ArrayList<>());
-        assertEquals(responseEntity.getStatusCode(), OK);
+        assertEquals(OK, responseEntity.getStatusCode());
     }
 
     @Test
@@ -113,7 +112,7 @@ public class RequestHandlerTest {
         when(userGroupDataService.datasetBelongsToDAC(any(), any())).thenReturn(true);
 
         ResponseEntity<Void> responseEntity = requestHandler.deletePermissions(EMPTY, new ArrayList<>());
-        assertEquals(responseEntity.getStatusCode(), OK);
+        assertEquals(OK, responseEntity.getStatusCode());
     }
 
     @Test

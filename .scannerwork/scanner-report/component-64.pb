@@ -1,0 +1,1 @@
+@ 2javaXhrksrc/main/java/uk/ac/ebi/ega/permissions/configuration/security/customauthorization/HasWritePermissions.java

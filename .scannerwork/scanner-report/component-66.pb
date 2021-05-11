@@ -1,0 +1,1 @@
+B 2javaXhrqsrc/main/java/uk/ac/ebi/ega/permissions/configuration/security/customauthorization/HasReadOrWritePermissions.java

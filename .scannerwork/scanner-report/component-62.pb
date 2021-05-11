@@ -1,0 +1,1 @@
+> 2javaXHhrUsrc/main/java/uk/ac/ebi/ega/permissions/configuration/security/WebSecurityConfig.java

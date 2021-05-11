@@ -1,0 +1,1 @@
+r 2javaX\hr?src/main/java/uk/ac/ebi/ega/permissions/model/ApiKeyParams.java

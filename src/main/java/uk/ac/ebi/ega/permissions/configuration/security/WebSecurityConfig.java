@@ -47,7 +47,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(final HttpSecurity http) throws Exception {
         http
                 .addFilterBefore(apiKeyAuthenticationFilter, AnonymousAuthenticationFilter.class)
-                .authorizeRequests((authorizeRequests) ->
+                .authorizeRequests(authorizeRequests ->
                         authorizeRequests
                                 .antMatchers(swaggerEndpointMatcher())
                                 .permitAll()

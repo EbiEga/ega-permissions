@@ -1,0 +1,1 @@
+s 2javaX/hrCsrc/main/java/uk/ac/ebi/ega/permissions/model/JWTTokenResponse.java

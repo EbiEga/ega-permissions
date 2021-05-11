@@ -19,16 +19,22 @@ import uk.ac.ebi.ega.permissions.model.APIKeyListItem;
 import uk.ac.ebi.ega.permissions.model.ApiKeyParams;
 import uk.ac.ebi.ega.permissions.model.CreatedAPIKey;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 import java.util.List;
 import java.util.Optional;
 
 public interface ApiKeyService {
 
-    CreatedAPIKey createApiKey(ApiKeyParams params) throws Exception;
+    CreatedAPIKey createApiKey(ApiKeyParams params) throws NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, InvalidKeySpecException, BadPaddingException, InvalidKeyException;
 
     void saveApiKeyDetails(ApiKeyParams params);
 
-    ApiKeyParams generateKeys(ApiKeyParams params) throws Exception;
+    ApiKeyParams generateKeys(ApiKeyParams params) throws NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, InvalidKeySpecException, BadPaddingException, InvalidKeyException;
 
     List<APIKeyListItem> getApiKeysForUser(String username);
 

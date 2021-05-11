@@ -1,0 +1,34 @@
+SonarQube plugins:
+  - Python Code Quality and Security 3.4.0.7980 (python)
+  - CSS Code Quality and Security 1.4.0.1899 (cssfamily)
+  - Go Code Quality and Security 1.8.2.1946 (go)
+  - JaCoCo 1.1.0.898 (jacoco)
+  - Kotlin Code Quality and Security 1.8.2.1946 (kotlin)
+  - JavaScript/TypeScript Code Quality and Security 7.3.0.15071 (javascript)
+  - Ruby Code Quality and Security 1.8.2.1946 (ruby)
+  - Scala Code Quality and Security 1.8.2.1946 (sonarscala)
+  - C# Code Quality and Security 8.19.0.28253 (csharp)
+  - Java Code Quality and Security 6.14.0.25463 (java)
+  - HTML Code Quality and Security 3.3.0.2534 (web)
+  - Flex Code Quality and Security 2.6.0.2294 (flex)
+  - XML Code Quality and Security 2.1.0.2861 (xml)
+  - PHP Code Quality and Security 3.16.0.7320 (php)
+  - VB.NET Code Quality and Security 8.19.0.28253 (vbnet)
+Global server settings:
+  - sonar.core.id=86E1FA4D-AXk23Wgjlq6luJhpAZQg
+  - sonar.core.startTime=2021-05-04T11:12:14+0100
+  - sonar.forceAuthentication=true
+Project server settings:
+Project scanner properties:
+  - sonar.host.url=http://localhost:9000
+  - sonar.java.binaries=target/classes
+  - sonar.login=******
+  - sonar.password=******
+  - sonar.projectBaseDir=/Users/egarcia/workspace/github/ega-permissions
+  - sonar.projectKey=ega-permissions:api
+  - sonar.projectVersion=1.0
+  - sonar.scanner.app=ScannerCLI
+  - sonar.scanner.appVersion=4.6.1.2450
+  - sonar.sourceEncoding=UTF-8
+  - sonar.verbose=true
+  - sonar.working.directory=/Users/egarcia/workspace/github/ega-permissions/.scannerwork

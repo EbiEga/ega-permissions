@@ -1,0 +1,1 @@
+< 2javaXÞhrOsrc/main/java/uk/ac/ebi/ega/permissions/configuration/EgaPermissionsConfig.java

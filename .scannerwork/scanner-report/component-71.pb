@@ -1,0 +1,1 @@
+G 2javaX2hrMsrc/main/java/uk/ac/ebi/ega/permissions/configuration/VisaInfoProperties.java

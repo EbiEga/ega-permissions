@@ -45,18 +45,18 @@ import uk.ac.ebi.ega.permissions.mapper.AccessGroupMapper;
 import uk.ac.ebi.ega.permissions.mapper.ApiKeyMapper;
 import uk.ac.ebi.ega.permissions.mapper.TokenPayloadMapper;
 import uk.ac.ebi.ega.permissions.model.JWTAlgorithm;
+import uk.ac.ebi.ega.permissions.persistence.repository.AccessGroupRepository;
 import uk.ac.ebi.ega.permissions.persistence.repository.AccountElixirIdRepository;
 import uk.ac.ebi.ega.permissions.persistence.repository.AccountRepository;
 import uk.ac.ebi.ega.permissions.persistence.repository.ApiKeyRepository;
 import uk.ac.ebi.ega.permissions.persistence.repository.EventRepository;
 import uk.ac.ebi.ega.permissions.persistence.repository.PassportClaimRepository;
-import uk.ac.ebi.ega.permissions.persistence.repository.AccessGroupRepository;
+import uk.ac.ebi.ega.permissions.persistence.service.AccessGroupDataService;
+import uk.ac.ebi.ega.permissions.persistence.service.AccessGroupDataServiceImpl;
 import uk.ac.ebi.ega.permissions.persistence.service.EventDataService;
 import uk.ac.ebi.ega.permissions.persistence.service.EventDataServiceImpl;
 import uk.ac.ebi.ega.permissions.persistence.service.PermissionsDataService;
 import uk.ac.ebi.ega.permissions.persistence.service.PermissionsDataServiceImpl;
-import uk.ac.ebi.ega.permissions.persistence.service.AccessGroupDataService;
-import uk.ac.ebi.ega.permissions.persistence.service.AccessGroupDataServiceImpl;
 import uk.ac.ebi.ega.permissions.service.ApiKeyService;
 import uk.ac.ebi.ega.permissions.service.ApiKeyServiceImpl;
 import uk.ac.ebi.ega.permissions.service.JWTService;
@@ -67,6 +67,7 @@ import uk.ac.ebi.ega.permissions.service.SecurityService;
 import uk.ac.ebi.ega.permissions.service.SecurityServiceImpl;
 import uk.ac.ebi.ega.permissions.utils.EncryptionUtils;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -75,6 +76,7 @@ import java.nio.file.FileSystemException;
 import java.nio.file.Files;
 import java.text.ParseException;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Configuration
 public class EgaPermissionsConfig {
@@ -85,9 +87,8 @@ public class EgaPermissionsConfig {
     }
 
     @Bean
-    public PermissionsApiDelegate accountIdApiDelegate(final PermissionsService permissionsService,
-                                                       final RequestHandler requestHandler) {
-        return new PermissionsApiDelegateImpl(permissionsService, requestHandler);
+    public PermissionsApiDelegate accountIdApiDelegate(final RequestHandler requestHandler) {
+        return new PermissionsApiDelegateImpl(requestHandler);
     }
 
     @Bean
@@ -145,7 +146,12 @@ public class EgaPermissionsConfig {
         final File keystoreFile = ResourceUtils.getFile(jwksKeystorePath);
         assertFileExistsAndReadable(keystoreFile, String.format("Keystore file %s should exists & must be readable", keystoreFile.toString()));
 
-        final String jwks = Files.lines(keystoreFile.toPath()).collect(Collectors.joining());
+        final String jwks;
+
+        try (Stream<String> fileStream = Files.lines(keystoreFile.toPath())) {
+            jwks = fileStream.collect(Collectors.joining());
+        }
+
         return new JWTServiceImpl(
                 jwks,
                 defaultSignerKeyId,
@@ -154,9 +160,9 @@ public class EgaPermissionsConfig {
     }
 
     @Bean
-    public AuthenticationManagerResolver authenticationManagerResolver(@Value("${ega.openid.jwt.issuer-uri}") String egaJwtIssUri,
-                                                                       @Value("${ega.openid.jwt.jwk-set-uri}") String egaJwtJwkSetUri,
-                                                                       @Value("${elixir.openid.jwt.issuer-uri}") String elixirJwtIssUri) {
+    public AuthenticationManagerResolver<HttpServletRequest> authenticationManagerResolver(@Value("${ega.openid.jwt.issuer-uri}") String egaJwtIssUri,
+                                                                                           @Value("${ega.openid.jwt.jwk-set-uri}") String egaJwtJwkSetUri,
+                                                                                           @Value("${elixir.openid.jwt.issuer-uri}") String elixirJwtIssUri) {
         return new TenantAuthenticationManagerResolver(egaJwtIssUri, egaJwtJwkSetUri, elixirJwtIssUri);
     }
 

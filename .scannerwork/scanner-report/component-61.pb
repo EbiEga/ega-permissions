@@ -1,0 +1,1 @@
+= 2javaX-hrXsrc/main/java/uk/ac/ebi/ega/permissions/configuration/security/MethodSecurityConfig.java
