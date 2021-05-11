@@ -1,1 +1,0 @@
-? 2javaXhrjsrc/main/java/uk/ac/ebi/ega/permissions/configuration/security/customauthorization/HasReadPermissions.java

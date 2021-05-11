@@ -1,1 +1,0 @@
-: 2javaXLhresrc/main/java/uk/ac/ebi/ega/permissions/configuration/tenant/TenantAuthenticationManagerResolver.java

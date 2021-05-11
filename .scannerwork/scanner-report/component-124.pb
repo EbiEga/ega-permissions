@@ -1,1 +1,0 @@
-| 2javaXhrGsrc/main/java/uk/ac/ebi/ega/permissions/exception/ServiceException.java

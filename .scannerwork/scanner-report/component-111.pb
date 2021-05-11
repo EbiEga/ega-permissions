@@ -1,1 +1,0 @@
-o 2javaX.hrQsrc/main/java/uk/ac/ebi/ega/permissions/persistence/entities/AccountElixirId.java
