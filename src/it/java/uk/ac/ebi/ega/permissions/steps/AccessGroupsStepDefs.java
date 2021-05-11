@@ -118,7 +118,7 @@ public class AccessGroupsStepDefs {
 
     @And("^database does not contain group (.*?) for user (.*?)$")
     public void databaseDoesNotContainGroupForUser(String groupId, String userId) {
-        assertThat(this.world.userGroupRepository.findAll()).filteredOn(ug -> ug.getGroupStableId().equals(groupId) && ug.getEgaAccountStableId().equals(userId) && ug.getStatus().equals("active")).hasSize(0);
+        assertThat(this.world.userGroupRepository.findAll()).filteredOn(ug -> ug.getGroupStableId().equals(groupId) && ug.getEgaAccountStableId().equals(userId) && ug.getStatus().equals("active")).isEmpty();
     }
 
     @When("^retrieve groups for user (.*?)$")

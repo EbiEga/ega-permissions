@@ -111,7 +111,7 @@ public class PermissionsServiceImpl implements PermissionsService {
 
         Visa visa = generatedVisaInfo(userAccountId);
 
-        List<Visa> visas = passportVisaObjects.stream().map(e -> {
+        return passportVisaObjects.stream().map(e -> {
             Visa innerVisa = new Visa();
             innerVisa.setJti(visa.getJti());
             innerVisa.setIss(visa.getIss());
@@ -124,7 +124,6 @@ public class PermissionsServiceImpl implements PermissionsService {
             return innerVisa;
         }).collect(Collectors.toList());
 
-        return visas;
     }
 
     @Override
@@ -157,7 +156,7 @@ public class PermissionsServiceImpl implements PermissionsService {
         try {
             List<PassportClaim> deletedClaims = toDeleteValues.stream().map(val -> this.permissionsDataService.deletePassportClaim(accountId, val)).filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList());
 
-            if (toDeleteValues.size() > 0 && deletedClaims.size() == 0) {
+            if (!toDeleteValues.isEmpty() && deletedClaims.isEmpty()) {
                 throw new ValidationException("Values for accountId and value are incorrect or not valid");
             } else if (toDeleteValues.size() != deletedClaims.size()) {
                 LOGGER.warn("Some values provided trying to delete permissions might be invalid: {}", String.join(",", toDeleteValues));
@@ -193,7 +192,7 @@ public class PermissionsServiceImpl implements PermissionsService {
     private Event getEvent(String userId, String data, String method) {
         Event events = new Event();
         events.setBearerId(getBearerAccountId());
-        events.setData((data == null) ? data : data.replaceAll("\n", ""));
+        events.setData(data == null ? null : data.replace("\n", ""));
         events.setMethod(method);
         events.setUserId(userId);
         return events;
@@ -201,10 +200,13 @@ public class PermissionsServiceImpl implements PermissionsService {
 
     private String getBearerAccountId() {
         String email = securityService.getCurrentUser().orElseThrow(() -> new ValidationException("Invalid user"));
+
         if (email.toLowerCase().endsWith(ELIXIR_ACCOUNT_SUFFIX)) {
-            return getAccountIdForElixirId(email).get().getAccountId();
+            AccountElixirId accountElixirId = getAccountIdForElixirId(email).orElseThrow(() -> new ValidationException("Account not found."));
+            return accountElixirId.getAccountId();
         } else {
-            return getAccountByEmail(email).get().getAccountId();
+            Account account = getAccountByEmail(email).orElseThrow(() -> new ValidationException("Account not found."));
+            return account.getAccountId();
         }
     }
 

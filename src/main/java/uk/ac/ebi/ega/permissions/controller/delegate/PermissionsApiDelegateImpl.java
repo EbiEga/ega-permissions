@@ -6,18 +6,15 @@ import uk.ac.ebi.ega.permissions.controller.RequestHandler;
 import uk.ac.ebi.ega.permissions.model.Format;
 import uk.ac.ebi.ega.permissions.model.PermissionsResponses;
 import uk.ac.ebi.ega.permissions.model.Visas;
-import uk.ac.ebi.ega.permissions.service.PermissionsService;
 
 import javax.validation.ConstraintViolationException;
 import java.util.List;
 
 public class PermissionsApiDelegateImpl implements PermissionsApiDelegate {
 
-    private final PermissionsService permissionsService;
     private final RequestHandler requestHandler;
 
-    public PermissionsApiDelegateImpl(PermissionsService permissionsService, RequestHandler requestHandler) {
-        this.permissionsService = permissionsService;
+    public PermissionsApiDelegateImpl(RequestHandler requestHandler) {
         this.requestHandler = requestHandler;
     }
 
