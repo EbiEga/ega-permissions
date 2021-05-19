@@ -22,10 +22,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
 import org.slf4j.LoggerFactory;
+import uk.ac.ebi.ega.ga4gh.jwt.passport.persistence.entities.ApiKey;
+import uk.ac.ebi.ega.ga4gh.jwt.passport.persistence.repository.ApiKeyRepository;
 import uk.ac.ebi.ega.permissions.mapper.ApiKeyMapper;
 import uk.ac.ebi.ega.permissions.model.ApiKeyParams;
-import uk.ac.ebi.ega.permissions.persistence.entities.ApiKey;
-import uk.ac.ebi.ega.permissions.persistence.repository.ApiKeyRepository;
 import uk.ac.ebi.ega.permissions.utils.EncryptionUtils;
 
 import java.time.Duration;

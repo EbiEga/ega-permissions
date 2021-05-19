@@ -5,16 +5,16 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.PermissionEvaluator;
 import org.springframework.security.core.Authentication;
-import uk.ac.ebi.ega.permissions.persistence.entities.AccessGroup;
-import uk.ac.ebi.ega.permissions.persistence.entities.Account;
-import uk.ac.ebi.ega.permissions.persistence.entities.AccountElixirId;
-import uk.ac.ebi.ega.permissions.persistence.service.AccessGroupDataService;
+import uk.ac.ebi.ega.ga4gh.jwt.passport.persistence.entities.AccessGroup;
+import uk.ac.ebi.ega.ga4gh.jwt.passport.persistence.entities.Account;
+import uk.ac.ebi.ega.ga4gh.jwt.passport.persistence.entities.AccountElixirId;
+import uk.ac.ebi.ega.ga4gh.jwt.passport.persistence.service.AccessGroupDataService;
 import uk.ac.ebi.ega.permissions.service.PermissionsService;
 
 import java.io.Serializable;
 import java.util.List;
 
-import static uk.ac.ebi.ega.permissions.persistence.entities.GroupType.EGAAdmin;
+import static uk.ac.ebi.ega.ga4gh.jwt.passport.persistence.entities.GroupType.EGAAdmin;
 
 public class CustomPermissionEvaluator implements PermissionEvaluator {
 

@@ -18,10 +18,10 @@ package uk.ac.ebi.ega.permissions.mapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
+import uk.ac.ebi.ega.ga4gh.jwt.passport.persistence.entities.ApiKey;
 import uk.ac.ebi.ega.permissions.model.APIKeyListItem;
 import uk.ac.ebi.ega.permissions.model.ApiKeyParams;
 import uk.ac.ebi.ega.permissions.model.CreatedAPIKey;
-import uk.ac.ebi.ega.permissions.persistence.entities.ApiKey;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;

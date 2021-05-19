@@ -20,9 +20,9 @@ import uk.ac.ebi.ega.permissions.api.AccessGroupsApiDelegate;
 import uk.ac.ebi.ega.permissions.configuration.security.customauthorization.HasAdminPermissions;
 import uk.ac.ebi.ega.permissions.mapper.AccessGroupMapper;
 import uk.ac.ebi.ega.permissions.model.GroupUser;
-import uk.ac.ebi.ega.permissions.persistence.entities.GroupType;
-import uk.ac.ebi.ega.permissions.persistence.entities.AccessGroup;
-import uk.ac.ebi.ega.permissions.persistence.service.AccessGroupDataService;
+import uk.ac.ebi.ega.ga4gh.jwt.passport.persistence.entities.GroupType;
+import uk.ac.ebi.ega.ga4gh.jwt.passport.persistence.entities.AccessGroup;
+import uk.ac.ebi.ega.ga4gh.jwt.passport.persistence.service.AccessGroupDataService;
 
 import java.util.List;
 

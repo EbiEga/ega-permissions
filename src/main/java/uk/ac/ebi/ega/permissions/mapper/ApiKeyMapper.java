@@ -21,7 +21,7 @@ import org.mapstruct.Mapping;
 import uk.ac.ebi.ega.permissions.model.APIKeyListItem;
 import uk.ac.ebi.ega.permissions.model.ApiKeyParams;
 import uk.ac.ebi.ega.permissions.model.CreatedAPIKey;
-import uk.ac.ebi.ega.permissions.persistence.entities.ApiKey;
+import uk.ac.ebi.ega.ga4gh.jwt.passport.persistence.entities.ApiKey;
 
 import java.util.List;
 

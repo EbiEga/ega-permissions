@@ -17,13 +17,13 @@ package uk.ac.ebi.ega.permissions.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import uk.ac.ebi.ega.permissions.exception.SystemException;
+import uk.ac.ebi.ega.ga4gh.jwt.passport.exception.SystemException;
+import uk.ac.ebi.ega.ga4gh.jwt.passport.persistence.entities.ApiKey;
+import uk.ac.ebi.ega.ga4gh.jwt.passport.persistence.repository.ApiKeyRepository;
 import uk.ac.ebi.ega.permissions.mapper.ApiKeyMapper;
 import uk.ac.ebi.ega.permissions.model.APIKeyListItem;
 import uk.ac.ebi.ega.permissions.model.ApiKeyParams;
 import uk.ac.ebi.ega.permissions.model.CreatedAPIKey;
-import uk.ac.ebi.ega.permissions.persistence.entities.ApiKey;
-import uk.ac.ebi.ega.permissions.persistence.repository.ApiKeyRepository;
 import uk.ac.ebi.ega.permissions.utils.EncryptionUtils;
 
 import javax.crypto.BadPaddingException;

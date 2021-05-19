@@ -25,9 +25,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
+import uk.ac.ebi.ega.ga4gh.jwt.passport.persistence.entities.Permission;
 import uk.ac.ebi.ega.permissions.model.GroupUser;
 import uk.ac.ebi.ega.permissions.model.PermissionLevel;
-import uk.ac.ebi.ega.permissions.persistence.entities.Permission;
 
 import java.net.URI;
 import java.net.URISyntaxException;

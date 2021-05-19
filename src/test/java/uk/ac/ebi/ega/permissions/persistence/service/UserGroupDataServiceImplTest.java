@@ -22,12 +22,13 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import uk.ac.ebi.ega.permissions.persistence.entities.AccessGroup;
-import uk.ac.ebi.ega.permissions.persistence.repository.AccessGroupRepository;
+import uk.ac.ebi.ega.ga4gh.jwt.passport.persistence.entities.AccessGroup;
+import uk.ac.ebi.ega.ga4gh.jwt.passport.persistence.repository.AccessGroupRepository;
+import uk.ac.ebi.ega.ga4gh.jwt.passport.persistence.service.AccessGroupDataService;
+import uk.ac.ebi.ega.ga4gh.jwt.passport.persistence.service.AccessGroupDataServiceImpl;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static uk.ac.ebi.ega.permissions.persistence.entities.GroupType.EGAAdmin;
-import static uk.ac.ebi.ega.permissions.persistence.entities.Permission.read;
 
 @DataJpaTest
 class UserGroupDataServiceImplTest {

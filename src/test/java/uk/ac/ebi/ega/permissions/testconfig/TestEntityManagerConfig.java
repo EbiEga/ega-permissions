@@ -51,7 +51,7 @@ public class TestEntityManagerConfig {
 
         LocalContainerEntityManagerFactoryBean entityManagerFactory = new LocalContainerEntityManagerFactoryBean();
         entityManagerFactory.setDataSource(datasource);
-        entityManagerFactory.setPackagesToScan("uk.ac.ebi.ega.permissions.persistence.entities");
+        entityManagerFactory.setPackagesToScan("uk.ac.ebi.ega.ga4gh.jwt.passport.persistence.entities");
         entityManagerFactory.setJpaVendorAdapter(vendorAdapter);
         entityManagerFactory.setJpaProperties(properties);
 

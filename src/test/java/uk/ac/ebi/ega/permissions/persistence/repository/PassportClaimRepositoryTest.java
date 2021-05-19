@@ -24,9 +24,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import uk.ac.ebi.ega.permissions.persistence.entities.Authority;
-import uk.ac.ebi.ega.permissions.persistence.entities.PassportClaim;
-import uk.ac.ebi.ega.permissions.persistence.entities.VisaType;
+import uk.ac.ebi.ega.ga4gh.jwt.passport.persistence.entities.Authority;
+import uk.ac.ebi.ega.ga4gh.jwt.passport.persistence.entities.PassportClaim;
+import uk.ac.ebi.ega.ga4gh.jwt.passport.persistence.entities.VisaType;
+import uk.ac.ebi.ega.ga4gh.jwt.passport.persistence.repository.PassportClaimRepository;
 
 import javax.persistence.EntityManager;
 import javax.sql.DataSource;

@@ -27,13 +27,13 @@ import com.nimbusds.jwt.SignedJWT;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
-import uk.ac.ebi.ega.permissions.exception.SystemException;
+import uk.ac.ebi.ega.ga4gh.jwt.passport.exception.SystemException;
+import uk.ac.ebi.ega.ga4gh.jwt.passport.persistence.entities.Authority;
+import uk.ac.ebi.ega.ga4gh.jwt.passport.persistence.entities.PassportClaim;
+import uk.ac.ebi.ega.ga4gh.jwt.passport.persistence.entities.VisaType;
 import uk.ac.ebi.ega.permissions.model.AccountAccess;
 import uk.ac.ebi.ega.permissions.model.PassportVisaObject;
 import uk.ac.ebi.ega.permissions.model.Visa;
-import uk.ac.ebi.ega.permissions.persistence.entities.Authority;
-import uk.ac.ebi.ega.permissions.persistence.entities.PassportClaim;
-import uk.ac.ebi.ega.permissions.persistence.entities.VisaType;
 
 import java.net.URI;
 import java.net.URISyntaxException;
