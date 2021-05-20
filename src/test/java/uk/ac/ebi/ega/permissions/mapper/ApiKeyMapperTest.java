@@ -15,6 +15,7 @@
  */
 package uk.ac.ebi.ega.permissions.mapper;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
 import uk.ac.ebi.ega.permissions.model.APIKeyListItem;
@@ -33,6 +34,7 @@ class ApiKeyMapperTest {
     ApiKeyMapper mapper = Mappers.getMapper(ApiKeyMapper.class);
 
     @Test
+    @DisplayName("ApiKeyMapper - CreatedAPIKey from ApiKeyParams")
     void fromApiKeyParams() throws ParseException {
         Date testDate = new SimpleDateFormat("dd/MM/yyyy").parse("18/03/1990");
         ApiKeyParams params = new ApiKeyParams("username", "keyId", testDate, "reason");
@@ -49,6 +51,7 @@ class ApiKeyMapperTest {
     }
 
     @Test
+    @DisplayName("ApiKeyMapper - ApiKey from APIKeyListItem")
     void fromEntity() throws ParseException {
         Date testDate = new SimpleDateFormat("dd/MM/yyyy").parse("18/03/1990");
         ApiKey apiKey = new ApiKey("username", "keyName", testDate, "reason", "salt", "privateKey");

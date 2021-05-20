@@ -17,6 +17,7 @@
  */
 package uk.ac.ebi.ega.permissions.persistence.repository;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,6 +46,7 @@ class UserGroupRepositoryTest {
     private PassportClaimRepository passportClaimRepository;
 
     @Test
+    @DisplayName("UserGroupRepository -  Find all by User ID and Dataset ID")
     void findAllByUserIdAndDataSetId() {
         List<AccessGroup> userGroupsBeforeInsert = userGroupRepository.findAllByUserIdAndDataSetId("user1", "d1");
         userGroupRepository.save(new AccessGroup("user1", "dac1", EGAAdmin, read));

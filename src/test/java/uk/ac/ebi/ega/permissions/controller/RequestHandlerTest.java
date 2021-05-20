@@ -18,6 +18,7 @@
 package uk.ac.ebi.ega.permissions.controller;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -61,6 +62,7 @@ class RequestHandlerTest {
     private RequestHandler requestHandler;
 
     @Test
+    @DisplayName("Request Handler (EGA Admin) - JWT Permissions created")
     void testCreateJWTPermissions_WhenUserIsEGAAdmin_ReturnCreatedObject() {
         when(userGroupDataService.isEGAAdmin(any())).thenReturn(true);
 
@@ -70,6 +72,7 @@ class RequestHandlerTest {
     }
 
     @Test
+    @DisplayName("Request Handler (DAC Admin) - JWT Permissions created")
     void testCreateJWTPermissions_WhenUserIsDACAndDatasetBelongToDac_ReturnCreatedObject() {
         when(userGroupDataService.isEGAAdmin(any())).thenReturn(false);
         when(userGroupDataService.datasetBelongsToDAC(any(), any())).thenReturn(true);
@@ -80,6 +83,7 @@ class RequestHandlerTest {
     }
 
     @Test
+    @DisplayName("Request Handler (EGA Admin) - Plain Permissions created")
     void testCreatePermissions_WhenUserIsEGAAdmin_ReturnCreatedObject() {
         when(userGroupDataService.isEGAAdmin(any())).thenReturn(true);
 
@@ -89,6 +93,7 @@ class RequestHandlerTest {
     }
 
     @Test
+    @DisplayName("Request Handler (DAC Admin) - Plain Permissions created")
     void testCreatePermissions_WhenUserIsDACAndDatasetBelongToDac_ReturnCreatedObject() {
         when(userGroupDataService.isEGAAdmin(any())).thenReturn(false);
         when(userGroupDataService.datasetBelongsToDAC(any(), any())).thenReturn(true);
@@ -99,6 +104,7 @@ class RequestHandlerTest {
     }
 
     @Test
+    @DisplayName("Request Handler (EGA Admin) - Delete permissions OK")
     void testDeletePermissions_WhenUserIsEGAAdmin_ReturnStatusOK() {
         when(userGroupDataService.isEGAAdmin(any())).thenReturn(true);
 
@@ -107,6 +113,7 @@ class RequestHandlerTest {
     }
 
     @Test
+    @DisplayName("Request Handler (DAC Admin) - Delete permissions OK")
     void testDeletePermissions_WhenUserIsDACAndDatasetBelongToDac_ReturnStatusOK() {
         when(userGroupDataService.isEGAAdmin(any())).thenReturn(false);
         when(userGroupDataService.datasetBelongsToDAC(any(), any())).thenReturn(true);
@@ -116,6 +123,7 @@ class RequestHandlerTest {
     }
 
     @Test
+    @DisplayName("Request Handler (DAC Admin) - Delete permissions ERROR (Invalid access)")
     void testDeletePermissions_WhenUserIsDACAndDatasetDoesntBelongToDac_ReturnValidationException() {
         when(userGroupDataService.isEGAAdmin(any())).thenReturn(false);
         when(userGroupDataService.datasetBelongsToDAC(any(), any())).thenReturn(false);

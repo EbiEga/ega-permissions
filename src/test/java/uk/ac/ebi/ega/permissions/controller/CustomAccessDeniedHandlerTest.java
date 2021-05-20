@@ -16,6 +16,7 @@
 package uk.ac.ebi.ega.permissions.controller;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
@@ -50,7 +51,8 @@ class CustomAccessDeniedHandlerTest {
     }
 
     @Test
-    void handle() throws ServletException, IOException {
+    @DisplayName("CustomAccessDeniedHandler - Handle Exception")
+    void handleException() throws ServletException, IOException {
 
         try (MockedStatic<SecurityContextHolder> contextHolder = Mockito.mockStatic(SecurityContextHolder.class)) {
             contextHolder.when(SecurityContextHolder::getContext).thenReturn(securityContext);

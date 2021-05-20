@@ -17,6 +17,7 @@
 package uk.ac.ebi.ega.permissions.controller.delegate;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -47,6 +48,7 @@ class PermissionsApiDelegateImplTest {
     }
 
     @Test
+    @DisplayName("Read Permissions - OK")
     void readPermissions() {
         ResponseEntity<Visas> requestHandlerResponse = ResponseEntity.ok(new Visas());
         when(requestHandler.getPermissionsForUser("accountId", Format.PLAIN)).thenReturn(requestHandlerResponse);
@@ -55,12 +57,14 @@ class PermissionsApiDelegateImplTest {
     }
 
     @Test
+    @DisplayName("Read Permissions - No Account ID Provided ")
     void readPermissions_noAccountId() {
         assertThatThrownBy(() -> this.permissionsApiDelegate.readPermissions(null, null, Format.PLAIN))
                 .isInstanceOf(ConstraintViolationException.class);
     }
 
     @Test
+    @DisplayName("Create Permissions - OK")
     void createPermissions() {
         ResponseEntity<PermissionsResponses> requestHandlerResponse = ResponseEntity.ok(new PermissionsResponses());
         when(requestHandler.createPermissions(eq("accountId"), anyList(), eq(Format.PLAIN))).thenReturn(requestHandlerResponse);
@@ -69,6 +73,7 @@ class PermissionsApiDelegateImplTest {
     }
 
     @Test
+    @DisplayName("Delete Permissions - OK")
     void deletePermissions() {
         ResponseEntity<Void> requestHandlerResponse =  ResponseEntity.status(HttpStatus.OK).build();
         when(requestHandler.getAccountIdForElixirId(any())).thenReturn("accountId");

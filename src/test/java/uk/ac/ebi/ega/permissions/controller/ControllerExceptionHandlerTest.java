@@ -17,6 +17,7 @@ package uk.ac.ebi.ega.permissions.controller;
 
 import org.assertj.core.util.Sets;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -42,6 +43,7 @@ class ControllerExceptionHandlerTest {
     }
 
     @Test
+    @DisplayName("Exception Handler - ConstraintViolationException thrown")
     void constraintViolationException() {
         ResponseEntity<Object> responseEntity = controllerExceptionHandler.constraintViolationException(constraintViolationException);
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
@@ -49,6 +51,7 @@ class ControllerExceptionHandlerTest {
     }
 
     @Test
+    @DisplayName("Exception Handler - ValidationException thrown")
     void validationExceptions() {
         ResponseEntity<Object> responseEntity = controllerExceptionHandler.validationExceptions(validationException);
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
