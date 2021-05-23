@@ -58,7 +58,7 @@ public class ApiKeyServiceImpl implements ApiKeyService {
     }
 
     @Override
-    public CreatedAPIKey createApiKey(ApiKeyParams params) throws Exception {
+    public CreatedAPIKey createApiKey(ApiKeyParams params) throws NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, InvalidKeySpecException, BadPaddingException, InvalidKeyException {
         params = this.generateKeys(params);
         this.saveApiKeyDetails(params);
         return apiKeyMapper.fromApiKeyParams(params);
@@ -72,7 +72,7 @@ public class ApiKeyServiceImpl implements ApiKeyService {
     }
 
     @Override
-    public ApiKeyParams generateKeys(ApiKeyParams params) throws Exception {
+    public ApiKeyParams generateKeys(ApiKeyParams params) throws NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, InvalidKeySpecException, BadPaddingException, InvalidKeyException {
         //Generate public and private keys
         KeyPair generateKeyPair = encryptionUtils.generateKeyPair();
         byte[] publicKey = generateKeyPair.getPublic().getEncoded();

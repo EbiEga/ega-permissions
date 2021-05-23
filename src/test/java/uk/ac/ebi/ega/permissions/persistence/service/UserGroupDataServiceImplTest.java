@@ -48,7 +48,7 @@ class UserGroupDataServiceImplTest {
         AccessGroup userGroup = new AccessGroup("user1", "dac1", EGAAdmin, read);
         userGroup.setPeaRecord(1);
         AccessGroup savedWithService = userGroupDataService.save(userGroup);
-        assertThat(savedWithService.getPeaRecord()).isEqualTo(0);
+        assertThat(savedWithService.getPeaRecord()).isZero();
 
         //Verify that saving directly to the repository we get the proper value in case we need to specify the pea_record parameter
         userGroup.setPeaRecord(1);

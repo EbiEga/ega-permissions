@@ -22,7 +22,6 @@ import uk.ac.ebi.ega.permissions.service.ApiKeyService;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
@@ -31,9 +30,9 @@ import java.io.IOException;
 
 public class ApiKeyAuthenticationFilter implements Filter {
 
-    static final private String AUTH_METHOD = "api-key";
+    private static final String AUTH_METHOD = "api-key";
 
-    final ApiKeyService apiKeyService;
+    private final ApiKeyService apiKeyService;
 
     public ApiKeyAuthenticationFilter(final ApiKeyService apiKeyService) {
         this.apiKeyService = apiKeyService;

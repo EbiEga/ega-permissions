@@ -70,7 +70,7 @@ class PassportClaimRepositoryTest {
 
         List<PassportClaim> claimsForUser1After = passportClaimRepository.findAllByAccountId("account1");
 
-        assertThat(claimsForUser1Before).hasSize(0);
+        assertThat(claimsForUser1Before).isEmpty();
         assertThat(claimsForUser1After).hasSize(2);
     }
 
@@ -81,8 +81,8 @@ class PassportClaimRepositoryTest {
         passportClaimRepository.save(createPassportClaim("account1", "object1"));
         boolean existsPassportClaimAfter = passportClaimRepository.existsPassportClaimByAccountId("account1");
 
-        assertThat(existsPassportClaimBefore).isEqualTo(false);
-        assertThat(existsPassportClaimAfter).isEqualTo(true);
+        assertThat(existsPassportClaimBefore).isFalse();
+        assertThat(existsPassportClaimAfter).isTrue();
     }
 
 
@@ -96,7 +96,7 @@ class PassportClaimRepositoryTest {
         List<PassportClaim> claimsBefore = passportClaimRepository.findAllByAccountId("account1");
 
         assertThat(claimsBefore).hasSize(3);
-        assertThat(claimsBefore).filteredOn(e -> e.getValue().equals("object2") && e.getStatus().equals("revoked")).hasSize(0);
+        assertThat(claimsBefore).filteredOn(e -> e.getValue().equals("object2") && e.getStatus().equals("revoked")).isEmpty();
         assertThat(claimsBefore).filteredOn(e -> e.getValue().equals("object2") && e.getStatus().equals("approved")).hasSize(1);
 
         Optional<PassportClaim> claimToSoftDelete = passportClaimRepository.findByAccountIdAndValue("account1", "object2");
@@ -110,7 +110,7 @@ class PassportClaimRepositoryTest {
         List<PassportClaim> claimsAfter = passportClaimRepository.findAllByAccountId("account1");
 
         assertThat(claimsAfter).hasSize(2);
-        assertThat(claimsAfter).filteredOn(e -> e.getValue().equals("object2") && e.getStatus().equals("approved")).hasSize(0);
+        assertThat(claimsAfter).filteredOn(e -> e.getValue().equals("object2") && e.getStatus().equals("approved")).isEmpty();
     }
 
     private PassportClaim createPassportClaim(String accountId, String value) {

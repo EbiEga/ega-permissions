@@ -24,6 +24,7 @@ import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
 import uk.ac.ebi.ega.permissions.exception.SystemException;
@@ -45,6 +46,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class TokenPayloadMapperTest {
 
     @Test
+    @DisplayName("TokenPayloadMapper - List<PassportVisaObject> from List<PassportClaim>")
     void mapPassportClaimsToPassportVisaObjects() {
         PassportClaim claim1 = new PassportClaim("testAccountId", VisaType.ControlledAccessGrants, 1568814383L, "https://ega-archive.org/datasets/EGAD00002222222", "https://ega-archive.org/dacs/EGAC00001111111", Authority.dac);
         PassportClaim claim2 = new PassportClaim("testAccountId", VisaType.ControlledAccessGrants, 1768814383L, "https://ega-archive.org/datasets/EGAD00003333333", "https://ega-archive.org/dacs/EGAC00001111111", Authority.dac);
@@ -58,6 +60,7 @@ class TokenPayloadMapperTest {
     }
 
     @Test
+    @DisplayName("TokenPayloadMapper - List<PassportClaim> from List<PassportVisaObject>")
     void mapPassportVisaObjectsToPassportClaims() {
         PassportVisaObject passportVisaObject1 = createPassportVisaObject("https://ega-archive.org/datasets/EGAD00002222222");
         PassportVisaObject passportVisaObject2 = createPassportVisaObject("https://ega-archive.org/datasets/EGAD00003333333");
@@ -70,6 +73,7 @@ class TokenPayloadMapperTest {
     }
 
     @Test
+    @DisplayName("TokenPayloadMapper - Visa from SignedJWT ClaimSet")
     void mapJWTClaimSetToVisa() throws URISyntaxException, ParseException {
         SignedJWT signedJWT = createSignedJWT();
         TokenPayloadMapper mapper = Mappers.getMapper(TokenPayloadMapper.class);
@@ -80,6 +84,7 @@ class TokenPayloadMapperTest {
     }
 
     @Test
+    @DisplayName("TokenPayloadMapper -  List<AccountAccess> from List<PassportClaim>")
     void mapPassportClaimsToAccountAccesses(){
         PassportClaim claim1 = new PassportClaim("testAccountId1", VisaType.ControlledAccessGrants, 1568814383L, "https://ega-archive.org/datasets/EGAD00002222222", "https://ega-archive.org/dacs/EGAC00001111111", Authority.dac);
         PassportClaim claim2 = new PassportClaim("testAccountId2", VisaType.ControlledAccessGrants, 1768814383L, "https://ega-archive.org/datasets/EGAD00003333333", "https://ega-archive.org/dacs/EGAC00001111111", Authority.dac);

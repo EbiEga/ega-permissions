@@ -57,7 +57,7 @@ public class RequestHandler {
 
     public static final String EGA_ACCOUNT_ID_PREFIX = "EGAW";
     public static final String ELIXIR_ACCOUNT_SUFFIX = "@elixir-europe.org";
-    Logger LOGGER = LoggerFactory.getLogger(RequestHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(RequestHandler.class);
 
     private final PermissionsService permissionsService;
     private final TokenPayloadMapper tokenPayloadMapper;
@@ -151,7 +151,7 @@ public class RequestHandler {
     public List<JWTPermissionsResponse> createJWTPermissions(String accountId, List<String> ga4ghVisaV1List) {
         return ga4ghVisaV1List
                 .stream()
-                .map((strVisa) -> {
+                .map(strVisa -> {
                     try {
                         Visa visa = tokenPayloadMapper.mapJWTClaimSetToVisa(SignedJWT.parse(strVisa).getJWTClaimsSet());
                         PermissionsResponse preResponse = handlePassportVisaObjectProcessing(accountId, visa.getGa4ghVisaV1());
@@ -174,7 +174,7 @@ public class RequestHandler {
     public List<PermissionsResponse> createPlainPermissions(String accountId, List<PassportVisaObject> passportVisaObjects) {
         return passportVisaObjects
                 .stream()
-                .map((passportVisaObject) -> handlePassportVisaObjectProcessing(accountId, passportVisaObject))
+                .map(passportVisaObject -> handlePassportVisaObjectProcessing(accountId, passportVisaObject))
                 .collect(Collectors.toList());
     }
 
@@ -234,9 +234,8 @@ public class RequestHandler {
 
     public void validateDatasetBelongsToDAC(String datasetId) {
         String bearerAccountId = getBearerAccountId();
-        if (!userGroupDataService.isEGAAdmin(bearerAccountId)) {
-            if (!userGroupDataService.datasetBelongsToDAC(bearerAccountId, datasetId))
-                throw new ValidationException("User doesn't own dataset.");
+        if (!userGroupDataService.isEGAAdmin(bearerAccountId) && !userGroupDataService.datasetBelongsToDAC(bearerAccountId, datasetId)) {
+            throw new ValidationException("User doesn't own dataset.");
         }
     }
 
@@ -245,11 +244,13 @@ public class RequestHandler {
     }
 
     private String getBearerAccountId() {
-        String email = securityService.getCurrentUser().orElseThrow(() -> new ValidationException("Anonymous user not allowd."));
+        String email = securityService.getCurrentUser().orElseThrow(() -> new ValidationException("Anonymous user not allowed."));
         if (email.toLowerCase().endsWith(ELIXIR_ACCOUNT_SUFFIX)) {
-            return permissionsService.getAccountIdForElixirId(email).get().getAccountId();
+            AccountElixirId accountElixirId = permissionsService.getAccountIdForElixirId(email).orElseThrow(() -> new ValidationException("Account not found."));
+            return accountElixirId.getAccountId();
         } else {
-            return permissionsService.getAccountByEmail(email).get().getAccountId();
+            Account account = permissionsService.getAccountByEmail(email).orElseThrow(() -> new ValidationException("Account not found."));
+            return account.getAccountId();
         }
     }
 

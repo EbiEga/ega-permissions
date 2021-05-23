@@ -120,7 +120,7 @@ public class JWTServiceImpl implements JWTService {
 
         // Convert all keys in the keystore to a map based on key id
         for (final JWK key : jwkSet.getKeys()) {
-            if (!StringUtils.isEmpty(key.getKeyID())) {
+            if (StringUtils.hasText(key.getKeyID())) {
                 keys.put(key.getKeyID(), key);
             } else {
                 throw new IllegalArgumentException("Tried to load a key from a keystore without a 'kid' field: " + key);

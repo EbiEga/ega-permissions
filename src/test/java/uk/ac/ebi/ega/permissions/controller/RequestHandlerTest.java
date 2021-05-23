@@ -18,6 +18,7 @@
 package uk.ac.ebi.ega.permissions.controller;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -50,73 +51,79 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpStatus.OK;
 
-public class RequestHandlerTest {
+class RequestHandlerTest {
     private PermissionsService permissionsService = mock(PermissionsService.class);
     private TokenPayloadMapper tokenPayloadMapper = mock(TokenPayloadMapper.class);
     private AccessGroupMapper accessGroupMapper = mock(AccessGroupMapper.class);
     private AccessGroupDataService userGroupDataService = mock(AccessGroupDataService.class);
-    private EventDataService eventDataService = mock(EventDataService.class);
     private JWTService jwtService = mock(JWTService.class);
     private SecurityService securityService = mock(SecurityService.class);
 
     private RequestHandler requestHandler;
 
     @Test
+    @DisplayName("Request Handler (EGA Admin) - JWT Permissions created")
     void testCreateJWTPermissions_WhenUserIsEGAAdmin_ReturnCreatedObject() {
         when(userGroupDataService.isEGAAdmin(any())).thenReturn(true);
 
         List<JWTPermissionsResponse> permissionsCreated = requestHandler.createJWTPermissions(EMPTY,
                 Arrays.asList(getTestToken()));
-        assertEquals(permissionsCreated.size(), 1);
+        assertEquals(1, permissionsCreated.size());
     }
 
     @Test
+    @DisplayName("Request Handler (DAC Admin) - JWT Permissions created")
     void testCreateJWTPermissions_WhenUserIsDACAndDatasetBelongToDac_ReturnCreatedObject() {
         when(userGroupDataService.isEGAAdmin(any())).thenReturn(false);
         when(userGroupDataService.datasetBelongsToDAC(any(), any())).thenReturn(true);
 
         List<JWTPermissionsResponse> permissionsCreated = requestHandler.createJWTPermissions(EMPTY,
                 Arrays.asList(getTestToken()));
-        assertEquals(permissionsCreated.size(), 1);
+        assertEquals(1, permissionsCreated.size());
     }
 
     @Test
+    @DisplayName("Request Handler (EGA Admin) - Plain Permissions created")
     void testCreatePermissions_WhenUserIsEGAAdmin_ReturnCreatedObject() {
         when(userGroupDataService.isEGAAdmin(any())).thenReturn(true);
 
         List<PermissionsResponse> permissionsCreated = requestHandler.createPlainPermissions(EMPTY,
                 Arrays.asList(createPassportVisaObject()));
-        assertEquals(permissionsCreated.size(), 1);
+        assertEquals(1, permissionsCreated.size());
     }
 
     @Test
+    @DisplayName("Request Handler (DAC Admin) - Plain Permissions created")
     void testCreatePermissions_WhenUserIsDACAndDatasetBelongToDac_ReturnCreatedObject() {
         when(userGroupDataService.isEGAAdmin(any())).thenReturn(false);
         when(userGroupDataService.datasetBelongsToDAC(any(), any())).thenReturn(true);
 
         List<PermissionsResponse> permissionsCreated = requestHandler.createPlainPermissions(EMPTY,
                 Arrays.asList(createPassportVisaObject()));
-        assertEquals(permissionsCreated.size(), 1);
+        assertEquals(1, permissionsCreated.size());
     }
 
     @Test
+    @DisplayName("Request Handler (EGA Admin) - Delete permissions OK")
     void testDeletePermissions_WhenUserIsEGAAdmin_ReturnStatusOK() {
         when(userGroupDataService.isEGAAdmin(any())).thenReturn(true);
 
         ResponseEntity<Void> responseEntity = requestHandler.deletePermissions(EMPTY, new ArrayList<>());
-        assertEquals(responseEntity.getStatusCode(), OK);
+        assertEquals(OK, responseEntity.getStatusCode());
     }
 
     @Test
+    @DisplayName("Request Handler (DAC Admin) - Delete permissions OK")
     void testDeletePermissions_WhenUserIsDACAndDatasetBelongToDac_ReturnStatusOK() {
         when(userGroupDataService.isEGAAdmin(any())).thenReturn(false);
         when(userGroupDataService.datasetBelongsToDAC(any(), any())).thenReturn(true);
 
         ResponseEntity<Void> responseEntity = requestHandler.deletePermissions(EMPTY, new ArrayList<>());
-        assertEquals(responseEntity.getStatusCode(), OK);
+        assertEquals(OK, responseEntity.getStatusCode());
     }
 
     @Test
+    @DisplayName("Request Handler (DAC Admin) - Delete permissions ERROR (Invalid access)")
     void testDeletePermissions_WhenUserIsDACAndDatasetDoesntBelongToDac_ReturnValidationException() {
         when(userGroupDataService.isEGAAdmin(any())).thenReturn(false);
         when(userGroupDataService.datasetBelongsToDAC(any(), any())).thenReturn(false);

@@ -1,5 +1,7 @@
 package uk.ac.ebi.ega.permissions.configuration;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.PermissionEvaluator;
 import org.springframework.security.core.Authentication;
@@ -15,6 +17,8 @@ import java.util.List;
 import static uk.ac.ebi.ega.permissions.persistence.entities.GroupType.EGAAdmin;
 
 public class CustomPermissionEvaluator implements PermissionEvaluator {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(CustomPermissionEvaluator.class);
 
     public static final String ELIXIR_ACCOUNT_SUFFIX = "@elixir-europe.org";
 
@@ -43,6 +47,8 @@ public class CustomPermissionEvaluator implements PermissionEvaluator {
     }
 
     private boolean hasPrivilege(Authentication auth, String targetType, String permission) {
+        LOGGER.debug("Evaluating auth:{}, targetType:{}, permission:{}", auth, targetType, permission);
+
         String email = auth.getName();
 
         String accountId = getAccountIdForElixirId(email);
@@ -55,10 +61,7 @@ public class CustomPermissionEvaluator implements PermissionEvaluator {
         return userGroups.stream().anyMatch(entry -> {
             String accessGroup = entry.getGroupType().name();
             String accessLevel = entry.getPermission().name();
-            if (EGAAdmin.name().equals(accessGroup) || permission.equals(accessGroup.concat("_").concat(accessLevel))) {
-                return true;
-            }
-            return false;
+            return EGAAdmin.name().equals(accessGroup) || permission.equals(accessGroup.concat("_").concat(accessLevel));
         });
     }
 

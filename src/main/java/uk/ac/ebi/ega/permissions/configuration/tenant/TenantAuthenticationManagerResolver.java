@@ -3,17 +3,23 @@ package uk.ac.ebi.ega.permissions.configuration.tenant;
 import com.nimbusds.jwt.JWTParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.convert.converter.Converter;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationManagerResolver;
 import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.core.OAuth2TokenValidator;
+import org.springframework.security.oauth2.jose.jws.SignatureAlgorithm;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoders;
-import org.springframework.security.oauth2.jwt.NimbusJwtDecoderJwkSupport;
+import org.springframework.security.oauth2.jwt.JwtValidators;
+import org.springframework.security.oauth2.jwt.MappedJwtClaimSetConverter;
+import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationProvider;
 import org.springframework.security.oauth2.server.resource.web.BearerTokenResolver;
 import org.springframework.security.oauth2.server.resource.web.DefaultBearerTokenResolver;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -24,7 +30,6 @@ public class TenantAuthenticationManagerResolver implements AuthenticationManage
 
     private String egaJwtIssUri;
     private String egaJwtJwkSetUri;
-    private String elixirJtwIssUri;
 
     private final BearerTokenResolver resolver = new DefaultBearerTokenResolver();
     private final Map<String, String> tenants = new HashMap<>();
@@ -34,7 +39,6 @@ public class TenantAuthenticationManagerResolver implements AuthenticationManage
     public TenantAuthenticationManagerResolver(final String egaJwtIssUri, final String egaJwtJwkSetUri, final String elixirJtwIssUri) {
         this.egaJwtIssUri = egaJwtIssUri;
         this.egaJwtJwkSetUri = egaJwtJwkSetUri;
-        this.elixirJtwIssUri = elixirJtwIssUri;
 
         this.tenants.put(egaJwtIssUri, egaJwtIssUri);
         this.tenants.put(elixirJtwIssUri, elixirJtwIssUri);
@@ -59,7 +63,18 @@ public class TenantAuthenticationManagerResolver implements AuthenticationManage
         LOGGER.debug("Validating token for Tenant: {}", tenant);
         if (egaJwtIssUri.equals(tenant)) {
             //NimbusJTWDecoder used because EGA OpenID server doesn't have the /.well-known/ configuration endpoint enabled
-            JwtDecoder decoder = new NimbusJwtDecoderJwkSupport(egaJwtJwkSetUri);
+
+            NimbusJwtDecoder.JwkSetUriJwtDecoderBuilder jwtDecoderBuilder;
+            Converter<Map<String, Object>, Map<String, Object>> claimSetConverter;
+
+            claimSetConverter = MappedJwtClaimSetConverter.withDefaults(Collections.emptyMap());
+            jwtDecoderBuilder = NimbusJwtDecoder.withJwkSetUri(egaJwtJwkSetUri).jwsAlgorithm(SignatureAlgorithm.from("RS256"));
+            OAuth2TokenValidator<Jwt> jwtValidator = JwtValidators.createDefault();
+
+            NimbusJwtDecoder decoder = jwtDecoderBuilder.build();
+            decoder.setClaimSetConverter(claimSetConverter);
+            decoder.setJwtValidator(jwtValidator);
+
             AuthenticationProvider provider = new JwtAuthenticationProvider(decoder);
             manager = provider::authenticate;
         } else {
