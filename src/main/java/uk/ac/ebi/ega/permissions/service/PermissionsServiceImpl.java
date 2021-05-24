@@ -23,6 +23,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.util.CollectionUtils;
+import uk.ac.ebi.ega.permissions.cache.CacheManager;
+import uk.ac.ebi.ega.permissions.cache.dto.DatasetDTO;
 import uk.ac.ebi.ega.permissions.configuration.VisaInfoProperties;
 import uk.ac.ebi.ega.permissions.mapper.TokenPayloadMapper;
 import uk.ac.ebi.ega.permissions.model.AccountAccess;
@@ -45,6 +47,7 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -61,18 +64,20 @@ public class PermissionsServiceImpl implements PermissionsService {
     private final TokenPayloadMapper tokenPayloadMapper;
     private final VisaInfoProperties visaInfoProperties;
     private final SecurityService securityService;
+    private final CacheManager cacheManager;
 
     public PermissionsServiceImpl(final PermissionsDataService permissionsDataService,
                                   final EventDataService eventDataService,
                                   final TokenPayloadMapper tokenPayloadMapper,
                                   final VisaInfoProperties visaInfoProperties,
-                                  final SecurityService securityService) {
+                                  final SecurityService securityService,
+                                  final CacheManager cacheManager) {
         this.permissionsDataService = permissionsDataService;
         this.eventDataService = eventDataService;
         this.tokenPayloadMapper = tokenPayloadMapper;
         this.visaInfoProperties = visaInfoProperties;
         this.securityService = securityService;
-
+        this.cacheManager = cacheManager;
     }
 
     @Override
@@ -140,6 +145,8 @@ public class PermissionsServiceImpl implements PermissionsService {
             PassportClaim savedClaim = this.permissionsDataService.savePassportClaim(tokenPayloadMapper.mapPassportVisaObjectToPassportClaim(userAccountId, passportVisaObject));
             passportVisaObject = this.tokenPayloadMapper.mapPassportClaimToPassportVisaObject(savedClaim);
             eventDataService.saveEvent(getEvent(userAccountId, new ObjectMapper().writeValueAsString(passportVisaObject), EVENT_SAVED));
+            final Set<DatasetDTO> datasetDTOS = addDatasetPermissionToCache(userAccountId, passportVisaObject);
+            LOGGER.debug("User {} has {} no. of dataset permissions", userAccountId, datasetDTOS.size());
         } catch (PersistenceException | CannotCreateTransactionException | IllegalArgumentException ex) { //These are spring-data possible errors
             throw new ServiceException(String.format("Error saving permissions to the DB for [account:%s, object:%s]", userAccountId, passportVisaObject.getValue()), ex);
         } catch (ValidationException | AccessDeniedException exception) {
@@ -210,4 +217,13 @@ public class PermissionsServiceImpl implements PermissionsService {
         }
     }
 
+    private Set<DatasetDTO> addDatasetPermissionToCache(final String userAccountId,
+                                                        final PassportVisaObject passportVisaObject) {
+        final DatasetDTO datasetDTO = new DatasetDTO(
+                passportVisaObject.getValue(),
+                passportVisaObject.getSource(),
+                passportVisaObject.getAsserted()
+        );
+        return cacheManager.addUserDatasetPermission(userAccountId, datasetDTO);
+    }
 }

@@ -26,6 +26,8 @@ import uk.ac.ebi.ega.ga4gh.jwt.passport.exception.ServiceException;
 import uk.ac.ebi.ega.ga4gh.jwt.passport.exception.SystemException;
 import uk.ac.ebi.ega.ga4gh.jwt.passport.persistence.service.EventDataService;
 import uk.ac.ebi.ega.ga4gh.jwt.passport.persistence.service.PermissionsDataService;
+import uk.ac.ebi.ega.permissions.cache.CacheManager;
+
 import uk.ac.ebi.ega.permissions.configuration.VisaInfoProperties;
 import uk.ac.ebi.ega.permissions.mapper.TokenPayloadMapper;
 import uk.ac.ebi.ega.permissions.model.PassportVisaObject;
@@ -43,10 +45,17 @@ class PermissionsServiceImplTest {
     private VisaInfoProperties visaInfoProperties = mock(VisaInfoProperties.class);
     private SecurityService securityService = mock(SecurityService.class);
     private PermissionsService permissionsService;
+    private CacheManager cacheManager = mock(CacheManager.class);
 
     @BeforeEach
     public void setup() {
-        permissionsService = new PermissionsServiceImpl(permissionsDataService, eventDataService, tokenPayloadMapper, visaInfoProperties, securityService);
+        permissionsService = new PermissionsServiceImpl(
+                permissionsDataService,
+                eventDataService,
+                tokenPayloadMapper,
+                visaInfoProperties,
+                securityService,
+                cacheManager);
     }
 
     @Test
@@ -63,7 +72,7 @@ class PermissionsServiceImplTest {
             passportVisaObject.setType("ControlledAccessGrants");
             passportVisaObject.setSource("https://ega-archive.org/dacs/EGAC00001111111");
 
-            permissionsService.savePassportVisaObject("id","id", passportVisaObject);
+            permissionsService.savePassportVisaObject("id", "id", passportVisaObject);
         }).isInstanceOf(ServiceException.class).hasMessageContaining("Error saving permissions to the DB");
     }
 
@@ -73,7 +82,7 @@ class PermissionsServiceImplTest {
         when(permissionsDataService.savePassportClaim(any())).thenThrow(new RuntimeException("Generic Error"));
 
         assertThatThrownBy(() -> {
-            permissionsService.savePassportVisaObject("id","id", new PassportVisaObject());
+            permissionsService.savePassportVisaObject("id", "id", new PassportVisaObject());
         }).isInstanceOf(SystemException.class).hasMessageContaining("Error processing permissions");
     }
 }

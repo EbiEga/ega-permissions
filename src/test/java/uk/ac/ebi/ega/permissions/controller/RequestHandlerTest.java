@@ -58,8 +58,40 @@ class RequestHandlerTest {
     private AccessGroupDataService userGroupDataService = mock(AccessGroupDataService.class);
     private JWTService jwtService = mock(JWTService.class);
     private SecurityService securityService = mock(SecurityService.class);
-
     private RequestHandler requestHandler;
+
+    @BeforeEach
+    public void commonMock() {
+        final Authentication authentication = mock(Authentication.class);
+        final SecurityContext securityContext = mock(SecurityContext.class);
+        SecurityContextHolder.setContext(securityContext);
+        requestHandler = new RequestHandler(
+                permissionsService,
+                tokenPayloadMapper,
+                accessGroupMapper,
+                userGroupDataService,
+                jwtService,
+                securityService
+        );
+
+        Visa visa = new Visa();
+
+        final PassportVisaObject passportVisaObject = new PassportVisaObject();
+        passportVisaObject.setValue("EGAD00001000001");
+        passportVisaObject.setSource("EGAC0000100001");
+        passportVisaObject.setAsserted(1620752929L);
+
+        visa.setGa4ghVisaV1(passportVisaObject);
+
+        when(tokenPayloadMapper.mapJWTClaimSetToVisa(any())).thenReturn(visa);
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.getName()).thenReturn("test");
+        when(permissionsService.accountExist(any())).thenReturn(true);
+        when(permissionsService.getAccountByEmail("test")).thenReturn(Optional.of(new Account()));
+
+        when(securityService.getCurrentUser()).thenReturn(Optional.of("test@ebi.ac.uk"));
+        when(permissionsService.getAccountByEmail(any())).thenReturn(Optional.of(new Account()));
+    }
 
     @Test
     @DisplayName("Request Handler (EGA Admin) - JWT Permissions created")
@@ -131,25 +163,6 @@ class RequestHandlerTest {
         assertThatThrownBy(() -> {
             requestHandler.deletePermissions(EMPTY, Arrays.asList("CODE"));
         }).isInstanceOf(ValidationException.class);
-    }
-
-    @BeforeEach
-    private void commonMock() {
-        final Authentication authentication = mock(Authentication.class);
-        final SecurityContext securityContext = mock(SecurityContext.class);
-        SecurityContextHolder.setContext(securityContext);
-        requestHandler = new RequestHandler(permissionsService, tokenPayloadMapper, accessGroupMapper, userGroupDataService, jwtService, securityService);
-
-        Visa visa = new Visa();
-        visa.setGa4ghVisaV1(new PassportVisaObject());
-        when(tokenPayloadMapper.mapJWTClaimSetToVisa(any())).thenReturn(visa);
-        when(securityContext.getAuthentication()).thenReturn(authentication);
-        when(authentication.getName()).thenReturn("test");
-        when(permissionsService.accountExist(any())).thenReturn(true);
-        when(permissionsService.getAccountByEmail("test")).thenReturn(Optional.of(new Account()));
-
-        when(securityService.getCurrentUser()).thenReturn(Optional.of("test@ebi.ac.uk"));
-        when(permissionsService.getAccountByEmail(any())).thenReturn(Optional.of(new Account()));
     }
 
     private String getTestToken() {

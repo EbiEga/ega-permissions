@@ -44,6 +44,7 @@ import uk.ac.ebi.ega.permissions.api.DatasetsApiDelegate;
 import uk.ac.ebi.ega.permissions.api.GroupUsersApiDelegate;
 import uk.ac.ebi.ega.permissions.api.MeApiDelegate;
 import uk.ac.ebi.ega.permissions.api.PermissionsApiDelegate;
+import uk.ac.ebi.ega.permissions.cache.CacheManager;
 import uk.ac.ebi.ega.permissions.configuration.apikey.ApiKeyAuthenticationFilter;
 import uk.ac.ebi.ega.permissions.configuration.tenant.TenantAuthenticationManagerResolver;
 import uk.ac.ebi.ega.permissions.controller.CustomAccessDeniedHandler;
@@ -101,16 +102,31 @@ public class EgaPermissionsConfig {
                                                  final EventDataService eventDataService,
                                                  final TokenPayloadMapper tokenPayloadMapper,
                                                  final VisaInfoProperties visaInfoProperties,
-                                                 final SecurityService securityService) {
-        return new PermissionsServiceImpl(permissionsDataService, eventDataService, tokenPayloadMapper, visaInfoProperties, securityService);
+                                                 final SecurityService securityService,
+                                                 final CacheManager cacheManager) {
+        return new PermissionsServiceImpl(
+                permissionsDataService,
+                eventDataService,
+                tokenPayloadMapper,
+                visaInfoProperties,
+                securityService,
+                cacheManager
+        );
     }
 
     @Bean
     public PermissionsDataService permissionsDataService(final PassportClaimRepository passportClaimRepository,
                                                          final AccountElixirIdRepository accountElixirIdRepository,
                                                          final AccountRepository accountRepository,
-                                                         final AccessGroupRepository userGroupRepository) {
-        return new PermissionsDataServiceImpl(passportClaimRepository, accountRepository, accountElixirIdRepository, userGroupRepository);
+                                                         final AccessGroupRepository userGroupRepository,
+                                                         final CacheManager cacheManager) {
+        return new PermissionsDataServiceImpl(
+                passportClaimRepository,
+                accountRepository,
+                accountElixirIdRepository,
+                userGroupRepository,
+                cacheManager
+        );
     }
 
     @Bean
@@ -130,7 +146,14 @@ public class EgaPermissionsConfig {
                                          final AccessGroupDataService userGroupDataService,
                                          final JWTService jwtService,
                                          final SecurityService securityService) {
-        return new RequestHandler(permissionsService, tokenPayloadMapper, accessGroupMapper, userGroupDataService, jwtService, securityService);
+        return new RequestHandler(
+                permissionsService,
+                tokenPayloadMapper,
+                accessGroupMapper,
+                userGroupDataService,
+                jwtService,
+                securityService
+        );
     }
 
     @Bean
