@@ -19,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.ac.ebi.ega.ga4gh.jwt.passport.exception.SystemException;
 import uk.ac.ebi.ega.ga4gh.jwt.passport.persistence.entities.ApiKey;
+import uk.ac.ebi.ega.ga4gh.jwt.passport.persistence.entities.ApiKeyId;
 import uk.ac.ebi.ega.ga4gh.jwt.passport.persistence.repository.ApiKeyRepository;
 import uk.ac.ebi.ega.permissions.mapper.ApiKeyMapper;
 import uk.ac.ebi.ega.permissions.model.APIKeyListItem;
@@ -66,7 +67,7 @@ public class ApiKeyServiceImpl implements ApiKeyService {
 
     @Override
     public void saveApiKeyDetails(ApiKeyParams params) {
-        ApiKey apiKey = new ApiKey(params.getUsername(), params.getKeyId(), params.getExpiration(), params.getReason(),
+        ApiKey apiKey = new ApiKey(new ApiKeyId(params.getUsername(), params.getKeyId()), params.getExpiration(), params.getReason(),
                 params.getSalt(), params.getPrivateKey());
         this.apiKeyRepository.save(apiKey);
     }

@@ -43,9 +43,9 @@ public interface AccessGroupMapper {
 
     default PermissionLevel mapPermissionLevel(Permission permission) {
         switch (permission) {
-            case read:
+            case READ:
                 return PermissionLevel.READ;
-            case write:
+            case WRITE:
                 return PermissionLevel.WRITE;
             default:
                 return null;
@@ -55,9 +55,9 @@ public interface AccessGroupMapper {
     default Permission mapPermission(PermissionLevel permissionLevel) {
         switch (permissionLevel) {
             case READ:
-                return Permission.read;
+                return Permission.READ;
             case WRITE:
-                return Permission.write;
+                return Permission.WRITE;
             default:
                 return null;
         }
