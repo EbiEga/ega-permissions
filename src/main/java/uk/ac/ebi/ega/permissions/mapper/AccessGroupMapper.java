@@ -1,4 +1,4 @@
-package uk.ac.ebi.ega.permissions.mapper;/*
+/*
  * Copyright 2021-2021 EMBL - European Bioinformatics Institute
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,6 +13,7 @@ package uk.ac.ebi.ega.permissions.mapper;/*
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package uk.ac.ebi.ega.permissions.mapper;
 
 import org.mapstruct.InjectionStrategy;
 import org.mapstruct.Mapper;
@@ -32,7 +33,7 @@ public interface AccessGroupMapper {
     @Mapping(target = "userEmail", source = "email")
     GroupUser groupUserFromDTO(GroupUserDTO dto);
 
-    @Mapping(target = "groupId", source = "groupStableId")
+    @Mapping(target = "groupId", source = "accessGroupId.groupStableId")
     @Mapping(target = "description", ignore = true)
     AccessGroup accessGroupFromAccessGroupEntity(uk.ac.ebi.ega.ga4gh.jwt.passport.persistence.entities.AccessGroup accessGroup);
 

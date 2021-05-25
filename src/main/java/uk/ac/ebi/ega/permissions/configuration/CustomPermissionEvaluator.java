@@ -14,7 +14,7 @@ import uk.ac.ebi.ega.permissions.service.PermissionsService;
 import java.io.Serializable;
 import java.util.List;
 
-import static uk.ac.ebi.ega.ga4gh.jwt.passport.persistence.entities.GroupType.EGAAdmin;
+import static uk.ac.ebi.ega.ga4gh.jwt.passport.persistence.entities.GroupType.EGA_ADMIN;
 
 public class CustomPermissionEvaluator implements PermissionEvaluator {
 
@@ -61,7 +61,7 @@ public class CustomPermissionEvaluator implements PermissionEvaluator {
         return userGroups.stream().anyMatch(entry -> {
             String accessGroup = entry.getGroupType().name();
             String accessLevel = entry.getPermission().name();
-            return EGAAdmin.name().equals(accessGroup) || permission.equals(accessGroup.concat("_").concat(accessLevel));
+            return EGA_ADMIN.name().equals(accessGroup) || permission.equals(accessGroup.concat("_").concat(accessLevel));
         });
     }
 

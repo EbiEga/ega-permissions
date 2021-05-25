@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
         injectionStrategy = InjectionStrategy.CONSTRUCTOR)
 public interface TokenPayloadMapper {
 
-    @Mapping(source = "accountId", target = "accountId")
+    @Mapping(source = "accountId", target = "passportClaimId.accountId")
     PassportClaim mapPassportVisaObjectToPassportClaim(String accountId, PassportVisaObject passportVisaObject);
 
     default List<PassportClaim> mapPassportVisaObjectsToPassportClaims(String accountId, List<PassportVisaObject> passportVisaObjects) {
