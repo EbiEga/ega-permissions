@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
 import org.slf4j.LoggerFactory;
 import uk.ac.ebi.ega.ga4gh.jwt.passport.persistence.entities.ApiKey;
+import uk.ac.ebi.ega.ga4gh.jwt.passport.persistence.entities.ApiKeyId;
 import uk.ac.ebi.ega.ga4gh.jwt.passport.persistence.repository.ApiKeyRepository;
 import uk.ac.ebi.ega.permissions.mapper.ApiKeyMapper;
 import uk.ac.ebi.ega.permissions.model.ApiKeyParams;
@@ -66,9 +67,9 @@ class ApiKeyServiceImplTest {
         ApiKeyParams params = new ApiKeyParams("user@ebi.ac.uk", "MyTestKeyID", futureDate, "Reason");
         params = apiKeyService.generateKeys(params);
 
-        ApiKey apiKey = new ApiKey(params.getUsername(), params.getKeyId(), params.getExpiration(), params.getReason(), params.getSalt(), params.getPrivateKey());
+        ApiKey apiKey = new ApiKey(new ApiKeyId(params.getUsername(), params.getKeyId()), params.getExpiration(), params.getReason(), params.getSalt(), params.getPrivateKey());
 
-        when(apiKeyRepository.findApiKeyByUsernameAndKeyName(any(), any())).thenReturn(Optional.of(apiKey));
+        when(apiKeyRepository.findApiKeyByApiKeyIdUsernameAndApiKeyIdKeyName(any(), any())).thenReturn(Optional.of(apiKey));
 
         assertThat(apiKeyService.getUserFromToken(params.getToken())).get().isEqualTo("user@ebi.ac.uk");
     }
@@ -87,9 +88,9 @@ class ApiKeyServiceImplTest {
         ApiKeyParams inputParams = new ApiKeyParams("user@ebi.ac.uk", "MyTestKeyID", pastDate, "Reason");
         ApiKeyParams encryptedParams = apiKeyService.generateKeys(inputParams);
 
-        ApiKey apiKey = new ApiKey(inputParams.getUsername(), inputParams.getKeyId(), inputParams.getExpiration(), inputParams.getReason(), encryptedParams.getSalt(), encryptedParams.getPrivateKey());
+        ApiKey apiKey = new ApiKey(new ApiKeyId(inputParams.getUsername(), inputParams.getKeyId()), inputParams.getExpiration(), inputParams.getReason(), encryptedParams.getSalt(), encryptedParams.getPrivateKey());
 
-        when(apiKeyRepository.findApiKeyByUsernameAndKeyName(any(), any())).thenReturn(Optional.of(apiKey));
+        when(apiKeyRepository.findApiKeyByApiKeyIdUsernameAndApiKeyIdKeyName(any(), any())).thenReturn(Optional.of(apiKey));
 
         assertThat(apiKeyService.getUserFromToken(encryptedParams.getToken())).isEmpty();
 

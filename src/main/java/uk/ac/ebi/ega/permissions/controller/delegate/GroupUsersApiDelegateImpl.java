@@ -41,7 +41,7 @@ public class GroupUsersApiDelegateImpl implements GroupUsersApiDelegate {
     @Override
     public ResponseEntity<Void> delUserFromGroup(String accountId, List<String> groupIds) {
         if (groupIds.contains("all")) {
-            groupIds = this.userGroupDataService.getPermissionGroups(accountId).stream().map(AccessGroup::getGroupStableId).collect(Collectors.toList());
+            groupIds = this.userGroupDataService.getPermissionGroups(accountId).stream().map(ag -> ag.getAccessGroupId().getGroupStableId()).collect(Collectors.toList());
         }
         groupIds.forEach(groupId -> this.userGroupDataService.removeAccessGroup(accountId, groupId));
         return ResponseEntity.ok().build();

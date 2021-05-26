@@ -30,6 +30,7 @@ import org.mapstruct.factory.Mappers;
 import uk.ac.ebi.ega.ga4gh.jwt.passport.exception.SystemException;
 import uk.ac.ebi.ega.ga4gh.jwt.passport.persistence.entities.Authority;
 import uk.ac.ebi.ega.ga4gh.jwt.passport.persistence.entities.PassportClaim;
+import uk.ac.ebi.ega.ga4gh.jwt.passport.persistence.entities.PassportClaimId;
 import uk.ac.ebi.ega.ga4gh.jwt.passport.persistence.entities.VisaType;
 import uk.ac.ebi.ega.permissions.model.AccountAccess;
 import uk.ac.ebi.ega.permissions.model.PassportVisaObject;
@@ -48,8 +49,8 @@ class TokenPayloadMapperTest {
     @Test
     @DisplayName("TokenPayloadMapper - List<PassportVisaObject> from List<PassportClaim>")
     void mapPassportClaimsToPassportVisaObjects() {
-        PassportClaim claim1 = new PassportClaim("testAccountId", VisaType.ControlledAccessGrants, 1568814383L, "https://ega-archive.org/datasets/EGAD00002222222", "https://ega-archive.org/dacs/EGAC00001111111", Authority.dac);
-        PassportClaim claim2 = new PassportClaim("testAccountId", VisaType.ControlledAccessGrants, 1768814383L, "https://ega-archive.org/datasets/EGAD00003333333", "https://ega-archive.org/dacs/EGAC00001111111", Authority.dac);
+        PassportClaim claim1 = new PassportClaim(new PassportClaimId("testAccountId", "https://ega-archive.org/datasets/EGAD00002222222"), VisaType.ControlledAccessGrants, 1568814383L, "https://ega-archive.org/dacs/EGAC00001111111", Authority.dac);
+        PassportClaim claim2 = new PassportClaim(new PassportClaimId("testAccountId", "https://ega-archive.org/datasets/EGAD00003333333"), VisaType.ControlledAccessGrants, 1768814383L, "https://ega-archive.org/dacs/EGAC00001111111", Authority.dac);
 
         TokenPayloadMapper mapper = Mappers.getMapper(TokenPayloadMapper.class);
         List<PassportVisaObject> passportVisaObjects = mapper.mapPassportClaimsToPassportVisaObjects(Arrays.asList(claim1, claim2));
@@ -69,7 +70,7 @@ class TokenPayloadMapperTest {
         List<PassportClaim> claims = mapper.mapPassportVisaObjectsToPassportClaims("testAccountId", Arrays.asList(passportVisaObject1, passportVisaObject2));
 
         assertThat(claims).hasSize(2);
-        assertThat(claims.get(0).getAccountId()).isEqualTo("testAccountId");
+        assertThat(claims.get(0).getPassportClaimId().getAccountId()).isEqualTo("testAccountId");
     }
 
     @Test
@@ -86,8 +87,8 @@ class TokenPayloadMapperTest {
     @Test
     @DisplayName("TokenPayloadMapper -  List<AccountAccess> from List<PassportClaim>")
     void mapPassportClaimsToAccountAccesses(){
-        PassportClaim claim1 = new PassportClaim("testAccountId1", VisaType.ControlledAccessGrants, 1568814383L, "https://ega-archive.org/datasets/EGAD00002222222", "https://ega-archive.org/dacs/EGAC00001111111", Authority.dac);
-        PassportClaim claim2 = new PassportClaim("testAccountId2", VisaType.ControlledAccessGrants, 1768814383L, "https://ega-archive.org/datasets/EGAD00003333333", "https://ega-archive.org/dacs/EGAC00001111111", Authority.dac);
+        PassportClaim claim1 = new PassportClaim(new PassportClaimId("testAccountId1", "https://ega-archive.org/datasets/EGAD00002222222"), VisaType.ControlledAccessGrants, 1568814383L, "https://ega-archive.org/dacs/EGAC00001111111", Authority.dac);
+        PassportClaim claim2 = new PassportClaim(new PassportClaimId("testAccountId2", "https://ega-archive.org/datasets/EGAD00003333333"), VisaType.ControlledAccessGrants, 1768814383L, "https://ega-archive.org/dacs/EGAC00001111111", Authority.dac);
 
         TokenPayloadMapper mapper = Mappers.getMapper(TokenPayloadMapper.class);
 

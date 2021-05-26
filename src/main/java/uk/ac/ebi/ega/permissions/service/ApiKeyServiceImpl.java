@@ -99,13 +99,13 @@ public class ApiKeyServiceImpl implements ApiKeyService {
 
     @Override
     public List<APIKeyListItem> getApiKeysForUser(String username) {
-        return this.apiKeyMapper.fromEntityList(this.apiKeyRepository.findAllByUsername(username));
+        return this.apiKeyMapper.fromEntityList(this.apiKeyRepository.findAllByApiKeyIdUsername(username));
     }
 
     @Override
     @Transactional
     public void deleteApiKey(String username, String keyId) {
-        this.apiKeyRepository.removeAllByUsernameAndKeyName(username, keyId);
+        this.apiKeyRepository.removeAllByApiKeyIdUsernameAndApiKeyIdKeyName(username, keyId);
     }
 
     /***
@@ -129,7 +129,7 @@ public class ApiKeyServiceImpl implements ApiKeyService {
             keyId = new String(decodeString(tokenParts[1]));
             String encryptedSalt = tokenParts[2];
 
-            ApiKey apiKey = this.apiKeyRepository.findApiKeyByUsernameAndKeyName(username, keyId)
+            ApiKey apiKey = this.apiKeyRepository.findApiKeyByApiKeyIdUsernameAndApiKeyIdKeyName(username, keyId)
                     .orElseThrow(() -> new SystemException("The API_KEY is not valid"));
 
             assertTokenExpiration(apiKey);

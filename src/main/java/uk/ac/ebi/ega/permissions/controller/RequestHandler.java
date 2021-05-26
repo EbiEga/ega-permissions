@@ -34,7 +34,16 @@ import uk.ac.ebi.ega.permissions.configuration.security.customauthorization.HasR
 import uk.ac.ebi.ega.permissions.configuration.security.customauthorization.HasWritePermissions;
 import uk.ac.ebi.ega.permissions.mapper.AccessGroupMapper;
 import uk.ac.ebi.ega.permissions.mapper.TokenPayloadMapper;
-import uk.ac.ebi.ega.permissions.model.*;
+import uk.ac.ebi.ega.permissions.model.AccessGroup;
+import uk.ac.ebi.ega.permissions.model.Format;
+import uk.ac.ebi.ega.permissions.model.JWTPassportVisaObject;
+import uk.ac.ebi.ega.permissions.model.JWTPermissionsResponse;
+import uk.ac.ebi.ega.permissions.model.JWTVisa;
+import uk.ac.ebi.ega.permissions.model.PassportVisaObject;
+import uk.ac.ebi.ega.permissions.model.PermissionsResponse;
+import uk.ac.ebi.ega.permissions.model.PermissionsResponses;
+import uk.ac.ebi.ega.permissions.model.Visa;
+import uk.ac.ebi.ega.permissions.model.Visas;
 import uk.ac.ebi.ega.permissions.service.JWTService;
 import uk.ac.ebi.ega.permissions.service.PermissionsService;
 import uk.ac.ebi.ega.permissions.service.SecurityService;

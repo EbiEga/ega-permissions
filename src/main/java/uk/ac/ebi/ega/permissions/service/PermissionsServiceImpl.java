@@ -174,7 +174,7 @@ public class PermissionsServiceImpl implements PermissionsService {
 
     @Override
     public List<String> getPermissionByAccountIdAndController(String accountId, String egaAccountStableId) {
-        return this.permissionsDataService.getPassportClaimsByUserAndController(accountId, egaAccountStableId).stream().map(PassportClaim::getValue).collect(Collectors.toList());
+        return this.permissionsDataService.getPassportClaimsByUserAndController(accountId, egaAccountStableId).stream().map(pc -> pc.getPassportClaimId().getValue()).collect(Collectors.toList());
     }
 
     //TODO: Verify/improve this logic to populate visa attributes
