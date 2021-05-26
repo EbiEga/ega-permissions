@@ -29,8 +29,8 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 import javax.sql.DataSource;
 
 @Configuration
-@EnableJpaRepositories(basePackages = {"uk.ac.ebi.ega.permissions.persistence.repository"})
-@EntityScan(basePackages = {"uk.ac.ebi.ega.permissions.persistence.entities"})
+@EnableJpaRepositories(basePackages = {"uk.ac.ebi.ega.ga4gh.jwt.passport.persistence.repository"})
+@EntityScan(basePackages = {"uk.ac.ebi.ega.ga4gh.jwt.passport.persistence.entities"})
 @EnableTransactionManagement
 public class DatabaseConfig {
 

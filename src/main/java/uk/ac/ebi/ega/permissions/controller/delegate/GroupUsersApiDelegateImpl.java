@@ -20,8 +20,8 @@ import org.springframework.http.ResponseEntity;
 import uk.ac.ebi.ega.permissions.api.GroupUsersApiDelegate;
 import uk.ac.ebi.ega.permissions.configuration.security.customauthorization.HasAdminPermissions;
 import uk.ac.ebi.ega.permissions.mapper.AccessGroupMapper;
-import uk.ac.ebi.ega.permissions.persistence.entities.AccessGroup;
-import uk.ac.ebi.ega.permissions.persistence.service.AccessGroupDataService;
+import uk.ac.ebi.ega.ga4gh.jwt.passport.persistence.entities.AccessGroup;
+import uk.ac.ebi.ega.ga4gh.jwt.passport.persistence.service.AccessGroupDataService;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -41,7 +41,7 @@ public class GroupUsersApiDelegateImpl implements GroupUsersApiDelegate {
     @Override
     public ResponseEntity<Void> delUserFromGroup(String accountId, List<String> groupIds) {
         if (groupIds.contains("all")) {
-            groupIds = this.userGroupDataService.getPermissionGroups(accountId).stream().map(AccessGroup::getGroupStableId).collect(Collectors.toList());
+            groupIds = this.userGroupDataService.getPermissionGroups(accountId).stream().map(ag -> ag.getAccessGroupId().getGroupStableId()).collect(Collectors.toList());
         }
         groupIds.forEach(groupId -> this.userGroupDataService.removeAccessGroup(accountId, groupId));
         return ResponseEntity.ok().build();

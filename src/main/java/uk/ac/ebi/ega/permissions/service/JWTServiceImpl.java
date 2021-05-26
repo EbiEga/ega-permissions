@@ -33,9 +33,9 @@ import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import org.springframework.util.StringUtils;
-import uk.ac.ebi.ega.permissions.exception.JWTException;
-import uk.ac.ebi.ega.permissions.exception.SystemException;
-import uk.ac.ebi.ega.permissions.model.JWTAlgorithm;
+import uk.ac.ebi.ega.ga4gh.jwt.passport.constants.JWTAlgorithm;
+import uk.ac.ebi.ega.ga4gh.jwt.passport.exception.JWTException;
+import uk.ac.ebi.ega.ga4gh.jwt.passport.exception.SystemException;
 import uk.ac.ebi.ega.permissions.model.Visa;
 
 import java.net.URI;

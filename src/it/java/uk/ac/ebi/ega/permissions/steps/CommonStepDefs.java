@@ -19,8 +19,8 @@ import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.client.RestTemplate;
+import uk.ac.ebi.ega.ga4gh.jwt.passport.persistence.entities.Account;
 import uk.ac.ebi.ega.permissions.helpers.AccessTokenHelper;
-import uk.ac.ebi.ega.permissions.persistence.entities.Account;
 
 import java.net.URISyntaxException;
 

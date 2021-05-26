@@ -22,13 +22,13 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
 import org.springframework.transaction.CannotCreateTransactionException;
+import uk.ac.ebi.ega.ga4gh.jwt.passport.exception.ServiceException;
+import uk.ac.ebi.ega.ga4gh.jwt.passport.exception.SystemException;
+import uk.ac.ebi.ega.ga4gh.jwt.passport.persistence.service.EventDataService;
+import uk.ac.ebi.ega.ga4gh.jwt.passport.persistence.service.PermissionsDataService;
 import uk.ac.ebi.ega.permissions.configuration.VisaInfoProperties;
-import uk.ac.ebi.ega.permissions.exception.ServiceException;
-import uk.ac.ebi.ega.permissions.exception.SystemException;
 import uk.ac.ebi.ega.permissions.mapper.TokenPayloadMapper;
 import uk.ac.ebi.ega.permissions.model.PassportVisaObject;
-import uk.ac.ebi.ega.permissions.persistence.service.EventDataService;
-import uk.ac.ebi.ega.permissions.persistence.service.PermissionsDataService;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;

@@ -24,19 +24,19 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.util.CollectionUtils;
 import uk.ac.ebi.ega.permissions.configuration.VisaInfoProperties;
-import uk.ac.ebi.ega.permissions.exception.ServiceException;
-import uk.ac.ebi.ega.permissions.exception.SystemException;
 import uk.ac.ebi.ega.permissions.mapper.TokenPayloadMapper;
 import uk.ac.ebi.ega.permissions.model.AccountAccess;
 import uk.ac.ebi.ega.permissions.model.Format;
 import uk.ac.ebi.ega.permissions.model.PassportVisaObject;
 import uk.ac.ebi.ega.permissions.model.Visa;
-import uk.ac.ebi.ega.permissions.persistence.entities.Account;
-import uk.ac.ebi.ega.permissions.persistence.entities.AccountElixirId;
-import uk.ac.ebi.ega.permissions.persistence.entities.Event;
-import uk.ac.ebi.ega.permissions.persistence.entities.PassportClaim;
-import uk.ac.ebi.ega.permissions.persistence.service.EventDataService;
-import uk.ac.ebi.ega.permissions.persistence.service.PermissionsDataService;
+import uk.ac.ebi.ega.ga4gh.jwt.passport.exception.ServiceException;
+import uk.ac.ebi.ega.ga4gh.jwt.passport.exception.SystemException;
+import uk.ac.ebi.ega.ga4gh.jwt.passport.persistence.entities.Account;
+import uk.ac.ebi.ega.ga4gh.jwt.passport.persistence.entities.AccountElixirId;
+import uk.ac.ebi.ega.ga4gh.jwt.passport.persistence.entities.Event;
+import uk.ac.ebi.ega.ga4gh.jwt.passport.persistence.entities.PassportClaim;
+import uk.ac.ebi.ega.ga4gh.jwt.passport.persistence.service.EventDataService;
+import uk.ac.ebi.ega.ga4gh.jwt.passport.persistence.service.PermissionsDataService;
 
 import javax.persistence.PersistenceException;
 import javax.transaction.Transactional;
@@ -174,7 +174,7 @@ public class PermissionsServiceImpl implements PermissionsService {
 
     @Override
     public List<String> getPermissionByAccountIdAndController(String accountId, String egaAccountStableId) {
-        return this.permissionsDataService.getPassportClaimsByUserAndController(accountId, egaAccountStableId).stream().map(PassportClaim::getValue).collect(Collectors.toList());
+        return this.permissionsDataService.getPassportClaimsByUserAndController(accountId, egaAccountStableId).stream().map(pc -> pc.getPassportClaimId().getValue()).collect(Collectors.toList());
     }
 
     //TODO: Verify/improve this logic to populate visa attributes

@@ -18,7 +18,7 @@
 package uk.ac.ebi.ega.permissions.service;
 
 import com.nimbusds.jwt.SignedJWT;
-import uk.ac.ebi.ega.permissions.exception.JWTException;
+import uk.ac.ebi.ega.ga4gh.jwt.passport.exception.JWTException;
 import uk.ac.ebi.ega.permissions.model.Visa;
 
 public interface JWTService {

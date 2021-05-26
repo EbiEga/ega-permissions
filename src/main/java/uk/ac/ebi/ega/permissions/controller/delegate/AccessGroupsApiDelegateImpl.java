@@ -20,9 +20,10 @@ import uk.ac.ebi.ega.permissions.api.AccessGroupsApiDelegate;
 import uk.ac.ebi.ega.permissions.configuration.security.customauthorization.HasAdminPermissions;
 import uk.ac.ebi.ega.permissions.mapper.AccessGroupMapper;
 import uk.ac.ebi.ega.permissions.model.GroupUser;
-import uk.ac.ebi.ega.permissions.persistence.entities.GroupType;
-import uk.ac.ebi.ega.permissions.persistence.entities.AccessGroup;
-import uk.ac.ebi.ega.permissions.persistence.service.AccessGroupDataService;
+import uk.ac.ebi.ega.ga4gh.jwt.passport.persistence.entities.GroupType;
+import uk.ac.ebi.ega.ga4gh.jwt.passport.persistence.entities.AccessGroup;
+import uk.ac.ebi.ega.ga4gh.jwt.passport.persistence.entities.AccessGroupId;
+import uk.ac.ebi.ega.ga4gh.jwt.passport.persistence.service.AccessGroupDataService;
 
 import java.util.List;
 
@@ -46,7 +47,7 @@ public class AccessGroupsApiDelegateImpl implements AccessGroupsApiDelegate {
     @Override
     @HasAdminPermissions
     public ResponseEntity<GroupUser> postAccessGroup(String groupId, GroupUser groupUser) {
-        AccessGroup userGroup = new AccessGroup(groupUser.getUserAccountId(), groupId, GroupType.DAC, groupUserMapper.mapPermission(groupUser.getPermission()));
+        AccessGroup userGroup = new AccessGroup(new AccessGroupId(groupUser.getUserAccountId(), groupId), GroupType.DAC, groupUserMapper.mapPermission(groupUser.getPermission()));
         this.userGroupDataService.save(userGroup);
         return ResponseEntity.ok(groupUser);
     }

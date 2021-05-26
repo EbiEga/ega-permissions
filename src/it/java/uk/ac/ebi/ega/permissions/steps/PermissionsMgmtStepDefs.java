@@ -31,13 +31,15 @@ import org.springframework.web.util.UriComponentsBuilder;
 import uk.ac.ebi.ega.permissions.model.PassportVisaObject;
 import uk.ac.ebi.ega.permissions.model.PermissionsResponse;
 import uk.ac.ebi.ega.permissions.model.Visa;
-import uk.ac.ebi.ega.permissions.persistence.entities.Account;
-import uk.ac.ebi.ega.permissions.persistence.entities.Authority;
-import uk.ac.ebi.ega.permissions.persistence.entities.GroupType;
-import uk.ac.ebi.ega.permissions.persistence.entities.PassportClaim;
-import uk.ac.ebi.ega.permissions.persistence.entities.Permission;
-import uk.ac.ebi.ega.permissions.persistence.entities.AccessGroup;
-import uk.ac.ebi.ega.permissions.persistence.entities.VisaType;
+import uk.ac.ebi.ega.ga4gh.jwt.passport.persistence.entities.Account;
+import uk.ac.ebi.ega.ga4gh.jwt.passport.persistence.entities.Authority;
+import uk.ac.ebi.ega.ga4gh.jwt.passport.persistence.entities.GroupType;
+import uk.ac.ebi.ega.ga4gh.jwt.passport.persistence.entities.PassportClaim;
+import uk.ac.ebi.ega.ga4gh.jwt.passport.persistence.entities.PassportClaimId;
+import uk.ac.ebi.ega.ga4gh.jwt.passport.persistence.entities.Permission;
+import uk.ac.ebi.ega.ga4gh.jwt.passport.persistence.entities.AccessGroup;
+import uk.ac.ebi.ega.ga4gh.jwt.passport.persistence.entities.AccessGroupId;
+import uk.ac.ebi.ega.ga4gh.jwt.passport.persistence.entities.VisaType;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -72,7 +74,7 @@ public class PermissionsMgmtStepDefs {
         this.world.accountRepository.save(account);
 
         Permission permission = accessLevel.equals("write") ? Permission.write : Permission.read;
-        AccessGroup userGroup = new AccessGroup(dacUserAccountId, dacStableId, GroupType.DAC, permission);
+        AccessGroup userGroup = new AccessGroup(new AccessGroupId(dacUserAccountId, dacStableId), GroupType.DAC, permission);
         this.world.userGroupRepository.save(userGroup);
     }
 
@@ -109,7 +111,7 @@ public class PermissionsMgmtStepDefs {
     public void accountIsAnEGAAdmin(String egaAdminAccountId, String email) {
         Account account = new Account(egaAdminAccountId, "Test Account " + egaAdminAccountId, "Test", email, "Active");
         this.world.accountRepository.save(account);
-        AccessGroup userGroup = new AccessGroup(egaAdminAccountId, "", GroupType.EGAAdmin, Permission.write);
+        AccessGroup userGroup = new AccessGroup(new AccessGroupId(egaAdminAccountId, ""), GroupType.EGAAdmin, Permission.write);
         this.world.userGroupRepository.save(userGroup);
     }
 
@@ -179,7 +181,7 @@ public class PermissionsMgmtStepDefs {
     }
 
     private PassportClaim createPassportClaim(String accountId, String value) {
-        return new PassportClaim(accountId, VisaType.ControlledAccessGrants, new Date().getTime(), value, "SampleDAC", Authority.dac);
+        return new PassportClaim(new PassportClaimId(accountId, value), VisaType.ControlledAccessGrants, new Date().getTime(), "SampleDAC", Authority.dac);
     }
 
     @And("response only contains items")
@@ -199,7 +201,7 @@ public class PermissionsMgmtStepDefs {
     @And("^database still contains permissions for account (.*?)$")
     public void databaseShouldContainPermissionsForAccount(String accountId, DataTable datasetsTable) {
         List<String> datasets = datasetsTable.transpose().asList(String.class);
-        List<String> grantedDatasets = this.world.passportClaimRepository.findAllByAccountId(accountId).stream().map(PassportClaim::getValue).collect(Collectors.toList());
+        List<String> grantedDatasets = this.world.passportClaimRepository.findAllByAccountId(accountId).stream().map(pc -> pc.getPassportClaimId().getValue()).collect(Collectors.toList());
         assertThat(grantedDatasets).hasSameElementsAs(datasets);
     }
 

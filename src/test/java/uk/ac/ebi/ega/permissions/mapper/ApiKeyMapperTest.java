@@ -18,10 +18,11 @@ package uk.ac.ebi.ega.permissions.mapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
+import uk.ac.ebi.ega.ga4gh.jwt.passport.persistence.entities.ApiKey;
+import uk.ac.ebi.ega.ga4gh.jwt.passport.persistence.entities.ApiKeyId;
 import uk.ac.ebi.ega.permissions.model.APIKeyListItem;
 import uk.ac.ebi.ega.permissions.model.ApiKeyParams;
 import uk.ac.ebi.ega.permissions.model.CreatedAPIKey;
-import uk.ac.ebi.ega.permissions.persistence.entities.ApiKey;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -54,7 +55,7 @@ class ApiKeyMapperTest {
     @DisplayName("ApiKeyMapper - ApiKey from APIKeyListItem")
     void fromEntity() throws ParseException {
         Date testDate = new SimpleDateFormat("dd/MM/yyyy").parse("18/03/1990");
-        ApiKey apiKey = new ApiKey("username", "keyName", testDate, "reason", "salt", "privateKey");
+        ApiKey apiKey = new ApiKey(new ApiKeyId("username", "keyName"), testDate, "reason", "salt", "privateKey");
 
         APIKeyListItem listItem = mapper.fromEntity(apiKey);
 

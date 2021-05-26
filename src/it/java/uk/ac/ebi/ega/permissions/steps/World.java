@@ -19,12 +19,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import uk.ac.ebi.ega.ga4gh.jwt.passport.persistence.repository.AccessGroupRepository;
+import uk.ac.ebi.ega.ga4gh.jwt.passport.persistence.repository.AccountRepository;
+import uk.ac.ebi.ega.ga4gh.jwt.passport.persistence.repository.ApiKeyRepository;
+import uk.ac.ebi.ega.ga4gh.jwt.passport.persistence.repository.PassportClaimRepository;
 import uk.ac.ebi.ega.permissions.dto.TokenParams;
 import uk.ac.ebi.ega.permissions.helpers.DatasetHelper;
-import uk.ac.ebi.ega.permissions.persistence.repository.AccountRepository;
-import uk.ac.ebi.ega.permissions.persistence.repository.ApiKeyRepository;
-import uk.ac.ebi.ega.permissions.persistence.repository.PassportClaimRepository;
-import uk.ac.ebi.ega.permissions.persistence.repository.AccessGroupRepository;
 
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceUnit;

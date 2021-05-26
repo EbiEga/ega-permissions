@@ -21,41 +21,70 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import org.mapstruct.InjectionStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import uk.ac.ebi.ega.ga4gh.jwt.passport.persistence.entities.Authority;
+import uk.ac.ebi.ega.ga4gh.jwt.passport.persistence.entities.PassportClaimId;
+import uk.ac.ebi.ega.ga4gh.jwt.passport.persistence.entities.VisaType;
 import uk.ac.ebi.ega.permissions.model.AccountAccess;
 import uk.ac.ebi.ega.permissions.model.PassportVisaObject;
 import uk.ac.ebi.ega.permissions.model.Visa;
-import uk.ac.ebi.ega.permissions.persistence.entities.PassportClaim;
+import uk.ac.ebi.ega.ga4gh.jwt.passport.persistence.entities.PassportClaim;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Mapper(componentModel = "spring",
-        injectionStrategy = InjectionStrategy.CONSTRUCTOR)
+@Mapper(componentModel = "spring", injectionStrategy = InjectionStrategy.CONSTRUCTOR)
 public interface TokenPayloadMapper {
 
-    @Mapping(source = "accountId", target = "accountId")
-    PassportClaim mapPassportVisaObjectToPassportClaim(String accountId, PassportVisaObject passportVisaObject);
+	default PassportClaim mapPassportVisaObjectToPassportClaim(String accountId,
+			PassportVisaObject passportVisaObject) {
+		final PassportClaim pc = new PassportClaim();
+		pc.setPassportClaimId(new PassportClaimId(accountId, passportVisaObject.getValue()));
+		pc.setAsserted(passportVisaObject.getAsserted());
+		pc.setBy(Authority.valueOf(passportVisaObject.getBy()));
+		pc.setSource(passportVisaObject.getSource());
+		pc.setType(VisaType.valueOf(passportVisaObject.getType()));
+		return pc;
+	};
 
-    default List<PassportClaim> mapPassportVisaObjectsToPassportClaims(String accountId, List<PassportVisaObject> passportVisaObjects) {
-        return passportVisaObjects.stream().map(e -> this.mapPassportVisaObjectToPassportClaim(accountId, e)).collect(Collectors.toList());
-    }
+	default List<PassportClaim> mapPassportVisaObjectsToPassportClaims(String accountId,
+			List<PassportVisaObject> passportVisaObjects) {
+		return passportVisaObjects.stream().map(e -> this.mapPassportVisaObjectToPassportClaim(accountId, e))
+				.collect(Collectors.toList());
+	}
 
-    PassportVisaObject mapPassportClaimToPassportVisaObject(PassportClaim passportClaim);
+	default PassportVisaObject mapPassportClaimToPassportVisaObject(PassportClaim passportClaim) {
+		final PassportVisaObject pvo = new PassportVisaObject();
+		pvo.setAsserted(passportClaim.getAsserted());
+		pvo.setBy(passportClaim.getBy().name());
+		pvo.setSource(passportClaim.getSource());
+		pvo.setType(passportClaim.getType().name());
+		pvo.setValue(passportClaim.getPassportClaimId().getValue());
+		return pvo;
+	};
 
-    List<PassportVisaObject> mapPassportClaimsToPassportVisaObjects(List<PassportClaim> passportClaims);
+	default List<PassportVisaObject> mapPassportClaimsToPassportVisaObjects(List<PassportClaim> passportClaims) {
+		return passportClaims.stream().map(pc -> mapPassportClaimToPassportVisaObject(pc)).collect(Collectors.toList());
+	};
 
-    default Visa mapJWTClaimSetToVisa(JWTClaimsSet jwtClaimsSet) {
-        ObjectMapper mapper = new ObjectMapper();
-        Visa visa = null;
-        try {
-            visa = mapper.readValue(jwtClaimsSet.toString(), Visa.class);
-        } catch (JsonProcessingException jsonProcessingException) {
-            jsonProcessingException.printStackTrace();
-        }
-        return visa;
-    }
+	default Visa mapJWTClaimSetToVisa(JWTClaimsSet jwtClaimsSet) {
+		ObjectMapper mapper = new ObjectMapper();
+		Visa visa = null;
+		try {
+			visa = mapper.readValue(jwtClaimsSet.toString(), Visa.class);
+		} catch (JsonProcessingException jsonProcessingException) {
+			jsonProcessingException.printStackTrace();
+		}
+		return visa;
+	}
 
-    AccountAccess mapPassportClaimToAccountAccess(PassportClaim passportClaim);
+	default AccountAccess mapPassportClaimToAccountAccess(PassportClaim passportClaim) {
+		final AccountAccess ac = new AccountAccess();
+		ac.setAccountId(passportClaim.getPassportClaimId().getAccountId());
+		ac.setAsserted(passportClaim.getAsserted());
+		return ac;
+	};
 
-    List<AccountAccess> mapPassportClaimsToAccountAccesses(List<PassportClaim> passportClaims);
+	default List<AccountAccess> mapPassportClaimsToAccountAccesses(List<PassportClaim> passportClaims) {
+		return passportClaims.stream().map(pc -> mapPassportClaimToAccountAccess(pc)).collect(Collectors.toList());
+	};
 }

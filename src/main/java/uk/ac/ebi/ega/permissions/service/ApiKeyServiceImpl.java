@@ -17,13 +17,14 @@ package uk.ac.ebi.ega.permissions.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import uk.ac.ebi.ega.permissions.exception.SystemException;
+import uk.ac.ebi.ega.ga4gh.jwt.passport.exception.SystemException;
+import uk.ac.ebi.ega.ga4gh.jwt.passport.persistence.entities.ApiKey;
+import uk.ac.ebi.ega.ga4gh.jwt.passport.persistence.entities.ApiKeyId;
+import uk.ac.ebi.ega.ga4gh.jwt.passport.persistence.repository.ApiKeyRepository;
 import uk.ac.ebi.ega.permissions.mapper.ApiKeyMapper;
 import uk.ac.ebi.ega.permissions.model.APIKeyListItem;
 import uk.ac.ebi.ega.permissions.model.ApiKeyParams;
 import uk.ac.ebi.ega.permissions.model.CreatedAPIKey;
-import uk.ac.ebi.ega.permissions.persistence.entities.ApiKey;
-import uk.ac.ebi.ega.permissions.persistence.repository.ApiKeyRepository;
 import uk.ac.ebi.ega.permissions.utils.EncryptionUtils;
 
 import javax.crypto.BadPaddingException;
@@ -66,7 +67,7 @@ public class ApiKeyServiceImpl implements ApiKeyService {
 
     @Override
     public void saveApiKeyDetails(ApiKeyParams params) {
-        ApiKey apiKey = new ApiKey(params.getUsername(), params.getKeyId(), params.getExpiration(), params.getReason(),
+        ApiKey apiKey = new ApiKey(new ApiKeyId(params.getUsername(), params.getKeyId()), params.getExpiration(), params.getReason(),
                 params.getSalt(), params.getPrivateKey());
         this.apiKeyRepository.save(apiKey);
     }
@@ -98,13 +99,13 @@ public class ApiKeyServiceImpl implements ApiKeyService {
 
     @Override
     public List<APIKeyListItem> getApiKeysForUser(String username) {
-        return this.apiKeyMapper.fromEntityList(this.apiKeyRepository.findAllByUsername(username));
+        return this.apiKeyMapper.fromEntityList(this.apiKeyRepository.findAllByApiKeyIdUsername(username));
     }
 
     @Override
     @Transactional
     public void deleteApiKey(String username, String keyId) {
-        this.apiKeyRepository.removeAllByUsernameAndKeyName(username, keyId);
+        this.apiKeyRepository.removeAllByApiKeyIdUsernameAndApiKeyIdKeyName(username, keyId);
     }
 
     /***
@@ -128,7 +129,7 @@ public class ApiKeyServiceImpl implements ApiKeyService {
             keyId = new String(decodeString(tokenParts[1]));
             String encryptedSalt = tokenParts[2];
 
-            ApiKey apiKey = this.apiKeyRepository.findApiKeyByUsernameAndKeyName(username, keyId)
+            ApiKey apiKey = this.apiKeyRepository.findApiKeyByApiKeyIdUsernameAndApiKeyIdKeyName(username, keyId)
                     .orElseThrow(() -> new SystemException("The API_KEY is not valid"));
 
             assertTokenExpiration(apiKey);

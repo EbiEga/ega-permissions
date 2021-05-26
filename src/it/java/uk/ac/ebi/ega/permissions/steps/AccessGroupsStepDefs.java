@@ -25,9 +25,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
+import uk.ac.ebi.ega.ga4gh.jwt.passport.persistence.entities.Permission;
 import uk.ac.ebi.ega.permissions.model.GroupUser;
 import uk.ac.ebi.ega.permissions.model.PermissionLevel;
-import uk.ac.ebi.ega.permissions.persistence.entities.Permission;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -94,7 +94,7 @@ public class AccessGroupsStepDefs {
     @And("^database contains access group (.*?) for user (.*?) with (.*?) permission$")
     public void databaseContainsAccessGroupEGACForUserEGAWWithWritePermission(String groupId, String userId, String permissionStr) {
         Permission permission = permissionStr.equalsIgnoreCase("write") ? Permission.write : Permission.read;
-        assertThat(this.world.userGroupRepository.findAll()).filteredOn(ug -> ug.getGroupStableId().equals(groupId) && ug.getEgaAccountStableId().equals(userId) && ug.getPermission() == permission).hasSize(1);
+        assertThat(this.world.userGroupRepository.findAll()).filteredOn(ug -> ug.getAccessGroupId().getGroupStableId().equals(groupId) && ug.getAccessGroupId().getEgaAccountStableId().equals(userId) && ug.getPermission() == permission).hasSize(1);
     }
 
     @When("^remove group (.*?) from user (.*?)$")
@@ -118,7 +118,7 @@ public class AccessGroupsStepDefs {
 
     @And("^database does not contain group (.*?) for user (.*?)$")
     public void databaseDoesNotContainGroupForUser(String groupId, String userId) {
-        assertThat(this.world.userGroupRepository.findAll()).filteredOn(ug -> ug.getGroupStableId().equals(groupId) && ug.getEgaAccountStableId().equals(userId) && ug.getStatus().equals("active")).isEmpty();
+        assertThat(this.world.userGroupRepository.findAll()).filteredOn(ug -> ug.getAccessGroupId().getGroupStableId().equals(groupId) && ug.getAccessGroupId().getEgaAccountStableId().equals(userId) && ug.getStatus().equals("active")).isEmpty();
     }
 
     @When("^retrieve groups for user (.*?)$")
