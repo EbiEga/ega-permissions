@@ -26,8 +26,6 @@ import uk.ac.ebi.ega.ga4gh.jwt.passport.exception.ServiceException;
 import uk.ac.ebi.ega.ga4gh.jwt.passport.exception.SystemException;
 import uk.ac.ebi.ega.ga4gh.jwt.passport.persistence.service.EventDataService;
 import uk.ac.ebi.ega.ga4gh.jwt.passport.persistence.service.PermissionsDataService;
-import uk.ac.ebi.ega.permissions.cache.CacheManager;
-
 import uk.ac.ebi.ega.permissions.configuration.VisaInfoProperties;
 import uk.ac.ebi.ega.permissions.mapper.TokenPayloadMapper;
 import uk.ac.ebi.ega.permissions.model.PassportVisaObject;
@@ -45,7 +43,6 @@ class PermissionsServiceImplTest {
     private VisaInfoProperties visaInfoProperties = mock(VisaInfoProperties.class);
     private SecurityService securityService = mock(SecurityService.class);
     private PermissionsService permissionsService;
-    private CacheManager cacheManager = mock(CacheManager.class);
 
     @BeforeEach
     public void setup() {
@@ -54,8 +51,8 @@ class PermissionsServiceImplTest {
                 eventDataService,
                 tokenPayloadMapper,
                 visaInfoProperties,
-                securityService,
-                cacheManager);
+                securityService
+        );
     }
 
     @Test

@@ -38,19 +38,18 @@ import uk.ac.ebi.ega.ga4gh.jwt.passport.persistence.service.EventDataService;
 import uk.ac.ebi.ega.ga4gh.jwt.passport.persistence.service.EventDataServiceImpl;
 import uk.ac.ebi.ega.ga4gh.jwt.passport.persistence.service.PermissionsDataService;
 import uk.ac.ebi.ega.ga4gh.jwt.passport.persistence.service.PermissionsDataServiceImpl;
-import uk.ac.ebi.ega.permissions.api.ApiKeyApiDelegate;
 import uk.ac.ebi.ega.permissions.api.AccessGroupsApiDelegate;
+import uk.ac.ebi.ega.permissions.api.ApiKeyApiDelegate;
 import uk.ac.ebi.ega.permissions.api.DatasetsApiDelegate;
 import uk.ac.ebi.ega.permissions.api.GroupUsersApiDelegate;
 import uk.ac.ebi.ega.permissions.api.MeApiDelegate;
 import uk.ac.ebi.ega.permissions.api.PermissionsApiDelegate;
-import uk.ac.ebi.ega.permissions.cache.CacheManager;
 import uk.ac.ebi.ega.permissions.configuration.apikey.ApiKeyAuthenticationFilter;
 import uk.ac.ebi.ega.permissions.configuration.tenant.TenantAuthenticationManagerResolver;
 import uk.ac.ebi.ega.permissions.controller.CustomAccessDeniedHandler;
 import uk.ac.ebi.ega.permissions.controller.RequestHandler;
-import uk.ac.ebi.ega.permissions.controller.delegate.ApiKeyApiDelegateImpl;
 import uk.ac.ebi.ega.permissions.controller.delegate.AccessGroupsApiDelegateImpl;
+import uk.ac.ebi.ega.permissions.controller.delegate.ApiKeyApiDelegateImpl;
 import uk.ac.ebi.ega.permissions.controller.delegate.DatasetsApiDelegateImpl;
 import uk.ac.ebi.ega.permissions.controller.delegate.GroupUsersApiDelegateImpl;
 import uk.ac.ebi.ega.permissions.controller.delegate.MeApiDelegateImpl;
@@ -102,15 +101,13 @@ public class EgaPermissionsConfig {
                                                  final EventDataService eventDataService,
                                                  final TokenPayloadMapper tokenPayloadMapper,
                                                  final VisaInfoProperties visaInfoProperties,
-                                                 final SecurityService securityService,
-                                                 final CacheManager cacheManager) {
+                                                 final SecurityService securityService) {
         return new PermissionsServiceImpl(
                 permissionsDataService,
                 eventDataService,
                 tokenPayloadMapper,
                 visaInfoProperties,
-                securityService,
-                cacheManager
+                securityService
         );
     }
 
@@ -118,14 +115,12 @@ public class EgaPermissionsConfig {
     public PermissionsDataService permissionsDataService(final PassportClaimRepository passportClaimRepository,
                                                          final AccountElixirIdRepository accountElixirIdRepository,
                                                          final AccountRepository accountRepository,
-                                                         final AccessGroupRepository userGroupRepository,
-                                                         final CacheManager cacheManager) {
+                                                         final AccessGroupRepository userGroupRepository) {
         return new PermissionsDataServiceImpl(
                 passportClaimRepository,
                 accountRepository,
                 accountElixirIdRepository,
-                userGroupRepository,
-                cacheManager
+                userGroupRepository
         );
     }
 
@@ -167,7 +162,7 @@ public class EgaPermissionsConfig {
                                  @Value("${jwks.signer.default-key.id}") String defaultSignerKeyId,
                                  @Value("${ega.openid.jwt.jwk-set-uri}") String jwksURL) throws IOException, ParseException, URISyntaxException {
         final File keystoreFile = ResourceUtils.getFile(jwksKeystorePath);
-        assertFileExistsAndReadable(keystoreFile, String.format("Keystore file %s should exists & must be readable", keystoreFile.toString()));
+        assertFileExistsAndReadable(keystoreFile, String.format("Keystore file %s should exists & must be readable", keystoreFile));
 
         final String jwks;
 

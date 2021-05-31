@@ -25,9 +25,8 @@ import uk.ac.ebi.ega.permissions.cache.dto.DatasetDTO;
 import uk.ac.ebi.ega.permissions.cache.dto.UserDatasetPermissionDTO;
 
 import java.util.Set;
-import java.util.stream.Stream;
+import java.util.stream.Collectors;
 
-import static java.util.stream.Collectors.toSet;
 import static org.springframework.util.CollectionUtils.isEmpty;
 
 public class RedisCacheManager implements CacheManager {
@@ -45,9 +44,9 @@ public class RedisCacheManager implements CacheManager {
 
     @Override
     public Set<DatasetDTO> addUserDatasetPermission(final String userAccountId,
-                                                    final DatasetDTO datasetDTO) {
+                                                    final Set<DatasetDTO> datasetDTOS) {
         try {
-            return doAddUserDatasetPermission(userAccountId, datasetDTO);
+            return doAddUserDatasetPermission(userAccountId, datasetDTOS);
         } catch (JsonProcessingException e) {
             LOGGER.error("Unable to add dataset permission: " + e.getMessage(), e);
         }
@@ -56,9 +55,9 @@ public class RedisCacheManager implements CacheManager {
 
     @Override
     public Set<DatasetDTO> deleteUserDatasetPermission(final String userAccountId,
-                                                       final DatasetDTO datasetDTO) {
+                                                       final Set<DatasetDTO> datasetDTOS) {
         try {
-            return doDeleteUserDatasetPermission(userAccountId, datasetDTO);
+            return doDeleteUserDatasetPermission(userAccountId, datasetDTOS);
         } catch (JsonProcessingException e) {
             LOGGER.error("Unable to delete dataset permission: " + e.getMessage(), e);
         }
@@ -66,52 +65,37 @@ public class RedisCacheManager implements CacheManager {
     }
 
     private Set<DatasetDTO> doAddUserDatasetPermission(final String userAccountId,
-                                                       final DatasetDTO datasetDTO) throws JsonProcessingException {
-        UserDatasetPermissionDTO userDatasetElixirMappingDetails = getCacheData(userAccountId);
-        if (userDatasetElixirMappingDetails != null) {
-            if (userDatasetElixirMappingDetails.getDatasetDTOS() == null) {
-                userDatasetElixirMappingDetails.setDatasetDTOS(newMutableSet(datasetDTO));
-            } else {
-                userDatasetElixirMappingDetails
-                        .getDatasetDTOS()
-                        .add(datasetDTO);
-            }
-        } else {
-            userDatasetElixirMappingDetails = new UserDatasetPermissionDTO();
-            userDatasetElixirMappingDetails.setDatasetDTOS(newMutableSet(datasetDTO));
-        }
+                                                       final Set<DatasetDTO> datasetDTOS) throws JsonProcessingException {
+        final UserDatasetPermissionDTO userDatasetElixirMappingDetails = getCacheData(userAccountId);
+        userDatasetElixirMappingDetails.setDatasetDTOS(datasetDTOS);
         setCacheValue(userAccountId, userDatasetElixirMappingDetails);
-        LOGGER.debug("Dataset permission '{}' has been added to the Cache for user '{}'", datasetDTO.getDatasetId(), userAccountId);
+        LOGGER.debug("Total '{}' dataset permission has been added to the Cache for user '{}'", datasetDTOS.size(), userAccountId);
         return userDatasetElixirMappingDetails.getDatasetDTOS();
     }
 
     private Set<DatasetDTO> doDeleteUserDatasetPermission(final String userAccountId,
-                                                          final DatasetDTO datasetDTO) throws JsonProcessingException {
+                                                          final Set<DatasetDTO> datasetDTOS) throws JsonProcessingException {
         final UserDatasetPermissionDTO userDatasetPermissionDTO = getCacheData(userAccountId);
-        if (userDatasetPermissionDTO != null) {
-            final Set<DatasetDTO> datasetDTOS = userDatasetPermissionDTO.getDatasetDTOS();
-            if (!isEmpty(datasetDTOS)) {
-                final boolean isDatasetRemoved = datasetDTOS.remove(datasetDTO);
-
-                if (isDatasetRemoved) {
-                    setCacheValue(userAccountId, userDatasetPermissionDTO);
-                    LOGGER.debug("Dataset '{}' has been removed from Cache for user '{}'", datasetDTO.getDatasetId(), userAccountId);
-                }
-                return datasetDTOS;
-            }
+        final Set<DatasetDTO> cacheDatasetDTOS = userDatasetPermissionDTO.getDatasetDTOS();
+        if (!isEmpty(cacheDatasetDTOS)) {
+            final Set<DatasetDTO> datasetDTOAfterDeletion = cacheDatasetDTOS
+                    .stream()
+                    .filter(datasetDTO -> !datasetDTOS.contains(datasetDTO))
+                    .collect(Collectors.toSet());
+            userDatasetPermissionDTO.setDatasetDTOS(datasetDTOAfterDeletion);
+            setCacheValue(userAccountId, userDatasetPermissionDTO);
+            LOGGER.debug("Total '{}' Dataset have been removed from Cache for user '{}'", datasetDTOAfterDeletion.size(), userAccountId);
+            return datasetDTOAfterDeletion;
         }
         return Set.of();
     }
 
     private UserDatasetPermissionDTO getCacheData(final String key) {
-        return redisTemplate.opsForValue().get(cacheNamespace + key);
+        final UserDatasetPermissionDTO userDatasetPermissionDTO = redisTemplate.opsForValue().get(cacheNamespace + key);
+        return userDatasetPermissionDTO == null ? new UserDatasetPermissionDTO() : userDatasetPermissionDTO;
     }
 
     private void setCacheValue(final String key, final UserDatasetPermissionDTO userDatasetPermissionDTO) {
         redisTemplate.opsForValue().set(cacheNamespace + key, userDatasetPermissionDTO);
-    }
-
-    private Set<DatasetDTO> newMutableSet(final DatasetDTO datasetDTO) {
-        return Stream.of(datasetDTO).collect(toSet());
     }
 }

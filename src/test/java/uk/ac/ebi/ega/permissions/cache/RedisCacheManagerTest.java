@@ -63,20 +63,19 @@ public class RedisCacheManagerTest {
     }
 
     @Test
-    public void addUserDatasetPermission_WhenCallWithValidDataWhereSomeCacheDataExists_ThenStoreDataInCache() {
+    public void addUserDatasetPermission_WhenCallWithValidDataWhereSomeCacheDataExists_ThenOverwritesDataInCache() {
         //Given: mocking stub
         when(valueOperations.get(anyString())).thenReturn(userDatasetPermissionDTO(datasetDTO1()));
         doNothing().when(valueOperations).set(anyString(), any(UserDatasetPermissionDTO.class));
         when(redisTemplate.opsForValue()).thenReturn(valueOperations);
 
         //Test: method to be tested
-        final Set<DatasetDTO> datasetDTOS = redisCacheManager.addUserDatasetPermission(userAccountId(), datasetDTO2());
+        final Set<DatasetDTO> datasetDTOS = redisCacheManager.addUserDatasetPermission(userAccountId(), Set.of(datasetDTO2()));
 
         //Assertions: assert expected output
         assertThat(datasetDTOS)
-                .hasSize(2)
+                .hasSize(1)
                 .containsExactlyInAnyOrder(
-                        datasetDTO1(),
                         datasetDTO2()
                 );
 
@@ -97,7 +96,7 @@ public class RedisCacheManagerTest {
         when(redisTemplate.opsForValue()).thenReturn(valueOperations);
 
         //Test: method to be tested
-        final Set<DatasetDTO> datasetDTOS = redisCacheManager.addUserDatasetPermission(userAccountId(), datasetDTO1());
+        final Set<DatasetDTO> datasetDTOS = redisCacheManager.addUserDatasetPermission(userAccountId(), Set.of(datasetDTO1()));
 
         //Assertions: assert expected output
         assertThat(datasetDTOS)
@@ -123,7 +122,7 @@ public class RedisCacheManagerTest {
         when(redisTemplate.opsForValue()).thenReturn(valueOperations);
 
         //Given: test existing data mocked stub
-        final Set<DatasetDTO> newlyAddedDatasetDTOS = redisCacheManager.addUserDatasetPermission(userAccountId(), datasetDTO1());
+        final Set<DatasetDTO> newlyAddedDatasetDTOS = redisCacheManager.addUserDatasetPermission(userAccountId(), Set.of(datasetDTO1()));
         assertThat(newlyAddedDatasetDTOS)
                 .hasSize(1)
                 .containsExactlyInAnyOrder(
@@ -131,7 +130,7 @@ public class RedisCacheManagerTest {
                 );
 
         //Test: method to be tested
-        final Set<DatasetDTO> afterDeletionDatasetDTOS = redisCacheManager.deleteUserDatasetPermission(userAccountId(), datasetDTO1());
+        final Set<DatasetDTO> afterDeletionDatasetDTOS = redisCacheManager.deleteUserDatasetPermission(userAccountId(), Set.of(datasetDTO1()));
 
         //Assertions: assert expected output
         assertThat(afterDeletionDatasetDTOS).isEmpty();
@@ -152,7 +151,7 @@ public class RedisCacheManagerTest {
         when(redisTemplate.opsForValue()).thenReturn(valueOperations);
 
         //Test: method to be tested
-        final Set<DatasetDTO> datasetDTOS = redisCacheManager.deleteUserDatasetPermission(userAccountId(), datasetDTO1());
+        final Set<DatasetDTO> datasetDTOS = redisCacheManager.deleteUserDatasetPermission(userAccountId(), Set.of(datasetDTO1()));
 
         //Assertions: assert expected output
         assertThat(datasetDTOS).isEmpty();

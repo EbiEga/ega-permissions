@@ -26,19 +26,19 @@ public interface CacheManager {
      * Adds dataset permission into the cache
      *
      * @param userAccountId EGA account id
-     * @param datasetDTO DatasetDTO object
+     * @param datasetDTOS Set of DatasetDTO object
      *
      * @return Set of DatasetDTO objects
      */
-    Set<DatasetDTO> addUserDatasetPermission(String userAccountId, DatasetDTO datasetDTO);
+    Set<DatasetDTO> addUserDatasetPermission(String userAccountId, Set<DatasetDTO> datasetDTOS);
 
     /**
      * Deletes dataset permission from the cache
      *
      * @param userAccountId EGA account id
-     * @param datasetDTO DatasetDTO object
+     * @param datasetDTOS Set of DatasetDTO object
      *
      * @return Set of DatasetDTO objects
      */
-    Set<DatasetDTO> deleteUserDatasetPermission(String userAccountId, DatasetDTO datasetDTO);
+    Set<DatasetDTO> deleteUserDatasetPermission(String userAccountId, Set<DatasetDTO> datasetDTOS);
 }
