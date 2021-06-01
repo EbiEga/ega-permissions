@@ -46,7 +46,13 @@ class PermissionsServiceImplTest {
 
     @BeforeEach
     public void setup() {
-        permissionsService = new PermissionsServiceImpl(permissionsDataService, eventDataService, tokenPayloadMapper, visaInfoProperties, securityService);
+        permissionsService = new PermissionsServiceImpl(
+                permissionsDataService,
+                eventDataService,
+                tokenPayloadMapper,
+                visaInfoProperties,
+                securityService
+        );
     }
 
     @Test
@@ -63,7 +69,7 @@ class PermissionsServiceImplTest {
             passportVisaObject.setType("ControlledAccessGrants");
             passportVisaObject.setSource("https://ega-archive.org/dacs/EGAC00001111111");
 
-            permissionsService.savePassportVisaObject("id","id", passportVisaObject);
+            permissionsService.savePassportVisaObject("id", "id", passportVisaObject);
         }).isInstanceOf(ServiceException.class).hasMessageContaining("Error saving permissions to the DB");
     }
 
@@ -73,7 +79,7 @@ class PermissionsServiceImplTest {
         when(permissionsDataService.savePassportClaim(any())).thenThrow(new RuntimeException("Generic Error"));
 
         assertThatThrownBy(() -> {
-            permissionsService.savePassportVisaObject("id","id", new PassportVisaObject());
+            permissionsService.savePassportVisaObject("id", "id", new PassportVisaObject());
         }).isInstanceOf(SystemException.class).hasMessageContaining("Error processing permissions");
     }
 }

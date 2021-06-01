@@ -23,12 +23,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.util.CollectionUtils;
-import uk.ac.ebi.ega.permissions.configuration.VisaInfoProperties;
-import uk.ac.ebi.ega.permissions.mapper.TokenPayloadMapper;
-import uk.ac.ebi.ega.permissions.model.AccountAccess;
-import uk.ac.ebi.ega.permissions.model.Format;
-import uk.ac.ebi.ega.permissions.model.PassportVisaObject;
-import uk.ac.ebi.ega.permissions.model.Visa;
 import uk.ac.ebi.ega.ga4gh.jwt.passport.exception.ServiceException;
 import uk.ac.ebi.ega.ga4gh.jwt.passport.exception.SystemException;
 import uk.ac.ebi.ega.ga4gh.jwt.passport.persistence.entities.Account;
@@ -37,6 +31,14 @@ import uk.ac.ebi.ega.ga4gh.jwt.passport.persistence.entities.Event;
 import uk.ac.ebi.ega.ga4gh.jwt.passport.persistence.entities.PassportClaim;
 import uk.ac.ebi.ega.ga4gh.jwt.passport.persistence.service.EventDataService;
 import uk.ac.ebi.ega.ga4gh.jwt.passport.persistence.service.PermissionsDataService;
+import uk.ac.ebi.ega.permissions.cache.aop.annotation.UpdateCacheAfterCreatePermission;
+import uk.ac.ebi.ega.permissions.cache.aop.annotation.UpdateCacheAfterDeletePermission;
+import uk.ac.ebi.ega.permissions.configuration.VisaInfoProperties;
+import uk.ac.ebi.ega.permissions.mapper.TokenPayloadMapper;
+import uk.ac.ebi.ega.permissions.model.AccountAccess;
+import uk.ac.ebi.ega.permissions.model.Format;
+import uk.ac.ebi.ega.permissions.model.PassportVisaObject;
+import uk.ac.ebi.ega.permissions.model.Visa;
 
 import javax.persistence.PersistenceException;
 import javax.transaction.Transactional;
@@ -72,7 +74,6 @@ public class PermissionsServiceImpl implements PermissionsService {
         this.tokenPayloadMapper = tokenPayloadMapper;
         this.visaInfoProperties = visaInfoProperties;
         this.securityService = securityService;
-
     }
 
     @Override
@@ -126,6 +127,7 @@ public class PermissionsServiceImpl implements PermissionsService {
 
     }
 
+    @UpdateCacheAfterCreatePermission
     @Override
     @Transactional
     public PassportVisaObject savePassportVisaObject(String controllerAccountId, String userAccountId, PassportVisaObject passportVisaObject) throws ServiceException, SystemException {
@@ -150,11 +152,17 @@ public class PermissionsServiceImpl implements PermissionsService {
         return passportVisaObject;
     }
 
+    @UpdateCacheAfterDeletePermission
     @Override
     @Transactional
     public void deletePassportVisaObject(String accountId, List<String> toDeleteValues) {
         try {
-            List<PassportClaim> deletedClaims = toDeleteValues.stream().map(val -> this.permissionsDataService.deletePassportClaim(accountId, val)).filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList());
+            List<PassportClaim> deletedClaims = toDeleteValues
+                    .stream()
+                    .map(val -> permissionsDataService.deletePassportClaim(accountId, val))
+                    .filter(Optional::isPresent)
+                    .map(Optional::get)
+                    .collect(Collectors.toList());
 
             if (!toDeleteValues.isEmpty() && deletedClaims.isEmpty()) {
                 throw new ValidationException("Values for accountId and value are incorrect or not valid");
@@ -209,5 +217,4 @@ public class PermissionsServiceImpl implements PermissionsService {
             return account.getAccountId();
         }
     }
-
 }

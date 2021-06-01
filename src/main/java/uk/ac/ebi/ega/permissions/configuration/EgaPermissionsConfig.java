@@ -38,8 +38,8 @@ import uk.ac.ebi.ega.ga4gh.jwt.passport.persistence.service.EventDataService;
 import uk.ac.ebi.ega.ga4gh.jwt.passport.persistence.service.EventDataServiceImpl;
 import uk.ac.ebi.ega.ga4gh.jwt.passport.persistence.service.PermissionsDataService;
 import uk.ac.ebi.ega.ga4gh.jwt.passport.persistence.service.PermissionsDataServiceImpl;
-import uk.ac.ebi.ega.permissions.api.ApiKeyApiDelegate;
 import uk.ac.ebi.ega.permissions.api.AccessGroupsApiDelegate;
+import uk.ac.ebi.ega.permissions.api.ApiKeyApiDelegate;
 import uk.ac.ebi.ega.permissions.api.DatasetsApiDelegate;
 import uk.ac.ebi.ega.permissions.api.GroupUsersApiDelegate;
 import uk.ac.ebi.ega.permissions.api.MeApiDelegate;
@@ -48,8 +48,8 @@ import uk.ac.ebi.ega.permissions.configuration.apikey.ApiKeyAuthenticationFilter
 import uk.ac.ebi.ega.permissions.configuration.tenant.TenantAuthenticationManagerResolver;
 import uk.ac.ebi.ega.permissions.controller.CustomAccessDeniedHandler;
 import uk.ac.ebi.ega.permissions.controller.RequestHandler;
-import uk.ac.ebi.ega.permissions.controller.delegate.ApiKeyApiDelegateImpl;
 import uk.ac.ebi.ega.permissions.controller.delegate.AccessGroupsApiDelegateImpl;
+import uk.ac.ebi.ega.permissions.controller.delegate.ApiKeyApiDelegateImpl;
 import uk.ac.ebi.ega.permissions.controller.delegate.DatasetsApiDelegateImpl;
 import uk.ac.ebi.ega.permissions.controller.delegate.GroupUsersApiDelegateImpl;
 import uk.ac.ebi.ega.permissions.controller.delegate.MeApiDelegateImpl;
@@ -102,7 +102,13 @@ public class EgaPermissionsConfig {
                                                  final TokenPayloadMapper tokenPayloadMapper,
                                                  final VisaInfoProperties visaInfoProperties,
                                                  final SecurityService securityService) {
-        return new PermissionsServiceImpl(permissionsDataService, eventDataService, tokenPayloadMapper, visaInfoProperties, securityService);
+        return new PermissionsServiceImpl(
+                permissionsDataService,
+                eventDataService,
+                tokenPayloadMapper,
+                visaInfoProperties,
+                securityService
+        );
     }
 
     @Bean
@@ -110,7 +116,12 @@ public class EgaPermissionsConfig {
                                                          final AccountElixirIdRepository accountElixirIdRepository,
                                                          final AccountRepository accountRepository,
                                                          final AccessGroupRepository userGroupRepository) {
-        return new PermissionsDataServiceImpl(passportClaimRepository, accountRepository, accountElixirIdRepository, userGroupRepository);
+        return new PermissionsDataServiceImpl(
+                passportClaimRepository,
+                accountRepository,
+                accountElixirIdRepository,
+                userGroupRepository
+        );
     }
 
     @Bean
@@ -130,7 +141,14 @@ public class EgaPermissionsConfig {
                                          final AccessGroupDataService userGroupDataService,
                                          final JWTService jwtService,
                                          final SecurityService securityService) {
-        return new RequestHandler(permissionsService, tokenPayloadMapper, accessGroupMapper, userGroupDataService, jwtService, securityService);
+        return new RequestHandler(
+                permissionsService,
+                tokenPayloadMapper,
+                accessGroupMapper,
+                userGroupDataService,
+                jwtService,
+                securityService
+        );
     }
 
     @Bean
@@ -144,7 +162,7 @@ public class EgaPermissionsConfig {
                                  @Value("${jwks.signer.default-key.id}") String defaultSignerKeyId,
                                  @Value("${ega.openid.jwt.jwk-set-uri}") String jwksURL) throws IOException, ParseException, URISyntaxException {
         final File keystoreFile = ResourceUtils.getFile(jwksKeystorePath);
-        assertFileExistsAndReadable(keystoreFile, String.format("Keystore file %s should exists & must be readable", keystoreFile.toString()));
+        assertFileExistsAndReadable(keystoreFile, String.format("Keystore file %s should exists & must be readable", keystoreFile));
 
         final String jwks;
 
