@@ -70,7 +70,6 @@ public class CacheConfig {
         template.setKeySerializer(new StringRedisSerializer());
         template.setValueSerializer(new ValueRedisSerializer(objectMapper, UTF_8));
         template.setConnectionFactory(factory);
-        template.setEnableTransactionSupport(true);
         return template;
     }
 
