@@ -2,9 +2,9 @@ openapi: 3.0.3
 info:
   title: EGA Admins (Internal)
   description: The EGA Admin API is aimed to allow EGA Admins to control DAC Admins for the European Genome-Phenome Archive.
-  termsOfService: TBD
+  termsOfService: https://www.ebi.ac.uk/about/terms-of-use/
   contact:
-    email: ega-dev@ebi.ac.uk
+    email: helpdesk@ega-archive.org
   license:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html

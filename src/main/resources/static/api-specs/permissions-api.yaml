@@ -1,10 +1,10 @@
 openapi: 3.0.3
 info:
   title: EGA Permissions API (Public)
-  description: The EGA Permissions API is aimed to allow approved users (e.g. Data Access Committee) to control and audit access to EGA datasets. The API currently supports authentication using ELIXIR and EGA credentials for OpenID as well as generated API_KEYs.
-  termsOfService: TBD
+  description: The EGA Permissions API is aimed to allow approved users (e.g. Data Access Committee) to control and audit access to EGA datasets. The API currently supports authentication using ELIXIR and EGA credentials for OpenID as well as generated API_KEYs. EGA Permissions API uses GA4GH Visa and Passport standard (https://github.com/ga4gh-duri/ga4gh-duri.github.io/blob/master/researcher_ids/ga4gh_passport_v1.md).
+  termsOfService: https://www.ebi.ac.uk/about/terms-of-use/
   contact:
-    email: ega-dev@ebi.ac.uk
+    email: helpdesk@ega-archive.org
   license:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
